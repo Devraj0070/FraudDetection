@@ -1,6 +1,6 @@
 package com.frauddetection.frauddetection.controller;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.security.core.Authentication;
@@ -11,8 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.frauddetection.frauddetection.entity.Account;
+import com.frauddetection.frauddetection.entity.FraudPrediction;
 import com.frauddetection.frauddetection.entity.Transaction;
 import com.frauddetection.frauddetection.entity.User;
+import com.frauddetection.frauddetection.exception.ApplicationException;
 import com.frauddetection.frauddetection.repository.AccountRepository;
 import com.frauddetection.frauddetection.repository.TransactionRepository;
 import com.frauddetection.frauddetection.repository.UserRepository;
@@ -45,7 +47,7 @@ public class TransactionController {
     }
 
     @PostMapping("/transaction")
-    public String submitTransaction(@RequestParam double amount,
+    public String submitTransaction(@RequestParam BigDecimal amount,
                                     Authentication authentication,
                                     HttpServletRequest request,
                                     Model model) {
@@ -53,39 +55,34 @@ public class TransactionController {
         String username = authentication.getName();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApplicationException("User not found"));
 
-        List<Account> accounts = accountRepository.findByUser(user);
-
-        if (accounts.isEmpty()) {
-            throw new RuntimeException("No account found for user");
-        }
-
-        Account account = accounts.get(0);
-
-        Transaction transaction = new Transaction();
-
-        transaction.setAmount(java.math.BigDecimal.valueOf(amount));
-        transaction.setTransactionType("PAYMENT");
-        transaction.setTransactionTime(LocalDateTime.now());
-        transaction.setAccount(account);
-
-        String ipAddress = request.getRemoteAddr();
-        String userAgent = request.getHeader("User-Agent");
-
-        transaction.setIpAddress(ipAddress);
-        transaction.setUserAgent(userAgent);
-
-        transaction.setStatus("PENDING");
-
-        transactionService.saveTransaction(transaction);
-
-        model.addAttribute(
-                "message",
-                "Your transaction has been submitted for fraud analysis."
+        FraudPrediction fraudPrediction = transactionService.processPayment(
+                user,
+                amount,
+                request.getRemoteAddr(),
+                request.getHeader("User-Agent")
         );
+        Transaction transaction = fraudPrediction.getTransaction();
+
+        model.addAttribute("message", transactionMessage(transaction.getStatus()));
+        model.addAttribute("prediction", fraudPrediction.getPrediction());
+        model.addAttribute("fraudProbability", fraudPrediction.getProbability());
+        model.addAttribute("modelName", fraudPrediction.getModelName());
+        model.addAttribute("transactionStatus", transaction.getStatus());
+        model.addAttribute("transactionAmount", transaction.getAmount());
+        model.addAttribute("transactionTime", transaction.getTransactionTime());
 
         return "user/result";
+    }
+
+    private String transactionMessage(String status) {
+        return switch (status) {
+            case "APPROVED" -> "Your transaction was approved.";
+            case "DECLINED" -> "Your transaction was declined because the account balance is insufficient.";
+            case "BLOCKED" -> "Your transaction was blocked for fraud review.";
+            default -> throw new IllegalStateException("Unsupported transaction status: " + status);
+        };
     }
 
     @GetMapping("/history")

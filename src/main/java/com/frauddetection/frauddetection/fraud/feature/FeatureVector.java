@@ -3,6 +3,8 @@ package com.frauddetection.frauddetection.fraud.feature;
 public class FeatureVector {
 
     private double amount;
+    private double accountBalance;
+    private String transactionType;
     private int transactionHour;
     private int transactionDayOfWeek;
     private int recentTransactionCount;
@@ -18,6 +20,22 @@ public class FeatureVector {
 
     public void setAmount(double amount) {
         this.amount = amount;
+    }
+
+    public double getAccountBalance() {
+        return accountBalance;
+    }
+
+    public void setAccountBalance(double accountBalance) {
+        this.accountBalance = accountBalance;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
     public int getTransactionHour() {

@@ -1,5 +1,6 @@
 package com.frauddetection.frauddetection.ml;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import com.frauddetection.frauddetection.ml.training.DatasetLoader;
@@ -8,10 +9,11 @@ import com.frauddetection.frauddetection.ml.training.ModelTrainer;
 public class ModelSaveTest {
 
     @Test
+    @Disabled("Disabled to prevent retraining production model during normal test execution")
     void shouldTrainAndSaveModel() throws Exception {
 
         String datasetPath =
-                "ml/dataset/paysim_train.csv";
+                "ml/dataset/fraud_train.csv";
 
         String modelPath =
                 "ml/models/fraud_random_forest.model";

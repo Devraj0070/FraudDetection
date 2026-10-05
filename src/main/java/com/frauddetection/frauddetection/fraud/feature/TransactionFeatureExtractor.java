@@ -9,7 +9,7 @@ import com.frauddetection.frauddetection.entity.Transaction;
 import com.frauddetection.frauddetection.repository.TransactionRepository;
 
 @Component
-public class TransactionFeatureExtractor {
+public class TransactionFeatureExtractor implements FeatureExtractor {
 
     private final TransactionRepository transactionRepository;
 
@@ -17,6 +17,7 @@ public class TransactionFeatureExtractor {
         this.transactionRepository = transactionRepository;
     }
 
+    @Override
     public FeatureVector extractFeatures(Transaction transaction) {
 
         FeatureVector features = new FeatureVector();
@@ -26,6 +27,10 @@ public class TransactionFeatureExtractor {
         LocalDateTime transactionTime = transaction.getTransactionTime();
 
         features.setAmount(amount);
+        features.setAccountBalance(
+                transaction.getAccount().getBalance().doubleValue()
+        );
+        features.setTransactionType(transaction.getTransactionType());
 
         features.setTransactionHour(
                 transactionTime.getHour()

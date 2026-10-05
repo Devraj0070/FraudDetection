@@ -38,6 +38,9 @@ ml/dataset/paysim_training.csv
 ml/dataset/paysim_train.csv
 ml/dataset/paysim_test.csv
 ml/dataset/paysim_realistic_test.csv
+ml/dataset/fraud_train.csv
+ml/dataset/fraud_validation.csv
+ml/dataset/fraud_test.csv
 
 # Trained ML models
 ml/models/*.model

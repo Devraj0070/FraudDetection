@@ -9,10 +9,30 @@
 
 <body>
 
-    <h1>Transaction Submitted</h1>
+    <h1>Transaction Fraud Analysis</h1>
 
     <p th:text="${message}">
         Your transaction has been processed.
+    </p>
+
+    <p>
+        Prediction:
+        <strong th:text="${prediction}">LEGITIMATE</strong>
+    </p>
+
+    <p>
+        Fraud probability:
+        <span th:text="${#numbers.formatPercent(fraudProbability, 1, 2)}">0%</span>
+    </p>
+
+    <p>
+        Model:
+        <span th:text="${modelName}">Random Forest</span>
+    </p>
+
+    <p>
+        Transaction status:
+        <span th:text="${transactionStatus}">APPROVED</span>
     </p>
 
     <br>

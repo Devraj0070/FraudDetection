@@ -9,11 +9,11 @@ import weka.core.Instances;
 public class DatasetAnalysisTest {
 
     @Test
-    void shouldAnalyzeFraudDataset() throws Exception {
+    void shouldAnalyzePaySimTestDataset() throws Exception {
 
         DatasetLoader datasetLoader = new DatasetLoader();
 
-       String filePath = "ml/dataset/fraud_transactions_generated.csv";
+        String filePath = "ml/dataset/fraud_test.csv";
 
         Instances dataset = datasetLoader.loadDataset(filePath);
 
@@ -23,11 +23,8 @@ public class DatasetAnalysisTest {
         double legitimateAmount = 0;
         double fraudAmount = 0;
 
-        double legitimateRecentCount = 0;
-        double fraudRecentCount = 0;
-
-        double legitimateDifference = 0;
-        double fraudDifference = 0;
+        double legitimateBalance = 0;
+        double fraudBalance = 0;
 
         for (int i = 0; i < dataset.numInstances(); i++) {
 
@@ -35,60 +32,44 @@ public class DatasetAnalysisTest {
 
                 legitimate++;
 
-                legitimateAmount +=
-                        dataset.instance(i).value(0);
-
-                legitimateRecentCount +=
-                        dataset.instance(i).value(3);
-
-                legitimateDifference +=
-                        dataset.instance(i).value(5);
+                legitimateAmount += dataset.instance(i).value(0);
+                legitimateBalance += dataset.instance(i).value(1);
 
             } else {
 
                 fraud++;
 
-                fraudAmount +=
-                        dataset.instance(i).value(0);
-
-                fraudRecentCount +=
-                        dataset.instance(i).value(3);
-
-                fraudDifference +=
-                        dataset.instance(i).value(5);
+                fraudAmount += dataset.instance(i).value(0);
+                fraudBalance += dataset.instance(i).value(1);
             }
         }
 
         System.out.println("====================================");
-        System.out.println("DATASET ANALYSIS");
+        System.out.println("PAYSIM TEST DATASET ANALYSIS");
+        System.out.println("File: " + filePath);
         System.out.println("====================================");
 
+        System.out.println("Total instances         : " + dataset.numInstances());
         System.out.println("Legitimate transactions : " + legitimate);
         System.out.println("Fraud transactions      : " + fraud);
+        System.out.println("Fraud percentage        : "
+                + String.format("%.4f%%", (fraud * 100.0 / dataset.numInstances())));
 
         System.out.println();
 
         System.out.println("Average legitimate amount : "
-                + (legitimateAmount / legitimate));
+                + String.format("%.2f", legitimateAmount / legitimate));
 
         System.out.println("Average fraud amount      : "
-                + (fraudAmount / fraud));
+                + String.format("%.2f", fraudAmount / fraud));
 
         System.out.println();
 
-        System.out.println("Average legitimate recent transactions : "
-                + (legitimateRecentCount / legitimate));
+        System.out.println("Average legitimate balance : "
+                + String.format("%.2f", legitimateBalance / legitimate));
 
-        System.out.println("Average fraud recent transactions      : "
-                + (fraudRecentCount / fraud));
-
-        System.out.println();
-
-        System.out.println("Average legitimate amount difference : "
-                + (legitimateDifference / legitimate));
-
-        System.out.println("Average fraud amount difference      : "
-                + (fraudDifference / fraud));
+        System.out.println("Average fraud balance      : "
+                + String.format("%.2f", fraudBalance / fraud));
 
         System.out.println("====================================");
     }
