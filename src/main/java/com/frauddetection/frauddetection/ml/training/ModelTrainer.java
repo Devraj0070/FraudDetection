@@ -1,9 +1,12 @@
 package com.frauddetection.frauddetection.ml.training;
 
+import java.io.File;
+
 import org.springframework.stereotype.Component;
 
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
+import weka.core.SerializationHelper;
 
 @Component
 public class ModelTrainer {
@@ -16,18 +19,39 @@ public class ModelTrainer {
 
     public RandomForest trainModel(String filePath) throws Exception {
 
-        // Load the training dataset.
-        Instances dataset = datasetLoader.loadDataset(filePath);
+        Instances dataset =
+                datasetLoader.loadDataset(filePath);
 
-        // Create the Random Forest model.
-        RandomForest randomForest = new RandomForest();
+        RandomForest randomForest =
+                new RandomForest();
 
-        // Use 100 decision trees.
         randomForest.setNumIterations(100);
 
-        // Train the model using our dataset.
         randomForest.buildClassifier(dataset);
 
         return randomForest;
+    }
+
+    public void trainAndSaveModel(
+            String datasetPath,
+            String modelPath) throws Exception {
+
+        RandomForest model =
+                trainModel(datasetPath);
+
+        File modelFile =
+                new File(modelPath);
+
+        modelFile.getParentFile().mkdirs();
+
+        SerializationHelper.write(
+                modelPath,
+                model
+        );
+
+        System.out.println(
+                "Random Forest model saved to: "
+                        + modelPath
+        );
     }
 }

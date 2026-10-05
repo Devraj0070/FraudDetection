@@ -5,7 +5,7 @@ random.seed(42)
 
 OUTPUT_FILE = "ml/dataset/fraud_transactions_generated.csv"
 
-ROWS = 1000
+ROWS = 2000
 
 with open(OUTPUT_FILE, "w", newline="") as file:
 
@@ -23,11 +23,13 @@ with open(OUTPUT_FILE, "w", newline="") as file:
 
     for i in range(ROWS):
 
+        # User's normal transaction amount
         average_amount = random.uniform(500, 5000)
 
+        # Normal transaction amount
         amount = random.gauss(
             average_amount,
-            average_amount * 0.30
+            average_amount * 0.20
         )
 
         amount = max(50, amount)
@@ -40,24 +42,37 @@ with open(OUTPUT_FILE, "w", newline="") as file:
 
         difference = abs(amount - average_amount)
 
-        # Start with a neutral fraud probability.
-        fraud_probability = 0.10
+        # Calculate how unusual the transaction is.
+        deviation_ratio = difference / average_amount
 
-        # Unusual amount compared with normal behaviour.
-        if difference > average_amount * 0.60:
-            fraud_probability += 0.20
+        fraud_probability = 0.03
 
-        # Many transactions in a short period.
-        if recent_count >= 8:
+        # Large deviation from normal behaviour.
+        if deviation_ratio > 0.50:
             fraud_probability += 0.25
 
-        # Some hours are more unusual,
-        # but time alone does NOT mean fraud.
+        if deviation_ratio > 0.80:
+            fraud_probability += 0.20
+
+        # Many recent transactions.
+        if recent_count >= 6:
+            fraud_probability += 0.15
+
+        if recent_count >= 9:
+            fraud_probability += 0.20
+
+        # Unusual hours are only one signal.
         if transaction_hour <= 4:
             fraud_probability += 0.10
 
-        # Combine signals with random noise.
-        fraud_probability += random.uniform(-0.10, 0.10)
+        # Combine signals.
+        fraud_probability += random.uniform(-0.05, 0.05)
+
+        # Keep probability between 0 and 1.
+        fraud_probability = max(
+            0.01,
+            min(0.95, fraud_probability)
+        )
 
         fraud = 1 if random.random() < fraud_probability else 0
 

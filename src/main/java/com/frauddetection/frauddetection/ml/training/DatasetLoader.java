@@ -20,21 +20,20 @@ public class DatasetLoader {
 
         Instances dataset = loader.getDataSet();
 
-        // The last column is the fraud column.
+        // The last column is the fraud label.
         dataset.setClassIndex(dataset.numAttributes() - 1);
 
-        // Convert fraud from numeric 0/1 to nominal classes.
+        // Convert numeric fraud values (0/1) into nominal classes.
         NumericToNominal filter = new NumericToNominal();
 
-       filter.setAttributeIndices(
-        Integer.toString(dataset.classIndex() + 1)
+        filter.setAttributeIndices(
+                Integer.toString(dataset.classIndex() + 1)
         );
 
         filter.setInputFormat(dataset);
 
         dataset = Filter.useFilter(dataset, filter);
 
-        // Set the class again after filtering.
         dataset.setClassIndex(dataset.numAttributes() - 1);
 
         return dataset;
