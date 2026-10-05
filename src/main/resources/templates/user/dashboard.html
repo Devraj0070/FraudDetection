@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard - Fraud Detection System</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <div class="dashboard-header">
+        <h1>Fraud Detection System</h1>
+        <p>Welcome to your secure transaction dashboard.</p>
+    </div>
+
+    <div class="dashboard-grid">
+
+        <div class="dashboard-card">
+            <h2>New Transaction</h2>
+
+            <p>
+                Submit a transaction and let the system check its risk automatically.
+            </p>
+
+            <a class="dashboard-button" href="/transaction">
+                Check Transaction
+            </a>
+        </div>
+
+        <div class="dashboard-card">
+            <h2>Transaction History</h2>
+
+            <p>
+                View your previous transactions and their current status.
+            </p>
+
+            <a class="dashboard-button" href="/history">
+                View History
+            </a>
+        </div>
+
+    </div>
+
+    <form th:action="@{/logout}" method="post">
+        <button class="logout-button" type="submit">
+            Logout
+        </button>
+    </form>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Transaction History - Fraud Detection System</title>
+</head>
+
+<body>
+
+    <h1>Transaction History</h1>
+
+    <p>Here are your recent transactions.</p>
+
+    <table border="1">
+
+        <thead>
+            <tr>
+                <th>Amount</th>
+                <th>Date & Time</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr th:each="transaction : ${transactions}">
+
+                <td th:text="${transaction.amount}">
+                    0
+                </td>
+
+                <td th:text="${transaction.transactionTime}">
+                    Date
+                </td>
+
+                <td th:text="${transaction.status}">
+                    Status
+                </td>
+
+            </tr>
+
+        </tbody>
+
+    </table>
+
+    <br>
+
+    <a href="/transaction">New Transaction</a>
+
+    <br><br>
+
+    <a href="/dashboard">Back to Dashboard</a>
+
+</body>
+</html>
