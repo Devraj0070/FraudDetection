@@ -30,7 +30,7 @@ public class TransactionFeatureExtractor implements FeatureExtractor {
         features.setAccountBalance(
                 transaction.getAccount().getBalance().doubleValue()
         );
-        features.setTransactionType(transaction.getTransactionType());
+        features.setTransactionType(transaction.getTransactionTypeValue());
 
         features.setTransactionHour(
                 transactionTime.getHour()

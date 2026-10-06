@@ -10,4 +10,6 @@ import com.frauddetection.frauddetection.entity.Transaction;
 public interface FraudAlertRepository extends JpaRepository<FraudAlert, Long> {
 
     List<FraudAlert> findByTransaction(Transaction transaction);
+
+    List<FraudAlert> findAllByOrderByCreatedAtDesc();
 }

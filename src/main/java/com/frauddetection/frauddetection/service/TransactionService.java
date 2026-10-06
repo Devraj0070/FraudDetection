@@ -10,6 +10,7 @@ import com.frauddetection.frauddetection.entity.Account;
 import com.frauddetection.frauddetection.entity.FraudAlert;
 import com.frauddetection.frauddetection.entity.FraudPrediction;
 import com.frauddetection.frauddetection.entity.Transaction;
+import com.frauddetection.frauddetection.entity.TransactionType;
 import com.frauddetection.frauddetection.entity.User;
 import com.frauddetection.frauddetection.exception.TransactionException;
 import com.frauddetection.frauddetection.fraud.prediction.FraudPredictionResult;
@@ -22,7 +23,6 @@ import com.frauddetection.frauddetection.repository.TransactionRepository;
 @Service
 public class TransactionService {
 
-    private static final String PAYMENT = "PAYMENT";
     private static final String STATUS_APPROVED = "APPROVED";
     private static final String STATUS_BLOCKED = "BLOCKED";
     private static final String STATUS_DECLINED = "DECLINED";
@@ -51,10 +51,15 @@ public class TransactionService {
     public FraudPrediction processPayment(
             User user,
             BigDecimal amount,
+            TransactionType transactionType,
             String ipAddress,
             String userAgent) {
 
         validateAmount(amount);
+
+        if (transactionType == null) {
+            throw new TransactionException("Transaction type is required.");
+        }
 
         Account account = accountRepository
                 .findFirstByUserOrderByIdAsc(user)
@@ -67,7 +72,7 @@ public class TransactionService {
 
         Transaction transaction = new Transaction();
         transaction.setAmount(amount);
-        transaction.setTransactionType(PAYMENT);
+        transaction.setTransactionType(transactionType);
         transaction.setTransactionTime(LocalDateTime.now());
         transaction.setAccount(account);
         transaction.setIpAddress(ipAddress);

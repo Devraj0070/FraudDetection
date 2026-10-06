@@ -1,48 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Login - Fraud Detection System</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
 </head>
 
 <body>
 
-    <h1>Please Sign In</h1>
+<div class="auth-container">
 
-    <form th:action="@{/login}" method="post">
+    <!-- Header -->
+    <div class="auth-header">
+        <div class="app-name">Fraud Detection System</div>
+        <h1>Welcome Back</h1>
+        <p>Sign in to your account</p>
+    </div>
 
-        <div>
-            <label for="username">Username:</label>
-            <input
-                type="text"
-                id="username"
-                name="username"
-                required>
+    <!-- Card -->
+    <div class="auth-card">
+
+        <!-- Error Message (Spring Security default parameter) -->
+        <div th:if="${param.error}" class="alert alert-error">
+            Invalid username or password. Please try again.
         </div>
 
-        <br>
-
-        <div>
-            <label for="password">Password:</label>
-            <input
-                type="password"
-                id="password"
-                name="password"
-                required>
+        <!-- Logout Message -->
+        <div th:if="${param.logout}" class="alert alert-success">
+            You have been successfully logged out.
         </div>
 
-        <br>
+        <!-- Login Form -->
+        <form class="auth-form" th:action="@{/login}" method="post">
 
-        <button type="submit">Sign In</button>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Enter your username"
+                    required
+                    autofocus>
+            </div>
 
-    </form>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required>
+            </div>
 
-    <p>
-        Don't have an account?
-        <a href="/register">Register here</a>
-    </p>
+            <button type="submit" class="btn-submit">Sign In</button>
+
+        </form>
+
+        <!-- Footer -->
+        <div class="auth-footer">
+            Don't have an account?
+            <a href="/register">Create one here</a>
+        </div>
+
+    </div>
+
+</div>
 
 </body>
 </html>

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -20,7 +22,8 @@ public class Transaction {
 
     private BigDecimal amount;
 
-    private String transactionType;
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
 
     private LocalDateTime transactionTime;
 
@@ -48,12 +51,16 @@ public class Transaction {
         this.amount = amount;
     }
 
-    public String getTransactionType() {
+    public TransactionType getTransactionType() {
         return transactionType;
     }
 
-    public void setTransactionType(String transactionType) {
+    public void setTransactionType(TransactionType transactionType) {
         this.transactionType = transactionType;
+    }
+
+    public String getTransactionTypeValue() {
+        return transactionType != null ? transactionType.toModelValue() : null;
     }
 
     public LocalDateTime getTransactionTime() {

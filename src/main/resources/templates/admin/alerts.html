@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Fraud Alerts - Admin - Fraud Detection System</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+
+<body>
+
+<div class="admin-container">
+
+    <!-- Header -->
+    <div class="admin-header">
+        <h1>Fraud Alerts</h1>
+        <p>Review all fraud alerts raised across the system</p>
+    </div>
+
+    <!-- Table Container -->
+    <div class="admin-table-container">
+
+        <!-- Check if alerts exist -->
+        <div th:if="${alerts != null and !alerts.empty}">
+            <table class="alert-table">
+                <thead>
+                    <tr>
+                        <th>Alert ID</th>
+                        <th>Transaction ID</th>
+                        <th>Amount</th>
+                        <th>Alert Type</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr th:each="alert : ${alerts}">
+
+                        <td class="id-cell" data-label="Alert ID">
+                            <span th:text="${alert.id}">1</span>
+                        </td>
+
+                        <td class="id-cell" data-label="Transaction ID">
+                            <span th:text="${alert.transaction != null ? alert.transaction.id : '—'}">1</span>
+                        </td>
+
+                        <td class="amount-cell" data-label="Amount">
+                            ₹<span th:text="${alert.transaction != null ? #numbers.formatDecimal(alert.transaction.amount, 1, 2) : '0.00'}">0.00</span>
+                        </td>
+
+                        <td data-label="Alert Type">
+                            <span th:text="${alert.alertType}">VELOCITY</span>
+                        </td>
+
+                        <td data-label="Severity">
+                            <span class="severity-badge"
+                                  th:classappend="${#strings.toLowerCase(alert.severity)}"
+                                  th:text="${alert.severity}">
+                                HIGH
+                            </span>
+                        </td>
+
+                        <td data-label="Status">
+                            <span class="alert-status-badge"
+                                  th:classappend="${#strings.toLowerCase(alert.status)}"
+                                  th:text="${alert.status}">
+                                OPEN
+                            </span>
+                        </td>
+
+                        <td class="date-cell" data-label="Created">
+                            <span th:text="${#temporals.format(alert.createdAt, 'dd MMM yyyy, hh:mm a')}">
+                                06 Oct 2026, 04:30 PM
+                            </span>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${alerts == null or alerts.empty}" class="empty-state">
+            <div class="empty-state-icon">✅</div>
+            <h2>No Fraud Alerts</h2>
+            <p>There are currently no fraud alerts in the system.</p>
+        </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="admin-actions">
+        <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+
+</div>
+
+</body>
+</html>

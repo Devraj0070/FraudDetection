@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.frauddetection.frauddetection.entity.TransactionType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,11 +75,12 @@ class TransactionControllerTest {
         when(transactionService.processPayment(
                 user,
                 amount,
+                TransactionType.PAYMENT,
                 "127.0.0.1",
                 "test-agent"))
                 .thenReturn(fraudPrediction);
 
-        String view = controller.submitTransaction(amount, authentication, request, model);
+        String view = controller.submitTransaction(amount, TransactionType.PAYMENT, authentication, request, model);
 
         assertEquals("user/result", view);
         verify(model).addAttribute("prediction", "LEGITIMATE");
@@ -88,6 +91,7 @@ class TransactionControllerTest {
         verify(transactionService).processPayment(
                 eq(user),
                 eq(amount),
+                eq(TransactionType.PAYMENT),
                 eq("127.0.0.1"),
                 eq("test-agent")
         );
@@ -100,11 +104,12 @@ class TransactionControllerTest {
         when(transactionService.processPayment(
                 user,
                 amount,
+                TransactionType.PAYMENT,
                 "127.0.0.1",
                 "test-agent"))
                 .thenReturn(fraudPrediction);
 
-        String view = controller.submitTransaction(amount, authentication, request, model);
+        String view = controller.submitTransaction(amount, TransactionType.PAYMENT, authentication, request, model);
 
         assertEquals("user/result", view);
         verify(model).addAttribute("transactionStatus", "DECLINED");

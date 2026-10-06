@@ -12,6 +12,8 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import com.frauddetection.frauddetection.entity.TransactionType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,6 +81,7 @@ class TransactionServiceTest {
         FraudPrediction result = transactionService.processPayment(
                 user,
                 new BigDecimal("25.00"),
+                TransactionType.PAYMENT,
                 "127.0.0.1",
                 "test-agent"
         );
@@ -86,7 +89,7 @@ class TransactionServiceTest {
         assertEquals("LEGITIMATE", result.getPrediction());
         assertEquals("APPROVED", result.getTransaction().getStatus());
         assertEquals(new BigDecimal("75.00"), account.getBalance());
-        assertEquals("PAYMENT", result.getTransaction().getTransactionType());
+        assertEquals(TransactionType.PAYMENT, result.getTransaction().getTransactionType());
 
         InOrder order = inOrder(accountRepository, fraudPredictionService);
         order.verify(accountRepository).findFirstByUserOrderByIdAsc(user);
@@ -106,6 +109,7 @@ class TransactionServiceTest {
         FraudPrediction result = transactionService.processPayment(
                 user,
                 new BigDecimal("25.00"),
+                TransactionType.PAYMENT,
                 "127.0.0.1",
                 "test-agent"
         );
@@ -130,6 +134,7 @@ class TransactionServiceTest {
         FraudPrediction result = transactionService.processPayment(
                 user,
                 new BigDecimal("125.00"),
+                TransactionType.PAYMENT,
                 "127.0.0.1",
                 "test-agent"
         );
@@ -147,6 +152,7 @@ class TransactionServiceTest {
                 () -> transactionService.processPayment(
                         user,
                         BigDecimal.ZERO,
+                        TransactionType.PAYMENT,
                         "127.0.0.1",
                         "test-agent"
                 )
@@ -159,5 +165,110 @@ class TransactionServiceTest {
                 fraudPredictionRepository,
                 fraudAlertRepository
         );
+    }
+
+    @Test
+    void shouldApproveTransferWhenBalanceSufficient() {
+        // Set up sufficient balance for this test
+        account.setBalance(new BigDecimal("200000.00"));
+        Mockito.lenient().when(accountRepository.findFirstByUserOrderByIdAsc(user))
+                .thenReturn(Optional.of(account));
+
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.02, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("100000.00"),
+                TransactionType.TRANSFER,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("LEGITIMATE", result.getPrediction());
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance()); // 200000.00 - 100000.00
+    }
+
+    @Test
+    void shouldBlockCashOutWhenModelSaysFraud() {
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("FRAUD", 0.95, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("500000.00"),
+                TransactionType.CASH_OUT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("FRAUD", result.getPrediction());
+        assertEquals("BLOCKED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100.00"), account.getBalance()); // balance unchanged
+        verify(fraudAlertRepository).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldRejectUnsupportedTransactionType() {
+        assertThrows(
+                TransactionException.class,
+                () -> transactionService.processPayment(
+                        user,
+                        new BigDecimal("100.00"),
+                        null, // null type
+                        "127.0.0.1",
+                        "test-agent"
+                )
+        );
+
+        assertThrows(
+                TransactionException.class,
+                () -> transactionService.processPayment(
+                        user,
+                        new BigDecimal("100.00"),
+                        TransactionType.fromModelValue("UNSUPPORTED"), // returns null
+                        "127.0.0.1",
+                        "test-agent"
+                )
+        );
+    }
+
+    @Test
+    void shouldProcessDebitTransaction() {
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.15, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50.00"),
+                TransactionType.DEBIT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("LEGITIMATE", result.getPrediction());
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(TransactionType.DEBIT, result.getTransaction().getTransactionType());
+        assertEquals(new BigDecimal("50.00"), account.getBalance());
+    }
+
+    @Test
+    void shouldProcessCashInTransaction() {
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("30.00"),
+                TransactionType.CASH_IN,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("LEGITIMATE", result.getPrediction());
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(TransactionType.CASH_IN, result.getTransaction().getTransactionType());
+        assertEquals(new BigDecimal("70.00"), account.getBalance());
     }
 }

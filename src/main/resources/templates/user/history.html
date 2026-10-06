@@ -5,53 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Transaction History - Fraud Detection System</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/history.css}">
 </head>
 
 <body>
 
-    <h1>Transaction History</h1>
+<div class="history-container">
 
-    <p>Here are your recent transactions.</p>
+    <!-- Header -->
+    <div class="history-header">
+        <h1>Transaction History</h1>
+        <p>View all your recent transactions and their status</p>
+    </div>
 
-    <table border="1">
+    <!-- Table Container -->
+    <div class="table-container">
 
-        <thead>
-            <tr>
-                <th>Amount</th>
-                <th>Date & Time</th>
-                <th>Status</th>
-            </tr>
-        </thead>
+        <!-- Check if transactions exist -->
+        <div th:if="${transactions != null and !transactions.empty}">
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Amount</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
 
-        <tbody>
+                <tbody>
+                    <tr th:each="transaction : ${transactions}">
 
-            <tr th:each="transaction : ${transactions}">
+                        <td class="amount-cell" data-label="Amount">
+                            ₹<span th:text="${#numbers.formatDecimal(transaction.amount, 1, 2)}">0.00</span>
+                        </td>
 
-                <td th:text="${transaction.amount}">
-                    0
-                </td>
+                        <td class="date-cell" data-label="Date & Time">
+                            <span th:text="${#temporals.format(transaction.transactionTime, 'dd MMM yyyy, hh:mm a')}">
+                                06 Oct 2026, 04:30 PM
+                            </span>
+                        </td>
 
-                <td th:text="${transaction.transactionTime}">
-                    Date
-                </td>
+                        <td data-label="Status">
+                            <span class="status-badge"
+                                  th:classappend="${transaction.status == 'APPROVED' ? 'approved' : (transaction.status == 'DECLINED' ? 'declined' : 'blocked')}"
+                                  th:text="${transaction.status}">
+                                APPROVED
+                            </span>
+                        </td>
 
-                <td th:text="${transaction.status}">
-                    Status
-                </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
-            </tr>
+        <!-- Empty State -->
+        <div th:if="${transactions == null or transactions.empty}" class="empty-state">
+            <div class="empty-state-icon">📋</div>
+            <h2>No Transactions Yet</h2>
+            <p>You haven't made any transactions. Start by creating a new transaction.</p>
+            <a href="/transaction" class="btn btn-primary">New Transaction</a>
+        </div>
 
-        </tbody>
+    </div>
 
-    </table>
+    <!-- Actions -->
+    <div class="history-actions">
+        <a href="/transaction" class="btn btn-primary">New Transaction</a>
+        <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
 
-    <br>
-
-    <a href="/transaction">New Transaction</a>
-
-    <br><br>
-
-    <a href="/dashboard">Back to Dashboard</a>
+</div>
 
 </body>
 </html>

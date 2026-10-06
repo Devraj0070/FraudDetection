@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.frauddetection.frauddetection.entity.Account;
 import com.frauddetection.frauddetection.entity.FraudPrediction;
 import com.frauddetection.frauddetection.entity.Transaction;
+import com.frauddetection.frauddetection.entity.TransactionType;
 import com.frauddetection.frauddetection.entity.User;
 import com.frauddetection.frauddetection.exception.ApplicationException;
 import com.frauddetection.frauddetection.repository.AccountRepository;
@@ -48,6 +49,7 @@ public class TransactionController {
 
     @PostMapping("/transaction")
     public String submitTransaction(@RequestParam BigDecimal amount,
+                                    @RequestParam TransactionType transactionType,
                                     Authentication authentication,
                                     HttpServletRequest request,
                                     Model model) {
@@ -60,6 +62,7 @@ public class TransactionController {
         FraudPrediction fraudPrediction = transactionService.processPayment(
                 user,
                 amount,
+                transactionType,
                 request.getRemoteAddr(),
                 request.getHeader("User-Agent")
         );

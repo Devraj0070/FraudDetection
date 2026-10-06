@@ -5,43 +5,104 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Transaction Result - Fraud Detection System</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/result.css}">
 </head>
 
 <body>
 
-    <h1>Transaction Fraud Analysis</h1>
+<div class="result-container">
 
-    <p th:text="${message}">
-        Your transaction has been processed.
-    </p>
+    <!-- Status Badge -->
+    <div class="status-badge"
+         th:classappend="${transactionStatus == 'APPROVED' ? 'approved' : (transactionStatus == 'DECLINED' ? 'declined' : 'blocked')}">
 
-    <p>
-        Prediction:
-        <strong th:text="${prediction}">LEGITIMATE</strong>
-    </p>
+        <span class="status-icon" th:text="${transactionStatus == 'APPROVED' ? '✓' : (transactionStatus == 'BLOCKED' ? '⚠' : '✕')}">✓</span>
 
-    <p>
-        Fraud probability:
-        <span th:text="${#numbers.formatPercent(fraudProbability, 1, 2)}">0%</span>
-    </p>
+        <h1 th:text="${transactionStatus}">APPROVED</h1>
 
-    <p>
-        Model:
-        <span th:text="${modelName}">Random Forest</span>
-    </p>
+        <p th:text="${message}">Your transaction was approved.</p>
+    </div>
 
-    <p>
-        Transaction status:
-        <span th:text="${transactionStatus}">APPROVED</span>
-    </p>
+    <!-- Result Card -->
+    <div class="result-card">
 
-    <br>
+        <!-- Transaction Details -->
+        <div class="transaction-details">
 
-    <a href="/transaction">Submit Another Transaction</a>
+            <div class="amount-display">
+                <span class="amount-label">Transaction Amount</span>
+                <div class="amount-value">
+                    ₹<span th:text="${#numbers.formatDecimal(transactionAmount, 1, 2)}">0.00</span>
+                </div>
+            </div>
 
-    <br><br>
+            <div class="detail-grid">
 
-    <a href="/dashboard">Back to Dashboard</a>
+                <div class="detail-item">
+                    <span class="detail-label">Transaction Time</span>
+                    <span class="detail-value" th:text="${#temporals.format(transactionTime, 'dd MMM yyyy, hh:mm a')}">
+                        06 Oct 2026, 04:30 PM
+                    </span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Status</span>
+                    <span class="detail-value" th:text="${transactionStatus}">APPROVED</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Fraud Analysis -->
+        <div class="fraud-analysis">
+
+            <h2>Fraud Risk Analysis</h2>
+
+            <div class="analysis-grid">
+
+                <div class="analysis-item">
+                    <span class="analysis-label">Prediction</span>
+                    <span class="prediction-badge"
+                          th:classappend="${prediction == 'LEGITIMATE' ? 'legitimate' : 'fraudulent'}"
+                          th:text="${prediction}">
+                        LEGITIMATE
+                    </span>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-label">Fraud Probability</span>
+                    <div class="analysis-value" th:text="${#numbers.formatPercent(fraudProbability, 1, 2)}">
+                        0.5%
+                    </div>
+                    <div class="probability-bar">
+                        <div class="probability-fill"
+                             th:classappend="${fraudProbability < 0.3 ? 'probability-low' : (fraudProbability < 0.7 ? 'probability-medium' : 'probability-high')}"
+                             th:style="'width: ' + ${fraudProbability * 100} + '%'">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analysis-item">
+                    <span class="analysis-label">Model Used</span>
+                    <div class="analysis-value" th:text="${modelName}">Random Forest</div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Actions -->
+        <div class="result-actions">
+            <a href="/transaction" class="btn btn-primary">New Transaction</a>
+            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+
+    </div>
+
+</div>
 
 </body>
 </html>

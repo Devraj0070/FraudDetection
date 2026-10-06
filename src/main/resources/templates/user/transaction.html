@@ -4,38 +4,69 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Transaction - Fraud Detection System</title>
+    <title>New Transaction - Fraud Detection System</title>
+
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/transaction.css}">
 </head>
 
 <body>
 
-    <h1>Check Transaction</h1>
+<div class="transaction-container">
 
-    <p>Enter the transaction amount to check its fraud risk.</p>
+    <div class="transaction-header">
+        <h1>New Transaction</h1>
+        <p>Enter transaction details for fraud risk analysis</p>
+    </div>
 
-    <form th:action="@{/transaction}" method="post">
+    <div class="transaction-card">
 
-        <div>
-            <label for="amount">Transaction Amount:</label>
+        <form th:action="@{/transaction}" method="post">
 
-            <input
-                type="number"
-                id="amount"
-                name="amount"
-                step="0.01"
-                min="0"
-                required>
-        </div>
+            <div class="form-group">
+                <label for="amount">Transaction Amount</label>
+                <div class="input-wrapper">
+                    <span class="currency-symbol">₹</span>
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        step="0.01"
+                        min="0.01"
+                        placeholder="0.00"
+                        required
+                        autofocus>
+                </div>
+                <span class="input-hint">Enter the amount you wish to transfer</span>
+            </div>
 
-        <br>
+            <div class="form-group">
+                <label for="transactionType">Transaction Type</label>
+                <select id="transactionType" name="transactionType" required>
+                    <option value="">-- Select Type --</option>
+                    <option value="PAYMENT">Payment</option>
+                    <option value="TRANSFER">Transfer</option>
+                    <option value="CASH_OUT">Cash Out</option>
+                    <option value="DEBIT">Debit</option>
+                    <option value="CASH_IN">Cash In</option>
+                </select>
+                <span class="input-hint">Select the type of transaction</span>
+            </div>
 
-        <button type="submit">Check Transaction</button>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    Submit Transaction
+                </button>
+                <a href="/dashboard" class="btn btn-secondary">
+                    Cancel
+                </a>
+            </div>
 
-    </form>
+        </form>
 
-    <br>
+    </div>
 
-    <a href="/dashboard">Back to Dashboard</a>
+</div>
 
 </body>
 </html>
