@@ -14,12 +14,9 @@ import com.frauddetection.frauddetection.security.CustomUserDetailsService;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService,
-                          PasswordEncoder passwordEncoder) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
