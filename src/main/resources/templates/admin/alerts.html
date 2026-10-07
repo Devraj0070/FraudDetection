@@ -31,6 +31,7 @@
                         <th>Alert ID</th>
                         <th>Transaction ID</th>
                         <th>Amount</th>
+                        <th>Txn Type</th>
                         <th>Alert Type</th>
                         <th>Severity</th>
                         <th>Status</th>
@@ -42,19 +43,23 @@
                     <tr th:each="alert : ${alerts}">
 
                         <td class="id-cell" data-label="Alert ID">
-                            <span th:text="${alert.id}">1</span>
+                            #<span th:text="${alert.id}">1</span>
                         </td>
 
                         <td class="id-cell" data-label="Transaction ID">
-                            <span th:text="${alert.transaction != null ? alert.transaction.id : '—'}">1</span>
+                            <span th:text="${alert.transaction != null ? '#' + alert.transaction.id : '—'}">#1</span>
                         </td>
 
                         <td class="amount-cell" data-label="Amount">
                             ₹<span th:text="${alert.transaction != null ? #numbers.formatDecimal(alert.transaction.amount, 1, 2) : '0.00'}">0.00</span>
                         </td>
 
+                        <td data-label="Txn Type">
+                            <span th:text="${alert.transaction != null and alert.transaction.transactionType != null ? alert.transaction.transactionType.toModelValue() : '—'}">TRANSFER</span>
+                        </td>
+
                         <td data-label="Alert Type">
-                            <span th:text="${alert.alertType}">VELOCITY</span>
+                            <span th:text="${alert.alertType}">FRAUD</span>
                         </td>
 
                         <td data-label="Severity">

@@ -10,4 +10,10 @@ import com.frauddetection.frauddetection.entity.Transaction;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     List<Transaction> findByAccountOrderByTransactionTimeDesc(Account account);
+
+    List<Transaction> findTop5ByAccountOrderByTransactionTimeDesc(Account account);
+
+    long countByAccount(Account account);
+
+    long countByAccountAndStatus(Account account, String status);
 }

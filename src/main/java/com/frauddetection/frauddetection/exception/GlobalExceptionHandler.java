@@ -42,6 +42,7 @@ public class GlobalExceptionHandler {
     }
 
     private String errorPage(Model model, String message) {
+        model.addAttribute("errorTitle", "Transaction Notice");
         model.addAttribute("errorMessage", message);
         return "error";
     }

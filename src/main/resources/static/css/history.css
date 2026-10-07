@@ -77,11 +77,24 @@ body {
     color: #1f2937;
 }
 
+/* Id Column */
+.id-cell {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    color: #6b7280;
+    font-size: 14px;
+}
+
 /* Amount Column */
 .amount-cell {
     font-weight: 600;
     font-size: 16px;
     color: #111827;
+}
+
+/* Type Column */
+.type-cell {
+    font-weight: 600;
+    color: #374151;
 }
 
 /* Date Column */

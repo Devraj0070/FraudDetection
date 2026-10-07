@@ -1,14 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaction Error - Fraud Detection System</title>
+    <title>Error - Fraud Detection System</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/error.css}">
 </head>
 <body>
-    <h1>Transaction Could Not Be Completed</h1>
-    <p th:text="${errorMessage}">Please try again.</p>
-    <a href="/transaction">Return to Transaction</a>
-    <a href="/dashboard">Back to Dashboard</a>
+
+<div class="error-container">
+    <div class="error-card">
+        <span class="error-badge badge-generic" th:text="${status != null ? 'Error ' + status : 'Notice'}">Error</span>
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title" th:text="${errorTitle != null ? errorTitle : 'Request Error'}">Request Error</h1>
+        <p class="error-description" th:text="${errorMessage != null ? errorMessage : (message != null ? message : 'An unexpected error occurred while processing your request.')}">
+            An unexpected error occurred while processing your request.
+        </p>
+        <div class="error-actions">
+            <a href="/transaction" class="btn btn-secondary">Return to Transaction</a>
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

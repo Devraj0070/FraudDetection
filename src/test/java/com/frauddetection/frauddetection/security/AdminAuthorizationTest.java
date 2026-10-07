@@ -22,15 +22,25 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.frauddetection.frauddetection.entity.Account;
 import com.frauddetection.frauddetection.entity.FraudAlert;
 import com.frauddetection.frauddetection.entity.Transaction;
+import com.frauddetection.frauddetection.entity.User;
+import com.frauddetection.frauddetection.repository.AccountRepository;
 import com.frauddetection.frauddetection.repository.FraudAlertRepository;
+import com.frauddetection.frauddetection.repository.UserRepository;
 
 @SpringBootTest
 class AdminAuthorizationTest {
 
     @Autowired
     private WebApplicationContext context;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     @MockitoBean
     private FraudAlertRepository fraudAlertRepository;
@@ -43,6 +53,13 @@ class AdminAuthorizationTest {
                 .webAppContextSetup(context)
                 .apply(springSecurity())
                 .build();
+
+        userRepository.findAll().stream()
+                .filter(u -> "dash_user".equals(u.getUsername()) || "dash_admin".equals(u.getUsername()))
+                .forEach(u -> {
+                    accountRepository.findByUser(u).forEach(accountRepository::delete);
+                    userRepository.delete(u);
+                });
     }
 
     @Test
@@ -124,5 +141,55 @@ class AdminAuthorizationTest {
     void csrfProtectionIsStillEnabled() throws Exception {
         mockMvc.perform(post("/logout"))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "dash_user", roles = "USER")
+    void dashboardRendersSuccessfullyForUserWithAccount() throws Exception {
+        User user = new User();
+        user.setUsername("dash_user");
+        user.setEmail("dash@test.com");
+        user.setPassword("password");
+        user.setRole("USER");
+        user = userRepository.save(user);
+
+        Account account = new Account();
+        account.setAccountNumber("100000000099");
+        account.setAccountType("SAVINGS");
+        account.setBalance(new BigDecimal("5000.00"));
+        account.setStatus("ACTIVE");
+        account.setUser(user);
+        accountRepository.save(account);
+
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user/dashboard"))
+                .andExpect(model().attribute("username", "dash_user"))
+                .andExpect(model().attribute("balance", new BigDecimal("5000.00")));
+    }
+
+    @Test
+    @WithMockUser(username = "dash_admin", roles = "ADMIN")
+    void dashboardRendersSuccessfullyForAdminWithAccount() throws Exception {
+        User admin = new User();
+        admin.setUsername("dash_admin");
+        admin.setEmail("admin@test.com");
+        admin.setPassword("password");
+        admin.setRole("ADMIN");
+        admin = userRepository.save(admin);
+
+        Account account = new Account();
+        account.setAccountNumber("100000000098");
+        account.setAccountType("SAVINGS");
+        account.setBalance(new BigDecimal("10000.00"));
+        account.setStatus("ACTIVE");
+        account.setUser(admin);
+        accountRepository.save(account);
+
+        mockMvc.perform(get("/dashboard"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("user/dashboard"))
+                .andExpect(model().attribute("username", "dash_admin"))
+                .andExpect(model().attribute("balance", new BigDecimal("10000.00")));
     }
 }

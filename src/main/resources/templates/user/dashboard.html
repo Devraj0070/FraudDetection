@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,44 +14,163 @@
 
 <div class="dashboard-container">
 
+    <!-- Header -->
     <div class="dashboard-header">
-        <h1>Fraud Detection System</h1>
-        <p>Welcome to your secure transaction dashboard.</p>
+        <div class="dashboard-header-left">
+            <h1>
+                Fraud Detection Console
+                <span class="user-badge" th:text="${user != null and user.role != null ? user.role : 'USER'}">USER</span>
+            </h1>
+            <p>Welcome back, <strong th:text="${username != null ? username : 'User'}">User</strong>. Secure transaction monitoring is active.</p>
+        </div>
+        <div class="dashboard-header-right">
+            <form th:action="@{/logout}" method="post" style="margin: 0;">
+                <button class="btn btn-logout" type="submit">Sign Out</button>
+            </form>
+        </div>
     </div>
 
-    <div class="dashboard-grid">
-
-        <div class="dashboard-card">
-            <h2>New Transaction</h2>
-
-            <p>
-                Submit a transaction and let the system check its risk automatically.
-            </p>
-
-            <a class="dashboard-button" href="/transaction">
-                Check Transaction
-            </a>
+    <!-- Account Overview Bar -->
+    <div class="account-info-bar">
+        <div class="account-details">
+            <div class="account-item">
+                <span class="account-label">Account Number</span>
+                <span class="account-val" th:text="${account != null ? account.accountNumber : '—'}">100000000001</span>
+            </div>
+            <div class="account-item">
+                <span class="account-label">Account Type</span>
+                <span class="account-val" th:text="${account != null ? account.accountType : 'SAVINGS'}">SAVINGS</span>
+            </div>
+            <div class="account-item">
+                <span class="account-label">Account Status</span>
+                <span class="account-status-badge" th:text="${account != null ? account.status : 'ACTIVE'}">ACTIVE</span>
+            </div>
         </div>
-
-        <div class="dashboard-card">
-            <h2>Transaction History</h2>
-
-            <p>
-                View your previous transactions and their current status.
-            </p>
-
-            <a class="dashboard-button" href="/history">
-                View History
-            </a>
+        <div class="account-security">
+            <span class="account-label" style="text-align: right;">AI Protection</span>
+            <span style="font-size: 13px; font-weight: 600; color: #10b981;">● Active (Random Forest)</span>
         </div>
-
     </div>
 
-    <form th:action="@{/logout}" method="post">
-        <button class="logout-button" type="submit">
-            Logout
-        </button>
-    </form>
+    <!-- Metrics Row -->
+    <div class="metrics-grid">
+        <div class="metric-card balance-card">
+            <div>
+                <div class="metric-label">Available Balance</div>
+                <div class="metric-value">
+                    ₹<span th:text="${balance != null ? #numbers.formatDecimal(balance, 1, 2) : '0.00'}">0.00</span>
+                </div>
+            </div>
+            <div class="metric-subtext">Real-time ledger balance</div>
+        </div>
+
+        <div class="metric-card">
+            <div>
+                <div class="metric-label">Total Transactions</div>
+                <div class="metric-value" th:text="${totalTransactions}">0</div>
+            </div>
+            <div class="metric-subtext">Lifetime activity</div>
+        </div>
+
+        <div class="metric-card">
+            <div>
+                <div class="metric-label">
+                    <span class="metric-indicator ind-approved"></span>Approved
+                </div>
+                <div class="metric-value" th:text="${approvedTransactions}">0</div>
+            </div>
+            <div class="metric-subtext">Completed safely</div>
+        </div>
+
+        <div class="metric-card">
+            <div>
+                <div class="metric-label">
+                    <span class="metric-indicator ind-declined"></span>Declined
+                </div>
+                <div class="metric-value" th:text="${declinedTransactions}">0</div>
+            </div>
+            <div class="metric-subtext">Insufficient funds</div>
+        </div>
+
+        <div class="metric-card">
+            <div>
+                <div class="metric-label">
+                    <span class="metric-indicator ind-blocked"></span>Blocked
+                </div>
+                <div class="metric-value" th:text="${blockedTransactions}">0</div>
+            </div>
+            <div class="metric-subtext">AI fraud prevention</div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="actions-row">
+        <a href="/transaction" class="btn btn-primary">
+            + New Transaction
+        </a>
+        <a href="/history" class="btn btn-secondary">
+            📋 Full History
+        </a>
+        <a sec:authorize="hasRole('ADMIN')" href="/admin/alerts" class="btn btn-admin">
+            🛡️ Admin Fraud Alerts
+        </a>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="transactions-card">
+        <div class="transactions-card-header">
+            <h2>Recent Transactions</h2>
+            <a href="/history" class="view-all-link">View All History →</a>
+        </div>
+
+        <!-- Table if transactions exist -->
+        <div th:if="${recentTransactions != null and !recentTransactions.empty}">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Txn ID</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Date & Time</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="tx : ${recentTransactions}">
+                        <td class="cell-id" data-label="Txn ID">
+                            #<span th:text="${tx.id}">1</span>
+                        </td>
+                        <td class="cell-amount" data-label="Amount">
+                            ₹<span th:text="${tx.amount != null ? #numbers.formatDecimal(tx.amount, 1, 2) : '0.00'}">0.00</span>
+                        </td>
+                        <td class="cell-type" data-label="Type">
+                            <span th:text="${tx.transactionType != null ? tx.transactionType.toModelValue() : 'PAYMENT'}">PAYMENT</span>
+                        </td>
+                        <td class="cell-time" data-label="Date & Time">
+                            <span th:text="${tx.transactionTime != null ? #temporals.format(tx.transactionTime, 'dd MMM yyyy, hh:mm a') : '—'}">
+                                06 Oct 2026, 04:30 PM
+                            </span>
+                        </td>
+                        <td data-label="Status">
+                            <span class="status-badge"
+                                  th:classappend="${tx.status == 'APPROVED' ? 'approved' : (tx.status == 'DECLINED' ? 'declined' : 'blocked')}"
+                                  th:text="${tx.status}">
+                                APPROVED
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${recentTransactions == null or recentTransactions.empty}" class="empty-state">
+            <div class="empty-state-icon">💳</div>
+            <h3>No Transactions Yet</h3>
+            <p>You have not executed any transactions. Submit a new transaction to test fraud detection analysis.</p>
+            <a href="/transaction" class="btn btn-primary">+ Create First Transaction</a>
+        </div>
+    </div>
 
 </div>
 

@@ -14,6 +14,8 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     List<Account> findByUser(User user);
 
+    Optional<Account> findTopByUserOrderByIdAsc(User user);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Account> findFirstByUserOrderByIdAsc(User user);
 

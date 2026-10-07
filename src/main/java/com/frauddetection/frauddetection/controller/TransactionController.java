@@ -74,6 +74,7 @@ public class TransactionController {
         model.addAttribute("modelName", fraudPrediction.getModelName());
         model.addAttribute("transactionStatus", transaction.getStatus());
         model.addAttribute("transactionAmount", transaction.getAmount());
+        model.addAttribute("transactionType", transaction.getTransactionType());
         model.addAttribute("transactionTime", transaction.getTransactionTime());
 
         return "user/result";
@@ -94,7 +95,7 @@ public class TransactionController {
         String username = authentication.getName();
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApplicationException("User not found"));
 
         List<Account> accounts = accountRepository.findByUser(user);
 
@@ -106,6 +107,13 @@ public class TransactionController {
                             .findByAccountOrderByTransactionTimeDesc(account)
             );
         }
+
+        transactions.sort((t1, t2) -> {
+            if (t1.getTransactionTime() == null && t2.getTransactionTime() == null) return 0;
+            if (t1.getTransactionTime() == null) return 1;
+            if (t2.getTransactionTime() == null) return -1;
+            return t2.getTransactionTime().compareTo(t1.getTransactionTime());
+        });
 
         model.addAttribute("transactions", transactions);
 

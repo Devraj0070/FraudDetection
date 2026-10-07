@@ -41,6 +41,11 @@
             <div class="detail-grid">
 
                 <div class="detail-item">
+                    <span class="detail-label">Transaction Type</span>
+                    <span class="detail-value" th:text="${transactionType != null ? (transactionType.name != null ? transactionType.name() : transactionType) : 'PAYMENT'}">PAYMENT</span>
+                </div>
+
+                <div class="detail-item">
                     <span class="detail-label">Transaction Time</span>
                     <span class="detail-value" th:text="${#temporals.format(transactionTime, 'dd MMM yyyy, hh:mm a')}">
                         06 Oct 2026, 04:30 PM

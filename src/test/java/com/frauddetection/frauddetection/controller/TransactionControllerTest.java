@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 import org.springframework.ui.Model;
 
+import com.frauddetection.frauddetection.entity.Account;
 import com.frauddetection.frauddetection.entity.FraudPrediction;
 import com.frauddetection.frauddetection.entity.Transaction;
 import com.frauddetection.frauddetection.entity.User;
@@ -64,8 +65,8 @@ class TransactionControllerTest {
         user = new User();
         when(authentication.getName()).thenReturn("alice");
         when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
-        when(request.getRemoteAddr()).thenReturn("127.0.0.1");
-        when(request.getHeader("User-Agent")).thenReturn("test-agent");
+        org.mockito.Mockito.lenient().when(request.getRemoteAddr()).thenReturn("127.0.0.1");
+        org.mockito.Mockito.lenient().when(request.getHeader("User-Agent")).thenReturn("test-agent");
     }
 
     @Test
@@ -87,6 +88,8 @@ class TransactionControllerTest {
         verify(model).addAttribute("fraudProbability", 0.02);
         verify(model).addAttribute("modelName", "Random Forest");
         verify(model).addAttribute("transactionStatus", "APPROVED");
+        verify(model).addAttribute("transactionAmount", amount);
+        verify(model).addAttribute("transactionType", TransactionType.PAYMENT);
         verify(model).addAttribute("message", "Your transaction was approved.");
         verify(transactionService).processPayment(
                 eq(user),
@@ -119,6 +122,44 @@ class TransactionControllerTest {
         );
     }
 
+    @Test
+    void shouldShowHistorySortedNewestFirst() {
+        Account account = new Account();
+        account.setUser(user);
+
+        Transaction older = new Transaction();
+        older.setAmount(new BigDecimal("50.00"));
+        older.setTransactionTime(LocalDateTime.of(2026, 10, 1, 10, 0));
+
+        Transaction newer = new Transaction();
+        newer.setAmount(new BigDecimal("150.00"));
+        newer.setTransactionTime(LocalDateTime.of(2026, 10, 5, 15, 30));
+
+        when(accountRepository.findByUser(user)).thenReturn(java.util.List.of(account));
+        when(transactionRepository.findByAccountOrderByTransactionTimeDesc(account))
+                .thenReturn(java.util.List.of(older, newer));
+
+        String view = controller.showHistory(authentication, model);
+
+        assertEquals("user/history", view);
+        verify(model).addAttribute("transactions", java.util.List.of(newer, older));
+    }
+
+    @Test
+    void shouldShowEmptyHistoryWhenNoTransactions() {
+        Account account = new Account();
+        account.setUser(user);
+
+        when(accountRepository.findByUser(user)).thenReturn(java.util.List.of(account));
+        when(transactionRepository.findByAccountOrderByTransactionTimeDesc(account))
+                .thenReturn(java.util.Collections.emptyList());
+
+        String view = controller.showHistory(authentication, model);
+
+        assertEquals("user/history", view);
+        verify(model).addAttribute("transactions", java.util.Collections.emptyList());
+    }
+
     private FraudPrediction predictionFor(
             String prediction,
             double probability,
@@ -126,6 +167,7 @@ class TransactionControllerTest {
 
         Transaction transaction = new Transaction();
         transaction.setAmount(new BigDecimal("100.00"));
+        transaction.setTransactionType(TransactionType.PAYMENT);
         transaction.setStatus(transactionStatus);
         transaction.setTransactionTime(LocalDateTime.of(2026, 10, 5, 12, 0));
 

@@ -28,7 +28,9 @@
             <table class="transaction-table">
                 <thead>
                     <tr>
+                        <th>Txn ID</th>
                         <th>Amount</th>
+                        <th>Type</th>
                         <th>Date & Time</th>
                         <th>Status</th>
                     </tr>
@@ -37,8 +39,16 @@
                 <tbody>
                     <tr th:each="transaction : ${transactions}">
 
+                        <td class="id-cell" data-label="Txn ID">
+                            #<span th:text="${transaction.id}">1</span>
+                        </td>
+
                         <td class="amount-cell" data-label="Amount">
                             ₹<span th:text="${#numbers.formatDecimal(transaction.amount, 1, 2)}">0.00</span>
+                        </td>
+
+                        <td class="type-cell" data-label="Type">
+                            <span th:text="${transaction.transactionType != null ? transaction.transactionType.toModelValue() : 'PAYMENT'}">PAYMENT</span>
                         </td>
 
                         <td class="date-cell" data-label="Date & Time">

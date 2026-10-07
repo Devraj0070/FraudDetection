@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 - Access Denied - Fraud Detection System</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/error.css}">
+</head>
+<body>
+
+<div class="error-container">
+    <div class="error-card">
+        <span class="error-badge badge-403">403 Forbidden</span>
+        <div class="error-icon">🔒</div>
+        <h1 class="error-title">Access Denied</h1>
+        <p class="error-description">
+            You do not have permission to access this page. This section is restricted to authorized administrative personnel only.
+        </p>
+        <div class="error-actions">
+            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
