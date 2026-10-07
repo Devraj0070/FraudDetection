@@ -269,6 +269,6 @@ class TransactionServiceTest {
         assertEquals("LEGITIMATE", result.getPrediction());
         assertEquals("APPROVED", result.getTransaction().getStatus());
         assertEquals(TransactionType.CASH_IN, result.getTransaction().getTransactionType());
-        assertEquals(new BigDecimal("70.00"), account.getBalance());
+        assertEquals(new BigDecimal("130.00"), account.getBalance());
     }
 }

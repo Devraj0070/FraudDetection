@@ -43,7 +43,8 @@ public class TransactionController {
     }
 
     @GetMapping("/transaction")
-    public String showTransactionPage() {
+    public String showTransactionPage(Authentication authentication, Model model) {
+        populateUserAndAccount(authentication, model);
         return "user/transaction";
     }
 
@@ -54,7 +55,7 @@ public class TransactionController {
                                     HttpServletRequest request,
                                     Model model) {
 
-        String username = authentication.getName();
+        String username = authentication != null ? authentication.getName() : null;
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApplicationException("User not found"));
@@ -68,6 +69,16 @@ public class TransactionController {
         );
         Transaction transaction = fraudPrediction.getTransaction();
 
+        double probability = fraudPrediction.getProbability();
+        String riskAssessment;
+        if (probability < 0.30) {
+            riskAssessment = "LOW";
+        } else if (probability < 0.70) {
+            riskAssessment = "MEDIUM";
+        } else {
+            riskAssessment = "HIGH";
+        }
+
         model.addAttribute("message", transactionMessage(transaction.getStatus()));
         model.addAttribute("prediction", fraudPrediction.getPrediction());
         model.addAttribute("fraudProbability", fraudPrediction.getProbability());
@@ -76,6 +87,11 @@ public class TransactionController {
         model.addAttribute("transactionAmount", transaction.getAmount());
         model.addAttribute("transactionType", transaction.getTransactionType());
         model.addAttribute("transactionTime", transaction.getTransactionTime());
+        model.addAttribute("riskAssessment", riskAssessment);
+        model.addAttribute("riskLevel", riskAssessment);
+        model.addAttribute("aiEngineName", "AI Fraud Protection");
+
+        populateUserAndAccount(authentication, model);
 
         return "user/result";
     }
@@ -92,7 +108,7 @@ public class TransactionController {
     @GetMapping("/history")
     public String showHistory(Authentication authentication, Model model) {
 
-        String username = authentication.getName();
+        String username = authentication != null ? authentication.getName() : null;
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ApplicationException("User not found"));
@@ -116,7 +132,32 @@ public class TransactionController {
         });
 
         model.addAttribute("transactions", transactions);
+        populateUserAndAccount(authentication, model);
 
         return "user/history";
+    }
+
+    private void populateUserAndAccount(Authentication authentication, Model model) {
+        if (authentication == null) {
+            return;
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username).orElse(null);
+        Account account = null;
+        BigDecimal balance = BigDecimal.ZERO;
+        if (user != null) {
+            account = accountRepository.findTopByUserOrderByIdAsc(user)
+                    .orElseGet(() -> {
+                        List<Account> list = accountRepository.findByUser(user);
+                        return list.isEmpty() ? null : list.get(0);
+                    });
+            if (account != null && account.getBalance() != null) {
+                balance = account.getBalance();
+            }
+        }
+        model.addAttribute("username", username);
+        model.addAttribute("user", user);
+        model.addAttribute("account", account);
+        model.addAttribute("balance", balance);
     }
 }

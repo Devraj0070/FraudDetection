@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.frauddetection.frauddetection.security.CustomUserDetailsService;
@@ -14,12 +13,9 @@ import com.frauddetection.frauddetection.security.CustomUserDetailsService;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService,
-                          PasswordEncoder passwordEncoder) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
@@ -28,7 +24,7 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/register", "/login", "/css/**").permitAll()
+                .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/api/v1/metrics").permitAll()
                 .anyRequest().authenticated()
             )
             .userDetailsService(userDetailsService)

@@ -29,6 +29,11 @@
             Invalid username or password. Please try again.
         </div>
 
+        <!-- Registration Success Message -->
+        <div th:if="${param.registered}" class="alert alert-success">
+            Registration successful! Please sign in with your credentials.
+        </div>
+
         <!-- Logout Message -->
         <div th:if="${param.logout}" class="alert alert-success">
             You have been successfully logged out.
