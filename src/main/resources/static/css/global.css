@@ -1,29 +1,805 @@
-* {
+/* ==========================================================================
+   SAFE PAY - Enterprise Design System & Global Stylesheet
+   Fintech & Banking Security Platform
+   ========================================================================== */
+
+:root {
+    /* ----------------------------------------------------------------------
+       1. Brand Navy & Slate Palette
+       ---------------------------------------------------------------------- */
+    --safepay-navy-950: #040812;
+    --safepay-navy-900: #080f1d;
+    --safepay-navy-850: #0d172e;
+    --safepay-navy-800: #132240;
+    --safepay-navy-700: #1b2e53;
+    --safepay-navy-600: #263e6e;
+
+    /* Slate Neutral Scale */
+    --slate-900: #0f172a;
+    --slate-800: #1e293b;
+    --slate-700: #334155;
+    --slate-600: #475569;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-300: #cbd5e1;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50:  #f8fafc;
+    --white:     #ffffff;
+
+    /* ----------------------------------------------------------------------
+       2. Brand Cyan & Electric Blue Accents
+       ---------------------------------------------------------------------- */
+    --safepay-blue-700: #0369a1;
+    --safepay-blue-600: #0284c7;
+    --safepay-blue-500: #0ea5e9;
+    --safepay-blue-400: #38bdf8;
+    --safepay-blue-100: #e0f2fe;
+    --safepay-blue-50:  #f0f9ff;
+
+    --safepay-cyan-600: #0891b2;
+    --safepay-cyan-500: #06b6d4;
+    --safepay-cyan-400: #22d3ee;
+    --safepay-cyan-300: #67e8f9;
+    --safepay-cyan-100: #cffafe;
+    --safepay-cyan-50:  #ecfeff;
+
+    /* Brand Gradient */
+    --grad-primary: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%);
+    --grad-dark:    linear-gradient(135deg, #080f1d 0%, #132240 100%);
+    --grad-card:    linear-gradient(135deg, #0b152a 0%, #16284d 100%);
+
+    /* ----------------------------------------------------------------------
+       3. Status Semantics
+       ---------------------------------------------------------------------- */
+    --status-approved:       #059669;
+    --status-approved-bg:    #ecfdf5;
+    --status-approved-border:#a7f3d0;
+    --status-approved-text:  #065f46;
+
+    --status-declined:       #d97706;
+    --status-declined-bg:    #fffbeb;
+    --status-declined-border:#fde68a;
+    --status-declined-text:  #92400e;
+
+    --status-blocked:        #dc2626;
+    --status-blocked-bg:     #fef2f2;
+    --status-blocked-border: #fecaca;
+    --status-blocked-text:   #991b1b;
+
+    /* ----------------------------------------------------------------------
+       4. Canvas & Layout Tokens
+       ---------------------------------------------------------------------- */
+    --bg-canvas:        #f4f7fb;
+    --bg-card:          #ffffff;
+    --bg-card-subtle:   #f8fafc;
+    --border-color:     #e2e8f0;
+    --border-subtle:    #edf2f7;
+
+    --text-primary:     #0f172a;
+    --text-secondary:   #475569;
+    --text-muted:       #64748b;
+    --text-light:       #94a3b8;
+    --text-inverse:     #ffffff;
+
+    /* ----------------------------------------------------------------------
+       5. Radii & Shadows
+       ---------------------------------------------------------------------- */
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    --shadow-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 4px 6px -1px rgba(15, 23, 42, 0.07), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04);
+    --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.09), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
+    --shadow-glow: 0 0 25px -5px rgba(14, 165, 233, 0.25);
+
+    /* Typography */
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+}
+
+/* ==========================================================================
+   Base & CSS Reset
+   ========================================================================== */
+*, *::before, *::after {
     box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    font-size: 16px;
+    scroll-behavior: smooth;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f7fb;
-    color: #1f2937;
+    min-height: 100vh;
+    background-color: var(--bg-canvas);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 a {
-    color: #2563eb;
+    color: var(--safepay-blue-600);
     text-decoration: none;
+    transition: color 0.15s ease;
 }
 
 a:hover {
-    text-decoration: underline;
+    color: var(--safepay-blue-700);
 }
 
 button {
+    font-family: inherit;
     border: none;
     cursor: pointer;
-    font-family: inherit;
+    background: transparent;
 }
 
-input {
+input, select, textarea {
     font-family: inherit;
+    font-size: 100%;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ==========================================================================
+   SafePay Unified App Shell (Used across all logged-in views)
+   ========================================================================== */
+.app-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Top Navigation Bar - Deep Navy Fintech Header */
+.top-nav {
+    height: 68px;
+    background-color: var(--safepay-navy-900);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.mobile-toggle-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    color: var(--slate-300);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.mobile-toggle-btn:hover {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* SafePay Official Logo Brand Link */
+.brand-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+}
+
+.brand-logo-img {
+    height: 36px;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 8px rgba(34, 211, 238, 0.2));
+}
+
+.brand-badge-fintech {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: var(--radius-full);
+    background: rgba(34, 211, 238, 0.12);
+    border: 1px solid rgba(34, 211, 238, 0.25);
+    color: var(--safepay-cyan-300);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Security Status Indicator */
+.nav-security-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(6, 182, 212, 0.08);
+    border: 1px solid rgba(6, 182, 212, 0.2);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    color: var(--safepay-cyan-300);
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.pulse-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--safepay-cyan-400);
+    box-shadow: 0 0 10px var(--safepay-cyan-400);
+    animation: statusPulse 2s infinite ease-in-out;
+}
+
+@keyframes statusPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+}
+
+/* User Profile Badge */
+.user-profile-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 12px 4px 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-full);
+}
+
+.user-avatar-initial {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--grad-primary);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(14, 165, 233, 0.3);
+}
+
+.user-meta-details {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-display-name {
+    font-size: 0.825rem;
+    font-weight: 600;
+    color: var(--slate-100);
+}
+
+.user-role-tag {
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-xs);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.role-tag-user {
+    background: rgba(148, 163, 184, 0.2);
+    color: var(--slate-300);
+}
+
+.role-tag-admin {
+    background: rgba(14, 165, 233, 0.25);
+    border: 1px solid rgba(14, 165, 233, 0.4);
+    color: var(--safepay-cyan-300);
+}
+
+/* Sign Out Button */
+.nav-logout-form {
+    margin: 0;
+}
+
+.btn-logout {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--slate-300);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.btn-logout:hover {
+    color: var(--white);
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ----------------------------------------------------------------------
+   App Body Layout: Sidebar + Main Content Viewport
+   ---------------------------------------------------------------------- */
+.app-body {
+    display: flex;
+    flex: 1;
+    min-height: calc(100vh - 68px);
+    position: relative;
+}
+
+/* Sidebar Navigation - Sleek Deep Navy */
+.sidebar-nav {
+    width: 260px;
+    background-color: var(--safepay-navy-950);
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-content {
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    height: 100%;
+}
+
+.sidebar-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-section-title {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--slate-500);
+    padding: 0 12px 6px;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nav-menu-item {
+    width: 100%;
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    color: var(--slate-400);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.nav-link-icon {
+    flex-shrink: 0;
+    color: var(--slate-400);
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: var(--white);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-link:hover .nav-link-icon {
+    color: var(--safepay-cyan-300);
+}
+
+.nav-link.active {
+    color: var(--white);
+    background: linear-gradient(90deg, rgba(14, 165, 233, 0.15) 0%, rgba(6, 182, 212, 0.05) 100%);
+    border-color: rgba(14, 165, 233, 0.25);
+    font-weight: 600;
+}
+
+.nav-link.active .nav-link-icon {
+    color: var(--safepay-cyan-300);
+}
+
+.admin-nav-link {
+    color: #cbd5e1;
+}
+
+.admin-nav-link:hover,
+.admin-nav-link.active {
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+/* Sidebar Protection Status Card */
+.sidebar-footer-card {
+    margin-top: auto;
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(8, 15, 29, 0.95) 100%);
+    border: 1px solid rgba(34, 211, 238, 0.18);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-footer-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.footer-shield-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-xs);
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--safepay-cyan-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.footer-card-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--white);
+}
+
+.footer-card-text {
+    font-size: 0.72rem;
+    color: var(--slate-400);
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.footer-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--status-approved);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+}
+
+.status-green-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: var(--status-approved);
+    box-shadow: 0 0 6px var(--status-approved);
+}
+
+/* Main Viewport */
+.main-viewport {
+    flex: 1;
+    overflow-y: auto;
+    background-color: var(--bg-canvas);
+    padding: 32px 36px;
+}
+
+.content-wrapper {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.sidebar-backdrop {
+    display: none;
+}
+
+/* ==========================================================================
+   Shared Reusable Components
+   ========================================================================== */
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: 1px solid transparent;
+}
+
+.btn-primary {
+    background: var(--safepay-blue-600);
+    color: var(--white);
+    box-shadow: 0 2px 6px rgba(2, 132, 199, 0.25);
+}
+
+.btn-primary:hover {
+    background: var(--safepay-blue-700);
+    color: var(--white);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);
+}
+
+.btn-secondary {
+    background: var(--white);
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+    box-shadow: var(--shadow-xs);
+}
+
+.btn-secondary:hover {
+    background: var(--slate-50);
+    color: var(--slate-900);
+    border-color: var(--slate-300);
+    text-decoration: none;
+}
+
+.btn-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-primary-action {
+    background: var(--grad-primary);
+    color: var(--white);
+    box-shadow: 0 2px 8px rgba(14, 165, 233, 0.25);
+}
+
+.btn-primary-action:hover {
+    color: var(--white);
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+    transform: translateY(-1px);
+}
+
+.btn-secondary-action {
+    background: var(--white);
+    color: var(--slate-700);
+    border: 1px solid var(--slate-200);
+}
+
+.btn-secondary-action:hover {
+    background: var(--slate-50);
+    color: var(--slate-900);
+    border-color: var(--slate-300);
+}
+
+.btn-admin-action {
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--safepay-blue-700);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+}
+
+.btn-admin-action:hover {
+    background: rgba(14, 165, 233, 0.18);
+}
+
+/* Alert Notification Banners */
+.alert {
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.alert-error {
+    background-color: var(--status-blocked-bg);
+    color: var(--status-blocked-text);
+    border: 1px solid var(--status-blocked-border);
+}
+
+.alert-success {
+    background-color: var(--status-approved-bg);
+    color: var(--status-approved-text);
+    border: 1px solid var(--status-approved-border);
+}
+
+.alert-info {
+    background-color: var(--safepay-blue-50);
+    color: var(--safepay-blue-700);
+    border: 1px solid var(--safepay-blue-100);
+}
+
+/* Status Badges */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.status-indicator-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.status-approved {
+    background-color: var(--status-approved-bg);
+    color: var(--status-approved);
+    border: 1px solid var(--status-approved-border);
+}
+.status-approved .status-indicator-dot {
+    background-color: var(--status-approved);
+}
+
+.status-declined {
+    background-color: var(--status-declined-bg);
+    color: var(--status-declined);
+    border: 1px solid var(--status-declined-border);
+}
+.status-declined .status-indicator-dot {
+    background-color: var(--status-declined);
+}
+
+.status-blocked {
+    background-color: var(--status-blocked-bg);
+    color: var(--status-blocked);
+    border: 1px solid var(--status-blocked-border);
+}
+.status-blocked .status-indicator-dot {
+    background-color: var(--status-blocked);
+}
+
+/* Card Styling */
+.safepay-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.safepay-card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--slate-300);
+}
+
+/* ==========================================================================
+   Responsive Adaptations
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .main-viewport {
+        padding: 24px 20px;
+    }
+}
+
+@media (max-width: 868px) {
+    .mobile-toggle-btn {
+        display: flex;
+    }
+
+    .sidebar-nav {
+        position: fixed;
+        top: 68px;
+        left: -280px;
+        width: 280px;
+        height: calc(100vh - 68px);
+        z-index: 40;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .sidebar-nav.open {
+        transform: translateX(280px);
+    }
+
+    .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 68px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(4, 8, 18, 0.6);
+        backdrop-filter: blur(2px);
+        z-index: 35;
+    }
+
+    .sidebar-backdrop.active {
+        display: block;
+    }
+
+    .nav-security-status {
+        display: none;
+    }
+}
+
+@media (max-width: 640px) {
+    .top-nav {
+        padding: 0 16px;
+        height: 62px;
+    }
+
+    .brand-logo-img {
+        height: 28px;
+    }
+
+    .brand-badge-fintech {
+        display: none;
+    }
+
+    .user-meta-details {
+        display: none;
+    }
+
+    .user-profile-badge {
+        padding: 0;
+        background: transparent;
+        border: none;
+    }
+
+    .btn-logout span {
+        display: none;
+    }
+
+    .btn-logout {
+        padding: 8px;
+    }
+
+    .main-viewport {
+        padding: 16px 12px;
+    }
 }

@@ -1,168 +1,305 @@
-body {
-    min-height: 100vh;
+/* ==========================================================================
+   SAFE PAY - New Transaction Stylesheet
+   Modern Banking Transfer Interface
+   ========================================================================== */
+
+.transaction-page-wrapper {
+    max-width: 680px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Page Header */
+.page-title-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.page-title-banner h1 {
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.02em;
+}
+
+.page-title-banner p {
+    font-size: 0.95rem;
+    color: var(--slate-500);
+}
+
+/* Available Balance Quick Banner */
+.balance-reminder-card {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.05) 100%);
+    border: 1px solid rgba(14, 165, 233, 0.25);
+    border-radius: var(--radius-xl);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-xs);
+}
+
+.balance-reminder-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.balance-reminder-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-md);
+    background: rgba(14, 165, 233, 0.15);
+    color: var(--safepay-blue-600);
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
 }
 
-.transaction-container {
-    width: 100%;
-    max-width: 600px;
-}
-
-.transaction-header {
-    background: #111827;
-    color: white;
-    padding: 30px;
-    border-radius: 16px 16px 0 0;
-    text-align: center;
-}
-
-.transaction-header h1 {
-    margin: 0 0 10px;
-    font-size: 28px;
+.balance-reminder-label {
+    font-size: 0.8rem;
     font-weight: 600;
-}
-
-.transaction-header p {
-    margin: 0;
-    color: #d1d5db;
-    font-size: 15px;
-}
-
-.transaction-card {
-    background: white;
-    padding: 40px;
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-}
-
-.form-group {
-    margin-bottom: 30px;
-}
-
-.form-group label {
+    color: var(--slate-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #1f2937;
-    font-size: 15px;
 }
 
-.input-wrapper {
+.balance-account-ref {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--slate-400);
+}
+
+.balance-reminder-amount {
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+.balance-reminder-amount .curr-sym {
+    color: var(--safepay-blue-600);
+    font-weight: 600;
+    margin-right: 2px;
+}
+
+/* Main Form Card */
+.transaction-form-card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-2xl);
+    padding: 36px 40px;
+    box-shadow: var(--shadow-sm);
+}
+
+.transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.form-group-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.label-required-marker {
+    color: var(--safepay-blue-600);
+}
+
+/* Currency Input Styling */
+.currency-input-container {
     position: relative;
     display: flex;
     align-items: center;
 }
 
-.currency-symbol {
+.currency-input-symbol {
     position: absolute;
-    left: 16px;
-    font-size: 18px;
-    font-weight: 600;
-    color: #6b7280;
+    left: 20px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--slate-400);
+    pointer-events: none;
+    transition: color 0.15s ease;
+}
+
+.amount-input-control {
+    width: 100%;
+    padding: 16px 20px 16px 48px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    background-color: var(--slate-50);
+    border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.amount-input-control:focus {
+    outline: none;
+    background-color: var(--white);
+    border-color: var(--safepay-blue-500);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+
+.currency-input-container:focus-within .currency-input-symbol {
+    color: var(--safepay-blue-600);
+}
+
+/* Select Dropdown Styling */
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.type-select-control {
+    width: 100%;
+    padding: 14px 44px 14px 18px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--slate-900);
+    background-color: var(--slate-50);
+    border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    transition: all 0.2s ease;
+}
+
+.type-select-control:focus {
+    outline: none;
+    background-color: var(--white);
+    border-color: var(--safepay-blue-500);
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+}
+
+.select-arrow-icon {
+    position: absolute;
+    right: 18px;
+    color: var(--slate-400);
     pointer-events: none;
 }
 
-.form-group input,
-.form-group select {
-    width: 100%;
-    padding: 14px 16px 14px 36px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 18px;
-    font-weight: 500;
-    transition: all 0.2s;
+.input-helper-text {
+    font-size: 0.78rem;
+    color: var(--slate-500);
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-}
-
-.form-group input::placeholder {
-    color: #d1d5db;
-}
-
-.input-hint {
-    display: block;
-    margin-top: 6px;
-    font-size: 13px;
-    color: #6b7280;
-}
-
-.form-actions {
+/* Security Trust Banner */
+.security-trust-box {
+    background: var(--slate-50);
+    border: 1px solid var(--slate-200);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
     display: flex;
-    gap: 12px;
-    margin-top: 30px;
+    align-items: flex-start;
+    gap: 14px;
 }
 
-.btn {
+.trust-shield-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--status-approved);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.trust-text-content h4 {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin-bottom: 2px;
+}
+
+.trust-text-content p {
+    font-size: 0.76rem;
+    color: var(--slate-500);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Action Buttons */
+.form-buttons-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.btn-submit-transfer {
     flex: 1;
+    padding: 14px 28px;
+    background: var(--grad-primary);
+    color: var(--white);
+    font-size: 0.95rem;
+    font-weight: 700;
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-submit-transfer:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+}
+
+.btn-cancel-transfer {
     padding: 14px 24px;
-    border-radius: 8px;
-    font-size: 16px;
+    background: var(--white);
+    color: var(--slate-700);
+    border: 1.5px solid var(--slate-200);
+    border-radius: var(--radius-md);
+    font-size: 0.95rem;
     font-weight: 600;
-    text-align: center;
-    transition: all 0.2s;
-    border: none;
-    cursor: pointer;
-    text-decoration: none;
-    display: inline-block;
+    transition: all 0.2s ease;
 }
 
-.btn-primary {
-    background: #2563eb;
-    color: white;
+.btn-cancel-transfer:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
 }
 
-.btn-primary:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
-
-.btn-secondary {
-    background: #f3f4f6;
-    color: #374151;
-}
-
-.btn-secondary:hover {
-    background: #e5e7eb;
-    text-decoration: none;
-}
-
-/* Responsive design */
+/* Responsive */
 @media (max-width: 640px) {
-    body {
-        padding: 0;
-    }
-
-    .transaction-container {
-        max-width: 100%;
-    }
-
-    .transaction-header {
-        border-radius: 0;
+    .transaction-form-card {
         padding: 24px 20px;
     }
 
-    .transaction-header h1 {
-        font-size: 24px;
-    }
-
-    .transaction-card {
-        border-radius: 0;
-        padding: 24px 20px;
-    }
-
-    .form-actions {
+    .form-buttons-row {
         flex-direction: column;
     }
 
-    .btn {
+    .btn-submit-transfer,
+    .btn-cancel-transfer {
         width: 100%;
+        text-align: center;
     }
 }

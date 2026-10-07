@@ -1,806 +1,351 @@
 /* ==========================================================================
-   FraudGuard - Enterprise Fraud Detection Dashboard Stylesheet
-   Modern Fintech & Banking Security UI
+   SAFE PAY - Dashboard Stylesheet
+   Modern Fintech Dashboard Architecture
    ========================================================================== */
 
-:root {
-    /* Brand Navy Palette */
-    --navy-950: #070d18;
-    --navy-900: #0f172a;
-    --navy-800: #1e293b;
-    --navy-700: #334155;
-
-    /* Slate Neutral Scale */
-    --slate-600: #475569;
-    --slate-500: #64748b;
-    --slate-400: #94a3b8;
-    --slate-300: #cbd5e1;
-    --slate-200: #e2e8f0;
-    --slate-100: #f1f5f9;
-    --slate-50:  #f8fafc;
-    --white:     #ffffff;
-
-    /* Primary Accent Blue */
-    --blue-700:  #1d4ed8;
-    --blue-600:  #2563eb;
-    --blue-100:  #dbeafe;
-    --blue-50:   #eff6ff;
-
-    /* Status Colors */
-    --emerald-700: #047857;
-    --emerald-600: #059669;
-    --emerald-500: #10b981;
-    --emerald-100: #d1fae5;
-    --emerald-50:  #ecfdf5;
-
-    --rose-700:    #b91c1c;
-    --rose-600:    #dc2626;
-    --rose-500:    #ef4444;
-    --rose-100:    #fee2e2;
-    --rose-50:     #fef2f2;
-
-    --amber-700:   #b45309;
-    --amber-600:   #d97706;
-    --amber-500:   #f59e0b;
-    --amber-100:   #fef3c7;
-    --amber-50:    #fffbeb;
-
-    /* Radius & Elevation */
-    --radius-sm: 6px;
-    --radius-md: 10px;
-    --radius-lg: 12px;
-
-    --shadow-subtle: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
-    --shadow-elevated: 0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.03);
-    --shadow-hover: 0 6px 12px -2px rgba(15, 23, 42, 0.08), 0 3px 6px -2px rgba(15, 23, 42, 0.04);
-
-    /* Typography */
-    --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-}
-
-/* Reset / Base Setup */
-body {
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    background-color: var(--slate-50);
-    color: var(--navy-900);
-    font-family: var(--font-system);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-/* App Shell Structure */
-.app-shell {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-/* ==========================================================================
-   1. TOP NAVIGATION
-   ========================================================================== */
-
-.top-nav {
-    height: 60px;
-    background-color: var(--white);
-    border-bottom: 1px solid var(--slate-200);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 24px;
-    position: sticky;
-    top: 0;
-    z-index: 50;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.02);
-}
-
-.nav-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.mobile-toggle-btn {
-    display: none;
-    background: transparent;
-    border: 1px solid var(--slate-200);
-    color: var(--navy-800);
-    padding: 6px;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    line-height: 0;
-}
-
-.mobile-toggle-btn:hover {
-    background-color: var(--slate-100);
-}
-
-.brand-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    color: inherit;
-}
-
-.brand-container:hover {
-    text-decoration: none;
-}
-
-.brand-shield-icon {
-    width: 32px;
-    height: 32px;
-    background: linear-gradient(135deg, var(--navy-900) 0%, var(--navy-800) 100%);
-    color: var(--white);
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.15);
-}
-
-.brand-naming {
-    display: flex;
-    flex-direction: column;
-}
-
-.brand-title {
-    font-size: 15px;
-    font-weight: 700;
-    color: var(--navy-900);
-    letter-spacing: -0.3px;
-    line-height: 1.2;
-}
-
-.brand-caption {
-    font-size: 10.5px;
-    font-weight: 500;
-    color: var(--slate-500);
-    letter-spacing: 0.2px;
-}
-
-.nav-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-/* System Security Indicator Pill */
-.nav-security-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background-color: var(--emerald-50);
-    border: 1px solid var(--emerald-100);
-    padding: 4px 10px;
-    border-radius: 20px;
-}
-
-.pulse-indicator {
-    width: 7px;
-    height: 7px;
-    background-color: var(--emerald-500);
-    border-radius: 50%;
-    position: relative;
-}
-
-.pulse-indicator::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    background-color: var(--emerald-500);
-    opacity: 0.6;
-    animation: indicatorPulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes indicatorPulse {
-    0%, 100% {
-        transform: scale(1);
-        opacity: 0.6;
-    }
-    50% {
-        transform: scale(1.7);
-        opacity: 0;
-    }
-}
-
-.security-status-text {
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--emerald-600);
-    letter-spacing: 0.2px;
-}
-
-/* User Profile Badge */
-.user-profile-badge {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 3px 10px 3px 4px;
-    background-color: var(--slate-100);
-    border: 1px solid var(--slate-200);
-    border-radius: 20px;
-}
-
-.user-avatar-initial {
-    width: 26px;
-    height: 26px;
-    background-color: var(--navy-800);
-    color: var(--white);
-    border-radius: 50%;
-    font-size: 11px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.user-meta-details {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.user-display-name {
-    font-size: 12.5px;
-    font-weight: 600;
-    color: var(--navy-900);
-}
-
-.user-role-tag {
-    font-size: 9.5px;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.role-tag-user {
-    background-color: var(--slate-200);
-    color: var(--slate-700);
-}
-
-.role-tag-admin {
-    background-color: var(--navy-900);
-    color: var(--white);
-}
-
-/* Sign Out Action */
-.nav-logout-form {
-    margin: 0;
-}
-
-.btn-logout {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background-color: var(--white);
-    border: 1px solid var(--slate-300);
-    color: var(--slate-600);
-    padding: 5px 11px;
-    border-radius: var(--radius-sm);
-    font-size: 12.5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.btn-logout:hover {
-    background-color: var(--slate-100);
-    color: var(--navy-900);
-    border-color: var(--slate-400);
-}
-
-/* ==========================================================================
-   2. APP BODY & SIDEBAR
-   ========================================================================== */
-
-.app-body {
-    display: flex;
-    flex: 1;
-    min-height: calc(100vh - 60px);
-}
-
-.sidebar-nav {
-    width: 240px;
-    flex-shrink: 0;
-    background-color: var(--white);
-    border-right: 1px solid var(--slate-200);
-    padding: 20px 14px;
-    box-sizing: border-box;
-    transition: transform 0.25s ease;
-}
-
-.sidebar-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.sidebar-section {
-    margin-bottom: 24px;
-}
-
-.sidebar-section-title {
-    display: block;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--slate-400);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    padding: 0 10px;
-    margin-bottom: 8px;
-}
-
-.nav-menu {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-}
-
-.nav-link {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--slate-600);
-    text-decoration: none;
-    transition: all 0.15s ease;
-}
-
-.nav-link:hover {
-    background-color: var(--slate-100);
-    color: var(--navy-900);
-    text-decoration: none;
-}
-
-.nav-link.active {
-    background-color: var(--blue-50);
-    color: var(--blue-600);
-    font-weight: 600;
-}
-
-.nav-link.active .nav-link-icon {
-    stroke: var(--blue-600);
-}
-
-.admin-nav-link:hover {
-    background-color: var(--slate-100);
-    color: var(--navy-900);
-}
-
-/* Sidebar Footer Card */
-.sidebar-footer-card {
-    margin-top: auto;
-    background-color: var(--slate-50);
-    border: 1px solid var(--slate-200);
-    border-radius: var(--radius-md);
-    padding: 14px;
-}
-
-.sidebar-footer-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 6px;
-}
-
-.footer-shield-icon {
-    color: var(--blue-600);
-    line-height: 0;
-}
-
-.footer-card-title {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--navy-900);
-}
-
-.footer-card-text {
-    font-size: 11px;
-    color: var(--slate-500);
-    line-height: 1.4;
-    margin: 0 0 10px 0;
-}
-
-.footer-status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 10.5px;
-    font-weight: 600;
-    color: var(--emerald-600);
-}
-
-.status-green-dot {
-    width: 6px;
-    height: 6px;
-    background-color: var(--emerald-500);
-    border-radius: 50%;
-}
-
-.sidebar-backdrop {
-    display: none;
-}
-
-/* ==========================================================================
-   3. MAIN VIEWPORT & WELCOME AREA
-   ========================================================================== */
-
-.main-viewport {
-    flex: 1;
-    background-color: var(--slate-50);
-    padding: 24px 32px 40px 32px;
-    min-width: 0;
-}
-
-.content-wrapper {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-/* Welcome Banner */
+/* ----------------------------------------------------------------------
+   1. Welcome Banner
+   ---------------------------------------------------------------------- */
 .welcome-banner {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 16px;
-    padding-bottom: 4px;
+    gap: 24px;
+    flex-wrap: wrap;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 24px 32px;
+    box-shadow: var(--shadow-sm);
+}
+
+.welcome-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .welcome-heading {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--navy-900);
-    letter-spacing: -0.3px;
-    margin: 0 0 4px 0;
+    font-size: 1.65rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.welcome-user-highlight {
+    background: var(--grad-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .welcome-subtext {
-    font-size: 13px;
+    font-size: 0.95rem;
     color: var(--slate-500);
-    margin: 0;
+    line-height: 1.4;
 }
 
 .welcome-actions-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex-shrink: 0;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-/* ==========================================================================
-   7. BUTTONS & ACTIONS
-   ========================================================================== */
-
-.btn-cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-sizing: border-box;
-}
-
-.btn-primary-action {
-    background-color: var(--blue-600);
-    color: var(--white);
-    border: 1px solid var(--blue-600);
-    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
-}
-
-.btn-primary-action:hover {
-    background-color: var(--blue-700);
-    border-color: var(--blue-700);
-    color: var(--white);
-    text-decoration: none;
-    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.25);
-    transform: translateY(-1px);
-}
-
-.btn-secondary-action {
-    background-color: var(--white);
-    color: var(--navy-800);
-    border: 1px solid var(--slate-300);
-}
-
-.btn-secondary-action:hover {
-    background-color: var(--slate-100);
-    border-color: var(--slate-400);
-    color: var(--navy-900);
-    text-decoration: none;
-}
-
-.btn-admin-action {
-    background-color: var(--navy-900);
-    color: var(--white);
-    border: 1px solid var(--navy-900);
-}
-
-.btn-admin-action:hover {
-    background-color: var(--navy-800);
-    border-color: var(--navy-800);
-    color: var(--white);
-    text-decoration: none;
-}
-
-/* ==========================================================================
-   4 & 6. ACCOUNT SUMMARY & SECURITY STATUS
-   ========================================================================== */
-
+/* ----------------------------------------------------------------------
+   2. Hero Overview Grid (Balance Card + Security Status Card)
+   ---------------------------------------------------------------------- */
 .overview-grid {
     display: grid;
-    grid-template-columns: 1.5fr 1fr;
-    gap: 16px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
 }
 
-.summary-card {
-    background-color: var(--white);
-    border: 1px solid var(--slate-200);
-    border-radius: var(--radius-md);
-    padding: 20px;
-    box-shadow: var(--shadow-subtle);
+/* Premium SafePay Account Card */
+.account-card-fintech {
+    background: linear-gradient(135deg, #060e1d 0%, #0d1a36 60%, #15264c 100%);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: var(--radius-2xl);
+    padding: 28px 32px;
+    color: var(--white);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    min-height: 220px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 12px 30px -8px rgba(4, 8, 18, 0.4),
+                0 0 20px rgba(14, 165, 233, 0.1);
 }
 
-.summary-card:hover {
-    border-color: var(--slate-300);
-    box-shadow: var(--shadow-elevated);
+.account-card-fintech::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
-.summary-card-header {
+.account-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    position: relative;
+    z-index: 2;
 }
 
-.header-label-box {
+.balance-title-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
-.header-icon-container {
-    width: 28px;
-    height: 28px;
-    background-color: var(--slate-100);
-    color: var(--navy-700);
+.balance-card-icon {
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-sm);
+    background: rgba(34, 211, 238, 0.15);
+    color: var(--safepay-cyan-300);
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.security-icon-box {
-    background-color: var(--emerald-50);
-    color: var(--emerald-600);
-}
-
-.summary-header-label {
-    font-size: 11.5px;
+.balance-card-label {
+    font-size: 0.82rem;
     font-weight: 600;
-    color: var(--slate-500);
+    color: var(--slate-300);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-.account-badge-group {
+.account-tags-group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 .badge-account-type {
-    background-color: var(--slate-100);
-    border: 1px solid var(--slate-200);
-    color: var(--slate-700);
-    font-size: 10.5px;
-    font-weight: 600;
-    padding: 2px 7px;
-    border-radius: var(--radius-sm);
-    letter-spacing: 0.02em;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-xs);
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--slate-200);
+    letter-spacing: 0.06em;
 }
 
 .badge-account-status {
-    background-color: var(--slate-100);
-    border: 1px solid var(--slate-200);
-    color: var(--slate-700);
-    font-size: 10.5px;
+    font-size: 0.7rem;
     font-weight: 700;
-    padding: 2px 7px;
-    border-radius: var(--radius-sm);
-    letter-spacing: 0.02em;
+    padding: 3px 8px;
+    border-radius: var(--radius-xs);
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--status-approved);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    letter-spacing: 0.06em;
 }
 
-.badge-account-status.status-active {
-    background-color: var(--emerald-50);
-    border-color: var(--emerald-100);
-    color: var(--emerald-600);
-}
-
-.balance-display-block {
-    display: flex;
-    align-items: baseline;
-    gap: 2px;
-    margin: 4px 0 16px 0;
+.balance-figure-wrap {
+    margin: 18px 0;
+    position: relative;
+    z-index: 2;
 }
 
 .currency-symbol {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--slate-500);
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--safepay-cyan-300);
+    margin-right: 4px;
+    vertical-align: top;
 }
 
 .balance-number {
-    font-size: 30px;
-    font-weight: 700;
-    color: var(--navy-900);
-    letter-spacing: -0.5px;
+    font-size: 2.65rem;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
 }
 
-.summary-card-footer {
+.account-card-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 12px;
-    border-top: 1px solid var(--slate-100);
+    position: relative;
+    z-index: 2;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.account-number-display {
+.account-num-group {
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    gap: 2px;
 }
 
 .account-num-label {
-    font-size: 11.5px;
-    color: var(--slate-500);
-    font-weight: 500;
+    font-size: 0.68rem;
+    color: var(--slate-400);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .account-num-mono {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 0.9rem;
     font-weight: 600;
-    color: var(--navy-800);
-    background-color: var(--slate-100);
-    padding: 2px 6px;
-    border-radius: 4px;
+    color: var(--slate-200);
+    letter-spacing: 0.08em;
 }
 
-.ledger-indicator {
-    font-size: 11px;
-    color: var(--slate-400);
+.ledger-status-note {
+    font-size: 0.75rem;
+    color: var(--safepay-cyan-300);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-/* Security Status Card */
+/* Security Status Overview Card */
+.security-card-fintech {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-2xl);
+    padding: 28px 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 220px;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.security-card-fintech:hover {
+    border-color: var(--slate-300);
+    box-shadow: var(--shadow-md);
+}
+
+.security-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.security-title-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.security-card-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    background: rgba(14, 165, 233, 0.1);
+    color: var(--safepay-blue-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.security-card-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--slate-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
 .security-badge-protected {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background-color: var(--emerald-50);
-    border: 1px solid var(--emerald-100);
-    color: var(--emerald-600);
-    padding: 3px 9px;
-    border-radius: 20px;
-    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
-}
-
-.pulse-beacon {
-    width: 6px;
-    height: 6px;
-    background-color: var(--emerald-500);
-    border-radius: 50%;
-    position: relative;
-}
-
-.pulse-beacon::after {
-    content: '';
-    position: absolute;
-    top: -2px;
-    left: -2px;
-    right: -2px;
-    bottom: -2px;
-    border-radius: 50%;
-    background-color: var(--emerald-500);
-    opacity: 0.6;
-    animation: indicatorPulse 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    color: var(--status-approved);
+    background: var(--status-approved-bg);
+    border: 1px solid var(--status-approved-border);
+    letter-spacing: 0.05em;
 }
 
 .security-body-block {
-    margin: 4px 0 16px 0;
+    margin: 16px 0;
 }
 
 .security-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--navy-900);
-    margin: 0 0 6px 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    margin-bottom: 6px;
 }
 
 .security-description {
-    font-size: 12px;
+    font-size: 0.875rem;
     color: var(--slate-500);
-    line-height: 1.45;
-    margin: 0;
+    line-height: 1.5;
 }
 
-.security-card-footer {
+.security-card-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 12px;
-    border-top: 1px solid var(--slate-100);
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
 }
 
 .security-metric-tag {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11.5px;
+    gap: 6px;
+    font-size: 0.78rem;
     font-weight: 600;
-    color: var(--emerald-600);
+    color: var(--safepay-blue-600);
 }
 
 .security-subtext {
-    font-size: 11px;
+    font-size: 0.75rem;
     color: var(--slate-400);
+    font-weight: 500;
 }
 
-/* ==========================================================================
-   5. KPI METRICS CARDS
-   ========================================================================== */
-
+/* ----------------------------------------------------------------------
+   3. KPI Cards Grid (4 Columns)
+   ---------------------------------------------------------------------- */
 .kpi-cards-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+    gap: 20px;
 }
 
 .kpi-card {
-    background-color: var(--white);
-    border: 1px solid var(--slate-200);
-    border-radius: var(--radius-md);
-    padding: 16px 18px;
-    box-shadow: var(--shadow-subtle);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 22px 24px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    transition: all 0.15s ease;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
     border-color: var(--slate-300);
-    box-shadow: var(--shadow-elevated);
-    transform: translateY(-1px);
 }
 
 .kpi-card-header {
@@ -810,16 +355,16 @@ body {
 }
 
 .kpi-card-title {
-    font-size: 11.5px;
+    font-size: 0.825rem;
     font-weight: 600;
-    color: var(--slate-500);
+    color: var(--slate-600);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .kpi-icon-wrap {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
@@ -827,117 +372,127 @@ body {
 }
 
 .kpi-icon-total {
-    background-color: var(--blue-50);
-    color: var(--blue-600);
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--slate-600);
 }
 
 .kpi-icon-approved {
-    background-color: var(--emerald-50);
-    color: var(--emerald-600);
+    background: var(--status-approved-bg);
+    color: var(--status-approved);
 }
 
 .kpi-icon-declined {
-    background-color: var(--rose-50);
-    color: var(--rose-600);
+    background: var(--status-declined-bg);
+    color: var(--status-declined);
 }
 
 .kpi-icon-blocked {
-    background-color: var(--amber-50);
-    color: var(--amber-600);
+    background: var(--status-blocked-bg);
+    color: var(--status-blocked);
 }
 
 .kpi-card-number {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--navy-900);
+    font-size: 2.1rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
-    margin: 8px 0 4px 0;
+    line-height: 1.1;
 }
 
-.kpi-card-number.text-approved {
-    color: var(--emerald-600);
+.text-approved {
+    color: var(--status-approved);
 }
 
-.kpi-card-number.text-declined {
-    color: var(--rose-600);
+.text-declined {
+    color: var(--status-declined);
 }
 
-.kpi-card-number.text-blocked {
-    color: var(--amber-600);
+.text-blocked {
+    color: var(--status-blocked);
 }
 
 .kpi-card-footer {
     display: flex;
     align-items: center;
+    justify-content: space-between;
 }
 
 .kpi-meta-text {
-    font-size: 11px;
+    font-size: 0.75rem;
     color: var(--slate-400);
 }
 
-/* ==========================================================================
-   8. RECENT TRANSACTIONS TABLE
-   ========================================================================== */
+/* Border Accents on KPI Cards */
+.kpi-border-approved {
+    border-left: 4px solid var(--status-approved);
+}
 
+.kpi-border-declined {
+    border-left: 4px solid var(--status-declined);
+}
+
+.kpi-border-blocked {
+    border-left: 4px solid var(--status-blocked);
+}
+
+/* ----------------------------------------------------------------------
+   4. Recent Transactions Card & Table
+   ---------------------------------------------------------------------- */
 .transactions-container-card {
-    background-color: var(--white);
-    border: 1px solid var(--slate-200);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-subtle);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
 }
 
 .transactions-card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--slate-200);
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .section-heading-group {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
 }
 
 .section-heading-title {
-    font-size: 15px;
+    font-size: 1.15rem;
     font-weight: 700;
-    color: var(--navy-900);
-    margin: 0;
+    color: var(--slate-900);
 }
 
 .transactions-count-badge {
-    font-size: 10.5px;
+    font-size: 0.75rem;
     font-weight: 600;
-    color: var(--slate-500);
-    background-color: var(--slate-100);
-    padding: 2px 7px;
-    border-radius: 10px;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background: var(--slate-100);
+    color: var(--slate-600);
 }
 
 .link-view-all {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 12.5px;
+    gap: 6px;
+    font-size: 0.85rem;
     font-weight: 600;
-    color: var(--blue-600);
-    text-decoration: none;
-    transition: color 0.15s ease;
+    color: var(--safepay-blue-600);
+    transition: gap 0.2s ease;
 }
 
 .link-view-all:hover {
-    color: var(--blue-700);
-    text-decoration: underline;
+    color: var(--safepay-blue-700);
+    gap: 9px;
 }
 
-/* Table */
 .table-scroll-wrapper {
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
 }
 
 .fintech-data-table {
@@ -947,267 +502,150 @@ body {
 }
 
 .fintech-data-table thead th {
-    background-color: var(--slate-50);
-    color: var(--slate-500);
-    font-size: 11px;
-    font-weight: 600;
+    background: var(--slate-50);
+    padding: 14px 28px;
+    font-size: 0.75rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 11px 20px;
-    border-bottom: 1px solid var(--slate-200);
+    color: var(--slate-500);
+    border-bottom: 1px solid var(--border-color);
 }
 
-.table-data-row {
-    border-bottom: 1px solid var(--slate-100);
-    transition: background-color 0.12s ease;
+.fintech-data-table tbody tr {
+    transition: background-color 0.15s ease;
+    border-bottom: 1px solid var(--border-subtle);
 }
 
-.table-data-row:last-child {
+.fintech-data-table tbody tr:last-child {
     border-bottom: none;
 }
 
-.table-data-row:hover {
+.fintech-data-table tbody tr:hover {
     background-color: var(--slate-50);
 }
 
 .fintech-data-table td {
-    padding: 13px 20px;
-    font-size: 13px;
+    padding: 18px 28px;
+    font-size: 0.9rem;
+    color: var(--slate-700);
     vertical-align: middle;
 }
 
-/* Cell Specific Styles */
 .col-txn-id .txn-tag {
-    display: inline-flex;
-    align-items: center;
     font-family: var(--font-mono);
-    font-size: 12px;
     font-weight: 600;
-    color: var(--slate-500);
+    color: var(--slate-600);
+    font-size: 0.85rem;
 }
 
-.col-txn-id .hash-symbol {
+.hash-symbol {
     color: var(--slate-400);
 }
 
 .col-amount {
     font-weight: 700;
-    color: var(--navy-900);
-    font-size: 13.5px;
-    font-variant-numeric: tabular-nums;
+    color: var(--slate-900);
+    font-size: 0.95rem;
 }
 
-.col-amount .currency-prefix {
-    font-size: 12.5px;
-    font-weight: 500;
+.currency-prefix {
     color: var(--slate-500);
     margin-right: 2px;
 }
 
 .type-pill-badge {
     display: inline-block;
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--slate-100);
+    color: var(--slate-700);
+    font-size: 0.78rem;
     font-weight: 600;
-    background-color: var(--slate-100);
-    color: var(--navy-700);
-    border: 1px solid var(--slate-200);
-    text-transform: uppercase;
     letter-spacing: 0.02em;
 }
 
 .col-date .date-string {
     color: var(--slate-500);
-    font-size: 12.5px;
-}
-
-/* Status Pills */
-.status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 8px;
-    border-radius: 12px;
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.status-indicator-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-}
-
-.status-pill.status-approved {
-    background-color: var(--emerald-50);
-    border: 1px solid var(--emerald-100);
-    color: var(--emerald-600);
-}
-
-.status-pill.status-approved .status-indicator-dot {
-    background-color: var(--emerald-500);
-}
-
-.status-pill.status-declined {
-    background-color: var(--rose-50);
-    border: 1px solid var(--rose-100);
-    color: var(--rose-600);
-}
-
-.status-pill.status-declined .status-indicator-dot {
-    background-color: var(--rose-500);
-}
-
-.status-pill.status-blocked {
-    background-color: var(--amber-50);
-    border: 1px solid var(--amber-100);
-    color: var(--amber-600);
-}
-
-.status-pill.status-blocked .status-indicator-dot {
-    background-color: var(--amber-500);
+    font-size: 0.85rem;
 }
 
 /* Empty State */
 .empty-state-container {
-    padding: 44px 20px;
+    padding: 64px 32px;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    max-width: 480px;
+    margin: 0 auto;
 }
 
 .empty-state-icon-box {
-    width: 56px;
-    height: 56px;
-    background-color: var(--slate-100);
-    color: var(--slate-400);
-    border-radius: var(--radius-md);
-    margin: 0 auto 12px auto;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--safepay-blue-50);
+    color: var(--safepay-blue-600);
     display: flex;
     align-items: center;
     justify-content: center;
+    margin-bottom: 8px;
 }
 
 .empty-state-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--navy-900);
-    margin: 0 0 6px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--slate-900);
 }
 
 .empty-state-desc {
-    font-size: 12.5px;
+    font-size: 0.9rem;
     color: var(--slate-500);
-    max-width: 420px;
-    margin: 0 auto 18px auto;
-    line-height: 1.45;
+    line-height: 1.5;
+    margin-bottom: 12px;
 }
 
-/* ==========================================================================
-   9. RESPONSIVE BREAKPOINTS
-   ========================================================================== */
-
+/* ----------------------------------------------------------------------
+   Responsive Dashboard Styles
+   ---------------------------------------------------------------------- */
 @media (max-width: 1100px) {
-    .overview-grid {
-        grid-template-columns: 1fr;
-    }
-
     .kpi-cards-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-@media (max-width: 860px) {
-    .top-nav {
-        padding: 0 16px;
-    }
-
-    .mobile-toggle-btn {
-        display: block;
-    }
-
-    .sidebar-nav {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        bottom: 0;
-        z-index: 45;
-        transform: translateX(-100%);
-        box-shadow: 2px 0 12px rgba(15, 23, 42, 0.1);
-    }
-
-    .sidebar-nav.open {
-        transform: translateX(0);
-    }
-
-    .sidebar-backdrop {
-        display: none;
-        position: fixed;
-        top: 60px;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(15, 23, 42, 0.35);
-        z-index: 40;
-    }
-
-    .sidebar-backdrop.active {
-        display: block;
-    }
-
-    .main-viewport {
-        padding: 16px 16px 32px 16px;
+@media (max-width: 868px) {
+    .overview-grid {
+        grid-template-columns: 1fr;
     }
 
     .welcome-banner {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+        padding: 20px 24px;
     }
 
-    .welcome-actions-row {
-        width: 100%;
-        flex-wrap: wrap;
-    }
-
-    .nav-security-status .security-status-text {
-        display: none;
+    .account-card-fintech,
+    .security-card-fintech {
+        min-height: auto;
     }
 }
 
-@media (max-width: 600px) {
-    .brand-caption {
-        display: none;
-    }
-
-    .user-meta-details {
-        display: none;
-    }
-
-    .welcome-actions-row {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn-cta {
-        justify-content: center;
-        width: 100%;
-    }
-
+@media (max-width: 640px) {
     .kpi-cards-grid {
         grid-template-columns: 1fr;
     }
 
-    .summary-card-footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
+    .welcome-heading {
+        font-size: 1.35rem;
     }
 
-    .security-card-footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
+    .balance-number {
+        font-size: 2.1rem;
+    }
+
+    .fintech-data-table thead th,
+    .fintech-data-table td {
+        padding: 14px 16px;
     }
 }
