@@ -1,187 +1,278 @@
-/* ==========================================================================
-   SAFE PAY - Error & Access Denied Stylesheet
-   Consistent Fintech Security Notice Styling
-   ========================================================================== */
+/* =========================================================
+   SAFE PAY — error.css  (Notice / Error page)
+   Standalone page (no sidebar). Dark ink background with lime +
+   lavender shapes, and a white rounded card, like the dashboard.
+   ========================================================= */
+
+:root {
+    --sp-ink: #1c1c1c;
+    --sp-ink-soft: #2a2a2a;
+    --sp-lime: #dcf254;
+    --sp-lime-deep: #c9e03a;
+    --sp-lavender: #b8a9f0;
+    --sp-violet: #6b4fd8;
+    --sp-white: #ffffff;
+    --sp-muted: #6b6b6b;
+    --sp-field: #f4f4f4;
+    --sp-danger: #d64545;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 body {
+    position: relative;
+    margin: 0;
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background-color: var(--bg-body, #f8fafc);
-    color: var(--slate-800, #1e293b);
-    font-family: var(--font-sans, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+    overflow-x: hidden;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--sp-ink);
+    background: var(--sp-ink);
     -webkit-font-smoothing: antialiased;
 }
 
-.error-container {
-    width: 100%;
-    max-width: 520px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 24px;
+/* Background shapes, echoing the dashboard balance card */
+body::before,
+body::after {
+    content: "";
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
 }
 
-.error-brand-header {
+body::before {
+    width: 420px;
+    height: 420px;
+    top: -140px;
+    right: -120px;
+    background: var(--sp-lavender);
+}
+
+body::after {
+    width: 260px;
+    height: 260px;
+    bottom: -90px;
+    left: -70px;
+    background: var(--sp-lime);
+}
+
+/* ---------- Layout ---------- */
+.error-container {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    gap: 24px;
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.error-brand-header a {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 24px;
+    background: var(--sp-ink);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
 }
 
 .error-logo-img {
-    height: 38px;
+    display: block;
+    height: 36px;
     width: auto;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15));
 }
 
+/* ---------- Card ---------- */
 .error-card {
-    width: 100%;
-    background: var(--bg-card, #ffffff);
-    border-radius: var(--radius-2xl, 20px);
-    padding: 44px 36px;
-    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
-    border: 1px solid var(--border-color, #e2e8f0);
-    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
+    max-width: 520px;
+    padding: 44px 40px;
+    text-align: center;
+    background: var(--sp-white);
+    border-radius: 32px;
 }
 
+/* ---------- Icon ---------- */
 .error-icon-wrapper {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
     margin-bottom: 20px;
+    border-radius: 50%;
 }
 
 .icon-wrap-warning {
-    background: #fef3c7;
-    color: #b45309;
-    border: 1px solid #fde68a;
+    color: var(--sp-lime);
+    background: var(--sp-ink);
 }
 
-.icon-wrap-denied {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
+.icon-wrap-danger,
+.icon-wrap-error {
+    color: var(--sp-white);
+    background: var(--sp-danger);
 }
 
+.icon-wrap-info {
+    color: var(--sp-ink);
+    background: var(--sp-lavender);
+}
+
+.icon-wrap-success {
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+}
+
+/* ---------- Badge ---------- */
 .error-badge {
     display: inline-block;
-    padding: 5px 14px;
-    border-radius: var(--radius-full, 9999px);
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
     margin-bottom: 16px;
-}
-
-.badge-403 {
-    background: #fee2e2;
-    color: #991b1b;
-    border: 1px solid #fecaca;
+    padding: 6px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 999px;
 }
 
 .badge-generic {
-    background: #fef3c7;
-    color: #92400e;
-    border: 1px solid #fde68a;
+    color: var(--sp-ink);
+    background: var(--sp-lime);
 }
 
+.badge-danger,
+.badge-error {
+    color: var(--sp-white);
+    background: var(--sp-danger);
+}
+
+.badge-info {
+    color: var(--sp-ink);
+    background: var(--sp-lavender);
+}
+
+/* ---------- Text ---------- */
 .error-title {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--slate-900, #0f172a);
-    letter-spacing: -0.02em;
-    margin: 0 0 10px;
+    margin: 0 0 12px;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.15;
 }
 
 .error-description {
-    font-size: 0.95rem;
-    color: var(--slate-600, #475569);
-    line-height: 1.6;
     margin: 0 0 32px;
     max-width: 420px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--sp-muted);
 }
 
+/* ---------- Buttons ---------- */
 .error-actions {
     display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 12px;
     width: 100%;
-    justify-content: center;
 }
 
-.btn-error-primary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 24px;
-    border-radius: var(--radius-md, 10px);
-    font-size: 0.9rem;
-    font-weight: 700;
-    background: var(--safepay-blue-600, #2563eb);
-    color: #ffffff;
-    text-decoration: none;
-    border: 1px solid transparent;
-    transition: all 0.2s ease;
-    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
-    flex: 1;
-}
-
-.btn-error-primary:hover {
-    background: var(--safepay-blue-700, #1d4ed8);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
-}
-
+.btn-error-primary,
 .btn-error-secondary {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
-    border-radius: var(--radius-md, 10px);
-    font-size: 0.9rem;
+    flex: 1 1 180px;
+    height: 54px;
+    padding: 0 28px;
+    font: inherit;
+    font-size: 0.95rem;
     font-weight: 600;
-    background: #ffffff;
-    color: var(--slate-700, #334155);
-    border: 1px solid var(--border-color, #e2e8f0);
     text-decoration: none;
-    transition: all 0.2s ease;
-    flex: 1;
+    border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-error-primary:active,
+.btn-error-secondary:active {
+    transform: scale(0.98);
+}
+
+.btn-error-primary:focus-visible,
+.btn-error-secondary:focus-visible {
+    outline: 3px solid var(--sp-violet);
+    outline-offset: 3px;
+}
+
+.btn-error-primary {
+    color: var(--sp-white);
+    background: var(--sp-ink);
+}
+
+.btn-error-primary:hover {
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+}
+
+.btn-error-secondary {
+    color: var(--sp-ink);
+    background: var(--sp-field);
 }
 
 .btn-error-secondary:hover {
-    background: var(--slate-50, #f8fafc);
-    color: var(--slate-900, #0f172a);
+    background: var(--sp-lavender);
 }
 
+/* ---------- Security footer ---------- */
 .error-security-footer {
-    font-size: 0.8rem;
-    color: var(--slate-400, #94a3b8);
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+    border-radius: 999px;
 }
 
-@media (max-width: 540px) {
+/* ---------- Responsive ---------- */
+@media (max-width: 520px) {
     .error-card {
-        padding: 36px 20px;
+        padding: 32px 22px;
+        border-radius: 28px;
     }
 
     .error-actions {
-        flex-direction: column;
+        flex-direction: column-reverse;
     }
 
     .btn-error-primary,
     .btn-error-secondary {
         width: 100%;
+        flex: none;
+    }
+
+    body::before {
+        width: 260px;
+        height: 260px;
+    }
+
+    body::after {
+        width: 170px;
+        height: 170px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
     }
 }

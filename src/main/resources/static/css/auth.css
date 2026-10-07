@@ -1,176 +1,199 @@
-/* ==========================================================================
-   SAFE PAY - Authentication Stylesheet (Login & Register)
-   Clean Banking Aesthetics & Focused Form Layout
-   ========================================================================== */
+/* =========================================================
+   SAFE PAY — auth.css  (Sign In / Register)
+   Theme: dark navy shell, light-grey panel, lime + lavender accents
+   Font: Inter (already loaded in the HTML)
+   ========================================================= */
+
+:root {
+    --sp-ink: #1c1c1c;          /* near-black used for buttons / sidebar */
+    --sp-ink-soft: #2a2a2a;
+    --sp-lime: #dcf254;         /* signature lime */
+    --sp-lime-deep: #c9e03a;
+    --sp-lavender: #b8a9f0;     /* balance-card purple */
+    --sp-violet: #6b4fd8;       /* small accent dots */
+    --sp-panel: #e4e4e4;        /* grey main panel */
+    --sp-white: #ffffff;
+    --sp-muted: #6b6b6b;
+    --sp-border: #e2e2e2;
+
+    --sp-danger: #d64545;
+    --sp-danger-bg: #fdeaea;
+    --sp-success-bg: #eef9c8;
+    --sp-success: #3f5a00;
+    --sp-info-bg: #ece8fc;
+    --sp-info: #4a35b0;
+
+    --sp-radius-xl: 32px;
+    --sp-radius-lg: 24px;
+    --sp-radius-pill: 999px;
+}
+
+/* ---------- Base ---------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
 
 body.auth-page {
-    min-height: 100vh;
     margin: 0;
-    padding: 0;
-    background-color: #040814;
-    display: flex;
-    font-family: var(--font-sans, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+    min-height: 100vh;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--sp-ink);
+    background: var(--sp-ink);
     -webkit-font-smoothing: antialiased;
 }
 
-/* ----------------------------------------------------------------------
-   Split-Screen Layout Container
-   ---------------------------------------------------------------------- */
+/* ---------- Split layout ---------- */
 .auth-split-wrapper {
-    display: flex;
-    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(380px, 5fr) 7fr;
     min-height: 100vh;
+    gap: 0;
 }
 
-/* ----------------------------------------------------------------------
-   Left Side: Dark Navy Brand Pane & 3D Payment Flow Hero Composition
-   ---------------------------------------------------------------------- */
+/* =========================================================
+   LEFT — BRAND PANE
+   ========================================================= */
 .auth-brand-pane {
-    flex: 0 0 42%;
-    background-color: #040814;
     position: relative;
     overflow: hidden;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 48px 40px;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    align-items: flex-end;
+    padding: 48px;
+    background: var(--sp-ink);
+    color: var(--sp-white);
 }
 
-/* Designed Abstract Digital Payment Flow Hero Visual */
+/* Abstract shapes echoing the dashboard's balance card */
 .brand-hero-visual {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
     pointer-events: none;
-    overflow: hidden;
-    background-image: url("../images/safepay-flow.svg");
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    z-index: 1;
 }
 
-.brand-flow-svg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+.brand-hero-visual::before,
+.brand-hero-visual::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
 }
 
-/* Foreground Brand Anchor Content */
+/* big lavender disc */
+.brand-hero-visual::before {
+    width: 420px;
+    height: 420px;
+    top: 8%;
+    right: -140px;
+    background: var(--sp-lavender);
+}
+
+/* lime disc overlapping it */
+.brand-hero-visual::after {
+    width: 240px;
+    height: 240px;
+    top: 34%;
+    left: -70px;
+    background: var(--sp-lime);
+    box-shadow: 150px 190px 0 -70px var(--sp-violet);
+}
+
 .brand-pane-content {
     position: relative;
-    z-index: 2;
+    z-index: 1;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 14px;
+    align-items: flex-start;
+    gap: 16px;
 }
 
 .brand-logo-link {
-    display: inline-block;
-    line-height: 0;
-    text-decoration: none;
-}
-
-/* Official SafePay Transparent Logo */
-.auth-brand-logo {
-    width: 140px;
-    height: auto;
-    display: block;
-    object-fit: contain;
-    border: none;
-    outline: none;
-    box-shadow: none;
-    filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.55));
-    margin: 0 auto;
-}
-
-/* Small Neutral Brand Tagline */
-.brand-tagline {
-    font-size: 0.95rem;
-    color: #e2e8f0;
-    margin: 0;
-    font-weight: 500;
-    letter-spacing: 0.015em;
-    line-height: 1.4;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
-}
-
-/* ----------------------------------------------------------------------
-   Right Side: Clean Form Pane
-   ---------------------------------------------------------------------- */
-.auth-form-pane {
-    flex: 1;
-    background-color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: inline-flex;
     align-items: center;
-    padding: 48px 40px;
+    padding: 12px 22px;
+    background: var(--sp-ink);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--sp-radius-pill);
+}
+
+.auth-brand-logo {
+    display: block;
+    height: 38px;
+    width: auto;
+}
+
+.brand-tagline {
+    margin: 0;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+    border-radius: var(--sp-radius-pill);
+}
+
+/* =========================================================
+   RIGHT — FORM PANE (the grey rounded panel)
+   ========================================================= */
+.auth-form-pane {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    background: var(--sp-panel);
+    border-radius: var(--sp-radius-xl) 0 0 var(--sp-radius-xl);
 }
 
 .form-pane-container {
     width: 100%;
-    max-width: 380px;
+    max-width: 440px;
+    padding: 40px;
+    background: var(--sp-white);
+    border-radius: var(--sp-radius-lg);
 }
 
-/* Form Headings */
+/* ---------- Header ---------- */
 .auth-form-header {
     margin-bottom: 28px;
 }
 
 .auth-form-header h1 {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #0f172a;
-    letter-spacing: -0.02em;
-    margin: 0 0 8px;
+    margin: 0 0 6px;
+    font-size: 2.5rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
 }
 
 .auth-form-header p {
-    font-size: 0.95rem;
-    color: #64748b;
     margin: 0;
-    line-height: 1.5;
+    font-size: 0.95rem;
+    color: var(--sp-muted);
 }
 
-/* Feedback Alerts */
+/* ---------- Alerts ---------- */
 .alert {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 10px;
+    margin-bottom: 20px;
     padding: 12px 16px;
-    border-radius: 8px;
     font-size: 0.875rem;
     font-weight: 500;
-    margin-bottom: 20px;
     line-height: 1.4;
+    border-radius: 16px;
 }
 
-.alert-error {
-    background-color: #fef2f2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
+.alert svg {
+    flex-shrink: 0;
+    margin-top: 1px;
 }
 
-.alert-success {
-    background-color: #f0fdf4;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
-}
+.alert-error   { background: var(--sp-danger-bg);  color: var(--sp-danger); }
+.alert-success { background: var(--sp-success-bg); color: var(--sp-success); }
+.alert-info    { background: var(--sp-info-bg);    color: var(--sp-info); }
 
-.alert-info {
-    background-color: #eff6ff;
-    color: #1d4ed8;
-    border: 1px solid #bfdbfe;
-}
-
-/* Clean Form */
+/* ---------- Form ---------- */
 .auth-form {
     display: flex;
     flex-direction: column;
@@ -180,135 +203,170 @@ body.auth-page {
 .form-field {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .form-field label {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #334155;
 }
 
 .input-with-icon {
     position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .input-icon-left {
     position: absolute;
-    left: 14px;
-    color: #94a3b8;
+    top: 50%;
+    left: 18px;
+    transform: translateY(-50%);
+    color: var(--sp-muted);
     pointer-events: none;
-    flex-shrink: 0;
+    transition: color 0.2s ease;
 }
 
 .auth-input {
     width: 100%;
-    height: 44px;
-    padding: 10px 14px 10px 42px;
-    border: 1px solid #cbd5e1;
-    border-radius: 8px;
+    height: 54px;
+    padding: 0 20px 0 48px;
+    font: inherit;
     font-size: 0.95rem;
-    color: #0f172a;
-    background-color: #ffffff;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    color: var(--sp-ink);
+    background: #f4f4f4;
+    border: 2px solid transparent;
+    border-radius: var(--sp-radius-pill);
     outline: none;
-    box-sizing: border-box;
-    font-family: inherit;
-}
-
-.auth-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
 .auth-input::placeholder {
-    color: #94a3b8;
+    color: #9a9a9a;
 }
 
-/* Primary Button */
+.auth-input:hover {
+    background: #eeeeee;
+}
+
+.auth-input:focus {
+    background: var(--sp-white);
+    border-color: var(--sp-lime-deep);
+    box-shadow: 0 0 0 4px rgba(220, 242, 84, 0.35);
+}
+
+.input-with-icon:focus-within .input-icon-left {
+    color: var(--sp-ink);
+}
+
+/* Chrome autofill override so it stays on-theme */
+.auth-input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 100px #f4f4f4 inset;
+    -webkit-text-fill-color: var(--sp-ink);
+}
+
+/* ---------- Submit button ---------- */
 .btn-auth-submit {
-    height: 44px;
     width: 100%;
-    background-color: #2563eb;
-    color: #ffffff;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.15s ease, transform 0.1s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    height: 54px;
     margin-top: 4px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sp-white);
+    background: var(--sp-ink);
+    border: 0;
+    border-radius: var(--sp-radius-pill);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
 }
 
 .btn-auth-submit:hover {
-    background-color: #1d4ed8;
+    background: var(--sp-lime);
+    color: var(--sp-ink);
 }
 
 .btn-auth-submit:active {
-    transform: translateY(1px);
+    transform: scale(0.98);
 }
 
-/* Switcher Footer */
+.btn-auth-submit:focus-visible {
+    outline: 3px solid var(--sp-violet);
+    outline-offset: 3px;
+}
+
+/* ---------- Footer switch link ---------- */
 .auth-switch-footer {
-    margin-top: 24px;
+    margin-top: 28px;
+    padding-top: 22px;
+    font-size: 0.9rem;
     text-align: center;
-    font-size: 0.875rem;
-    color: #64748b;
+    color: var(--sp-muted);
+    border-top: 1px solid var(--sp-border);
 }
 
 .auth-switch-footer a {
-    color: #2563eb;
-    font-weight: 600;
-    text-decoration: none;
     margin-left: 4px;
+    font-weight: 600;
+    color: var(--sp-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--sp-lime-deep);
+    text-decoration-thickness: 3px;
+    text-underline-offset: 4px;
+    transition: background 0.2s ease;
 }
 
 .auth-switch-footer a:hover {
-    text-decoration: underline;
+    background: var(--sp-lime);
 }
 
-/* ----------------------------------------------------------------------
-   Responsive: Mobile Stacking
-   ---------------------------------------------------------------------- */
-@media (max-width: 840px) {
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 900px) {
     .auth-split-wrapper {
-        flex-direction: column;
-        min-height: 100vh;
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
     }
 
     .auth-brand-pane {
-        flex: 0 0 auto;
-        width: 100%;
-        max-width: 100%;
-        min-height: 150px;
-        padding: 28px 24px 24px;
-        border-right: none;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        box-sizing: border-box;
+        align-items: center;
+        min-height: 180px;
+        padding: 28px 24px;
     }
 
-    .auth-brand-logo {
-        width: 125px;
+    .brand-hero-visual::before {
+        width: 240px;
+        height: 240px;
+        top: -80px;
+        right: -60px;
     }
 
-    .brand-tagline {
-        font-size: 0.875rem;
+    .brand-hero-visual::after {
+        width: 140px;
+        height: 140px;
+        top: auto;
+        bottom: -60px;
+        left: -30px;
+        box-shadow: none;
     }
 
     .auth-form-pane {
-        flex: 1;
-        width: 100%;
-        padding: 36px 24px 48px;
-        box-sizing: border-box;
+        border-radius: var(--sp-radius-xl) var(--sp-radius-xl) 0 0;
+        padding: 32px 16px 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-pane-container {
+        padding: 28px 22px;
     }
 
-    .form-pane-container {
-        max-width: 100%;
+    .auth-form-header h1 {
+        font-size: 2rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
     }
 }

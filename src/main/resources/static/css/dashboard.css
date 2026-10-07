@@ -1,651 +1,816 @@
 /* ==========================================================================
-   SAFE PAY - Dashboard Stylesheet
-   Modern Fintech Dashboard Architecture
+   SAFE PAY — dashboard.css  ("flux" style: charcoal + lime + lavender)
+   - Dark sidebar, one big rounded light panel
+   - Lavender balance card with overlapping circles, black transactions card
+   - Lime chips and a lime upgrade-style protection card in the sidebar
+   Place at: src/main/resources/static/css/dashboard.css
    ========================================================================== */
 
-/* ----------------------------------------------------------------------
-   1. Welcome Banner
-   ---------------------------------------------------------------------- */
-.welcome-banner {
+:root {
+    --d-dark: #1c1c1c;
+    --d-dark-2: #2b2b2b;
+    --d-panel: #e3e3e3;
+    --d-card: #ffffff;
+    --d-chip: #efefef;
+
+    --d-ink: #151515;
+    --d-ink-2: #7b7b7b;
+    --d-ink-3: #a4a4a4;
+
+    --d-lime: #d9f25c;
+    --d-lime-soft: #eef9b8;
+    --d-lav: #b9acf2;
+    --d-lav-soft: #e6e1fa;
+    --d-lav-deep: #6f5bd0;
+    --d-coral: #ff8a7a;
+
+    --d-r-panel: 32px;
+    --d-r-card: 28px;
+    --d-pill: 999px;
+    --d-side-w: 236px;
+
+    --d-font: "Poppins", "DM Sans", "Inter", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--d-dark);
+    color: var(--d-ink);
+    font-family: var(--d-font);
+    font-size: 14.5px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; margin: 0; padding: 0; }
+h1, h2, h3, p { margin: 0; }
+button { font-family: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--d-lav-deep); outline-offset: 2px; }
+
+/* ==========================================================================
+   Shell — dark frame; sidebar spans full height, light panel on the right
+   ========================================================================== */
+.app-shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: var(--d-side-w) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    padding: 8px 8px 8px 0;
+    background: var(--d-dark);
+}
+
+.app-body { display: contents; }
+
+.sidebar-nav   { grid-column: 1; grid-row: 1 / span 2; }
+.top-nav       { grid-column: 2; grid-row: 1; }
+.main-viewport { grid-column: 2; grid-row: 2; }
+
+/* ---------- Top bar (top half of the light panel) ---------- */
+.top-nav {
+    min-height: 92px;
+    padding: 20px 32px 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 24px;
-    flex-wrap: wrap;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
-    padding: 24px 32px;
-    box-shadow: var(--shadow-sm);
+    gap: 16px;
+    border-radius: var(--d-r-panel) var(--d-r-panel) 0 0;
+    background: var(--d-panel);
 }
 
-.welcome-intro {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
+.nav-left, .nav-right { display: flex; align-items: center; gap: 12px; }
 
-.welcome-heading {
-    font-size: 1.65rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.02em;
-    display: flex;
+.mobile-toggle-btn {
+    display: none;
+    width: 50px;
+    height: 50px;
     align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--d-card);
+    color: var(--d-ink);
 }
 
-.welcome-user-highlight {
-    background: var(--grad-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.welcome-subtext {
-    font-size: 0.95rem;
-    color: var(--slate-500);
-    line-height: 1.4;
-}
-
-.welcome-actions-row {
+/* The SAFE PAY logo has light lettering, so it sits on a dark pill */
+.brand-link {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
+    padding: 8px 16px 8px 14px;
+    border-radius: var(--d-pill);
+    background: var(--d-dark);
 }
 
-/* ----------------------------------------------------------------------
-   2. Hero Overview Grid (Balance Card + Security Status Card)
-   ---------------------------------------------------------------------- */
-.overview-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
+.brand-logo-img {
+    display: block;
+    height: 34px;
+    width: auto;
+    max-width: 170px;
+    object-fit: contain;
 }
 
-/* Premium SafePay Account Card */
-.account-card-fintech {
-    background: linear-gradient(135deg, #060e1d 0%, #0d1a36 60%, #15264c 100%);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    border-radius: var(--radius-2xl);
-    padding: 28px 32px;
-    color: var(--white);
+.brand-badge-fintech {
+    padding: 4px 12px;
+    border-radius: var(--d-pill);
+    background: var(--d-lime);
+    color: var(--d-ink);
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.nav-security-status {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 220px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 12px 30px -8px rgba(4, 8, 18, 0.4),
-                0 0 20px rgba(14, 165, 233, 0.1);
+    align-items: center;
+    gap: 9px;
+    height: 50px;
+    padding: 0 22px;
+    border-radius: var(--d-pill);
+    background: var(--d-card);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--d-ink-2);
 }
 
-.account-card-fintech::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -20%;
-    width: 280px;
-    height: 280px;
-    background: radial-gradient(circle, rgba(34, 211, 238, 0.15) 0%, transparent 70%);
+.pulse-indicator, .status-green-dot {
+    position: relative;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
-    pointer-events: none;
+    background: #6fae1b;
+    flex-shrink: 0;
+}
+.pulse-indicator::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: inherit;
+    animation: d-pulse 2s ease-out infinite;
+}
+@keyframes d-pulse {
+    0%   { transform: scale(1); opacity: 0.55; }
+    100% { transform: scale(3); opacity: 0; }
 }
 
-.account-card-top {
+.user-profile-badge { display: flex; align-items: center; gap: 12px; padding: 0 4px; }
+
+.user-avatar-initial {
+    width: 46px;
+    height: 46px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--d-lav);
+    color: var(--d-ink);
+    font-weight: 600;
+    font-size: 17px;
+}
+
+.user-meta-details { display: flex; flex-direction: column; line-height: 1.25; }
+/* Scoped with .top-nav so global.css (white text, grey chip) can't override these */
+.top-nav .user-display-name { font-size: 14.5px; font-weight: 600; color: var(--d-ink); }
+
+.top-nav .user-role-tag {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--d-ink-2);
+}
+.top-nav .user-role-tag.role-tag-admin { color: var(--d-lav-deep); font-weight: 600; }
+
+.nav-logout-form { margin: 0; }
+
+/* Round icon button, like the bell */
+.btn-logout {
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--d-card);
+    color: var(--d-ink);
+    transition: background 0.15s, color 0.15s;
+}
+.btn-logout span { display: none; }
+.btn-logout svg { width: 18px; height: 18px; }
+.btn-logout:hover { background: var(--d-ink); color: var(--d-lime); }
+
+/* ==========================================================================
+   Sidebar — dark, white active pill, lime promo card at the bottom
+   ========================================================================== */
+.sidebar-nav {
+    position: sticky;
+    top: 8px;
+    align-self: start;
+    height: calc(100vh - 16px);
+    overflow-y: auto;
+    padding: 24px 14px 8px 18px;
+    background: transparent;
+    color: #fff;
+    scrollbar-width: none;
+}
+.sidebar-nav::-webkit-scrollbar { display: none; }
+
+.sidebar-content { min-height: 100%; display: flex; flex-direction: column; gap: 18px; }
+
+.sidebar-section-title {
+    display: block;
+    padding: 0 16px 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #8c8c8c;
+}
+
+.nav-menu { display: flex; flex-direction: column; gap: 6px; }
+
+.nav-link {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    position: relative;
-    z-index: 2;
+    gap: 14px;
+    padding: 13px 16px;
+    border-radius: 18px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.88);
+    transition: background 0.15s, color 0.15s;
+}
+.nav-link:hover { background: rgba(255, 255, 255, 0.09); color: #fff; }
+
+.nav-link-icon { width: 22px; height: 22px; flex-shrink: 0; }
+.nav-link .nav-link-icon { color: currentColor; }
+.nav-link.active .nav-link-icon { color: var(--d-ink); }
+
+.nav-link.active { background: #fff; color: var(--d-ink); }
+.nav-link.active:hover { background: #fff; }
+
+.admin-nav-link .nav-link-icon { color: var(--d-lime); }
+.admin-nav-link.active .nav-link-icon { color: var(--d-ink); }
+
+/* Lime "Upgrade to Pro" style card */
+.sidebar-footer-card {
+    margin-top: auto;
+    padding: 18px;
+    border-radius: 24px;
+    color: var(--d-ink);
+    background:
+        radial-gradient(circle at 86% 56%, var(--d-lav) 0 20px, transparent 21px),
+        radial-gradient(circle at 94% 68%, var(--d-lav-deep) 0 8px, transparent 9px),
+        radial-gradient(circle at 74% 62%, var(--d-dark) 0 6px, transparent 7px),
+        var(--d-lime);
 }
 
-.balance-title-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.sidebar-footer-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
 
-.balance-card-icon {
+.footer-shield-icon {
     width: 32px;
     height: 32px;
-    border-radius: var(--radius-sm);
-    background: rgba(34, 211, 238, 0.15);
-    color: var(--safepay-cyan-300);
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--d-ink);
+    color: var(--d-lime);
+}
+
+.sidebar-footer-card .footer-card-title { font-size: 16px; font-weight: 600; line-height: 1.2; color: var(--d-ink); }
+.sidebar-footer-card .footer-card-text { font-size: 11.5px; color: rgba(21, 21, 21, 0.75); margin-bottom: 44px; max-width: 19ch; }
+
+.footer-status-pill {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    height: 44px;
+    border-radius: var(--d-pill);
+    background: var(--d-ink);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+}
+.footer-status-pill .status-green-dot { background: var(--d-lime); }
+
+.sidebar-backdrop { display: none; }
+
+/* ==========================================================================
+   Main (bottom half of the light panel)
+   ========================================================================== */
+.main-viewport {
+    min-width: 0;
+    padding: 12px 32px 32px;
+    border-radius: 0 0 var(--d-r-panel) var(--d-r-panel);
+    background: var(--d-panel);
 }
 
-.balance-card-label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--slate-300);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
+.content-wrapper { display: flex; flex-direction: column; gap: 16px; }
 
-.account-tags-group {
+/* Visual order: welcome → stats → balance/security → transactions */
+.welcome-banner              { order: 0; }
+.kpi-cards-grid              { order: 1; }
+.overview-grid               { order: 2; }
+.transactions-container-card { order: 3; }
+
+/* Welcome */
+.welcome-banner {
     display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    padding-bottom: 6px;
+}
+
+.welcome-heading {
+    font-size: clamp(30px, 4.2vw, 52px);
+    font-weight: 500;
+    letter-spacing: -0.035em;
+    line-height: 1.08;
+}
+
+.welcome-subtext { margin-top: 10px; color: #3d3d3d; font-size: 13px; max-width: 60ch; }
+
+.welcome-actions-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.btn-cta {
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-}
-
-.badge-account-type {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: var(--radius-xs);
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--slate-200);
-    letter-spacing: 0.06em;
-}
-
-.badge-account-status {
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: var(--radius-xs);
-    background: rgba(16, 185, 129, 0.15);
-    color: var(--status-approved);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    letter-spacing: 0.06em;
-}
-
-.balance-figure-wrap {
-    margin: 18px 0;
-    position: relative;
-    z-index: 2;
-}
-
-.currency-symbol {
-    font-size: 1.75rem;
+    height: 48px;
+    padding: 0 24px;
+    border-radius: var(--d-pill);
+    font-size: 14px;
     font-weight: 500;
-    color: var(--safepay-cyan-300);
-    margin-right: 4px;
-    vertical-align: top;
+    white-space: nowrap;
+    transition: transform 0.15s, background 0.15s, color 0.15s;
+}
+.btn-cta:active { transform: scale(0.97); }
+
+.btn-primary-action { background: var(--d-ink); color: #fff; }
+.btn-primary-action:hover { background: #333; }
+
+/* The button text already starts with "+", so hide the extra plus icon */
+.welcome-actions-row .btn-primary-action svg { display: none; }
+
+.btn-secondary-action { background: var(--d-card); color: var(--d-ink); }
+.btn-secondary-action:hover { background: var(--d-lime-soft); }
+
+.btn-admin-action { background: var(--d-lime); color: var(--d-ink); }
+.btn-admin-action:hover { background: #cbe84a; }
+
+/* ==========================================================================
+   KPI cards
+   ========================================================================== */
+.kpi-cards-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+.kpi-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px 22px;
+    border-radius: var(--d-r-card);
+    background: var(--d-card);
 }
 
-.balance-number {
-    font-size: 2.65rem;
-    font-weight: 800;
-    color: var(--white);
-    letter-spacing: -0.03em;
+.kpi-card-header { display: flex; align-items: center; gap: 12px; }
+.kpi-card-header::after { content: "\22EE"; margin-left: auto; font-size: 20px; line-height: 1; color: var(--d-ink); }
+
+/* Round icon sits before the title, like the reference */
+.kpi-icon-wrap {
+    order: -1;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--d-chip);
+    color: var(--d-ink);
+}
+.kpi-icon-approved { background: var(--d-lime); }
+.kpi-icon-declined { background: var(--d-lav-soft); color: var(--d-lav-deep); }
+.kpi-icon-blocked  { background: var(--d-ink); color: var(--d-lime); }
+
+.kpi-card-title { font-size: 15px; font-weight: 500; }
+
+.kpi-card-number {
+    font-size: 46px;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
 }
 
-.account-card-bottom {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+.kpi-card-footer { margin-top: auto; }
+.kpi-meta-text { font-size: 12.5px; color: var(--d-ink-2); }
+
+/* ---------- KPI card hover effects ---------- */
+.kpi-card {
     position: relative;
-    z-index: 2;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    cursor: default;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.account-num-group {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+.kpi-icon-wrap { transition: transform 0.25s ease; }
+.kpi-card-number { transition: transform 0.25s ease; transform-origin: left center; }
+.kpi-card-header::after { transition: transform 0.25s ease; }
+
+@media (hover: hover) {
+    .kpi-card:hover,
+    .kpi-card:focus-within {
+        transform: translateY(-6px);
+        box-shadow:
+            0 18px 32px -16px rgba(21, 21, 21, 0.35),
+            0 0 0 2px var(--kpi-accent, var(--d-ink-3));
+    }
+
+    .kpi-card:hover .kpi-icon-wrap { transform: scale(1.1) rotate(-6deg); }
+    .kpi-card:hover .kpi-card-number { transform: scale(1.06); }
+    .kpi-card:hover .kpi-card-header::after { transform: rotate(90deg); }
 }
 
-.account-num-label {
-    font-size: 0.68rem;
-    color: var(--slate-400);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+/* Each card gets its own accent ring on hover */
+.kpi-card                { --kpi-accent: #cfcfcf; }
+.kpi-border-approved     { --kpi-accent: var(--d-lime); }
+.kpi-border-declined     { --kpi-accent: var(--d-lav); }
+.kpi-border-blocked      { --kpi-accent: var(--d-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+    .kpi-card,
+    .kpi-icon-wrap,
+    .kpi-card-number,
+    .kpi-card-header::after { transition: none; }
+    .kpi-card:hover,
+    .kpi-card:hover .kpi-icon-wrap,
+    .kpi-card:hover .kpi-card-number,
+    .kpi-card:hover .kpi-card-header::after { transform: none; }
 }
 
-.account-num-mono {
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--slate-200);
-    letter-spacing: 0.08em;
-}
+/* ==========================================================================
+   Balance + security cards
+   ========================================================================== */
+.overview-grid { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
 
-.ledger-status-note {
-    font-size: 0.75rem;
-    color: var(--safepay-cyan-300);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* Security Status Overview Card */
+.account-card-fintech,
 .security-card-fintech {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-2xl);
-    padding: 28px 32px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    min-height: 220px;
-    box-shadow: var(--shadow-sm);
-    position: relative;
-    overflow: hidden;
-    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    gap: 22px;
+    padding: 24px;
+    border-radius: var(--d-r-card);
 }
 
-.security-card-fintech:hover {
-    border-color: var(--slate-300);
-    box-shadow: var(--shadow-md);
-}
-
+.account-card-top,
 .security-card-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-.security-title-group {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+.balance-title-group,
+.security-title-group { display: flex; align-items: center; gap: 12px; }
 
+.balance-card-icon,
 .security-card-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    background: rgba(14, 165, 233, 0.1);
-    color: var(--safepay-blue-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
 }
 
-.security-card-label {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--slate-600);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+.balance-card-label,
+.security-card-label { font-size: 15px; font-weight: 500; }
+
+/* Lavender hero card with overlapping circles (like "Energy Used") */
+.account-card-fintech {
+    position: relative;
+    overflow: hidden;
+    color: var(--d-ink);
+    background:
+        radial-gradient(circle at 93% 70%, var(--d-lime) 0 36px, transparent 37px),
+        radial-gradient(circle at 84% 56%, var(--d-ink) 0 58px, transparent 59px),
+        var(--d-lav);
 }
+.balance-card-icon { background: rgba(255, 255, 255, 0.55); color: var(--d-ink); }
+
+.account-tags-group { display: flex; gap: 6px; }
+
+.badge-account-type,
+.badge-account-status {
+    padding: 5px 14px;
+    border-radius: var(--d-pill);
+    font-size: 12px;
+    font-weight: 500;
+}
+.badge-account-type { background: var(--d-ink); color: #fff; }
+.badge-account-status { background: #fff; color: var(--d-ink); }
+
+.balance-figure-wrap { display: flex; align-items: baseline; gap: 6px; }
+
+.currency-symbol { font-size: clamp(24px, 2.8vw, 34px); font-weight: 500; color: rgba(21, 21, 21, 0.6); }
+
+.balance-number {
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.account-card-bottom {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.account-num-group { display: flex; flex-direction: column; }
+.account-num-label { font-size: 12px; color: rgba(21, 21, 21, 0.65); }
+.account-num-mono { font-size: 15px; font-weight: 600; letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+
+.ledger-status-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: var(--d-pill);
+    background: var(--d-lime);
+    font-size: 11.5px;
+    font-weight: 600;
+}
+
+/* Security card */
+.security-card-fintech { background: var(--d-card); }
+.security-card-icon { background: var(--d-chip); color: var(--d-ink); }
 
 .security-badge-protected {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--status-approved);
-    background: var(--status-approved-bg);
-    border: 1px solid var(--status-approved-border);
-    letter-spacing: 0.05em;
+    gap: 8px;
+    padding: 3px 12px;
+    border-radius: var(--d-pill);
+    background: var(--d-lime);
+    color: var(--d-ink);
+    font-size: 11.5px;
+    font-weight: 600;
 }
 
-.security-body-block {
-    margin: 16px 0;
-}
-
-.security-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--slate-900);
-    margin-bottom: 6px;
-}
-
-.security-description {
-    font-size: 0.875rem;
-    color: var(--slate-500);
-    line-height: 1.5;
-}
+.security-body-block { display: flex; flex-direction: column; gap: 8px; }
+.security-title { font-size: 21px; font-weight: 500; letter-spacing: -0.02em; }
+.security-description { color: var(--d-ink-2); font-size: 13px; max-width: 48ch; }
 
 .security-card-bottom {
+    margin-top: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-subtle);
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .security-metric-tag {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--safepay-blue-600);
-}
-
-.security-subtext {
-    font-size: 0.75rem;
-    color: var(--slate-400);
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--d-pill);
+    background: var(--d-ink);
+    color: #fff;
+    font-size: 13px;
     font-weight: 500;
 }
+.security-metric-tag svg { color: var(--d-lime); }
+.security-subtext { font-size: 12.5px; color: var(--d-ink-2); }
 
-/* ----------------------------------------------------------------------
-   3. KPI Cards Grid (4 Columns)
-   ---------------------------------------------------------------------- */
-.kpi-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-}
-
-.kpi-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
-    padding: 22px 24px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 12px;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-}
-
-.kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--slate-300);
-}
-
-.kpi-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.kpi-card-title {
-    font-size: 0.825rem;
-    font-weight: 600;
-    color: var(--slate-600);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.kpi-icon-wrap {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--radius-sm);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.kpi-icon-total {
-    background: rgba(148, 163, 184, 0.12);
-    color: var(--slate-600);
-}
-
-.kpi-icon-approved {
-    background: var(--status-approved-bg);
-    color: var(--status-approved);
-}
-
-.kpi-icon-declined {
-    background: var(--status-declined-bg);
-    color: var(--status-declined);
-}
-
-.kpi-icon-blocked {
-    background: var(--status-blocked-bg);
-    color: var(--status-blocked);
-}
-
-.kpi-card-number {
-    font-size: 2.1rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.1;
-}
-
-.text-approved {
-    color: var(--status-approved);
-}
-
-.text-declined {
-    color: var(--status-declined);
-}
-
-.text-blocked {
-    color: var(--status-blocked);
-}
-
-.kpi-card-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.kpi-meta-text {
-    font-size: 0.75rem;
-    color: var(--slate-400);
-}
-
-/* Border Accents on KPI Cards */
-.kpi-border-approved {
-    border-left: 4px solid var(--status-approved);
-}
-
-.kpi-border-declined {
-    border-left: 4px solid var(--status-declined);
-}
-
-.kpi-border-blocked {
-    border-left: 4px solid var(--status-blocked);
-}
-
-/* ----------------------------------------------------------------------
-   4. Recent Transactions Card & Table
-   ---------------------------------------------------------------------- */
+/* ==========================================================================
+   Transactions — black card (like "Sleep Analysis")
+   ========================================================================== */
 .transactions-container-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-sm);
-    overflow: hidden;
+    padding: 24px;
+    border-radius: var(--d-r-card);
+    background: var(--d-dark);
+    color: #fff;
 }
 
 .transactions-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 22px 28px;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.section-heading-group {
-    display: flex;
-    align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
 }
 
-.section-heading-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--slate-900);
-}
+.section-heading-group { display: flex; align-items: center; gap: 12px; }
+.section-heading-title { font-size: 19px; font-weight: 500; letter-spacing: -0.01em; }
 
 .transactions-count-badge {
-    font-size: 0.75rem;
+    padding: 3px 12px;
+    border-radius: var(--d-pill);
+    background: var(--d-lime);
+    color: var(--d-ink);
+    font-size: 11.5px;
     font-weight: 600;
-    padding: 3px 8px;
-    border-radius: var(--radius-full);
-    background: var(--slate-100);
-    color: var(--slate-600);
 }
 
 .link-view-all {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--safepay-blue-600);
-    transition: gap 0.2s ease;
+    gap: 8px;
+    height: 42px;
+    padding: 0 20px;
+    border-radius: var(--d-pill);
+    background: var(--d-dark-2);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
 }
+.link-view-all:hover { background: var(--d-lime); color: var(--d-ink); }
 
-.link-view-all:hover {
-    color: var(--safepay-blue-700);
-    gap: 9px;
-}
+.table-scroll-wrapper { overflow-x: auto; }
 
-.table-scroll-wrapper {
-    overflow-x: auto;
-}
-
-.fintech-data-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-}
+.fintech-data-table { width: 100%; border-collapse: collapse; }
 
 .fintech-data-table thead th {
-    background: var(--slate-50);
-    padding: 14px 28px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--slate-500);
-    border-bottom: 1px solid var(--border-color);
+    padding: 8px 14px 10px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    color: #8c8c8c;
+    white-space: nowrap;
 }
 
-.fintech-data-table tbody tr {
-    transition: background-color 0.15s ease;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.fintech-data-table tbody tr:last-child {
-    border-bottom: none;
-}
-
-.fintech-data-table tbody tr:hover {
-    background-color: var(--slate-50);
-}
-
-.fintech-data-table td {
-    padding: 18px 28px;
-    font-size: 0.9rem;
-    color: var(--slate-700);
+.fintech-data-table tbody td {
+    padding: 15px 14px;
+    border-top: 1px solid #2f2f2f;
     vertical-align: middle;
+    white-space: nowrap;
 }
+.fintech-data-table tbody tr:hover td { background: rgba(255, 255, 255, 0.04); }
 
-.col-txn-id .txn-tag {
-    font-family: var(--font-mono);
-    font-weight: 600;
-    color: var(--slate-600);
-    font-size: 0.85rem;
-}
+.txn-tag { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hash-symbol { color: var(--d-lime); margin-right: 1px; }
 
-.hash-symbol {
-    color: var(--slate-400);
-}
-
-.col-amount {
-    font-weight: 700;
-    color: var(--slate-900);
-    font-size: 0.95rem;
-}
-
-.currency-prefix {
-    color: var(--slate-500);
-    margin-right: 2px;
-}
+.col-amount { font-weight: 600; font-variant-numeric: tabular-nums; }
+.currency-prefix { color: #8c8c8c; margin-right: 3px; font-weight: 500; }
 
 .type-pill-badge {
     display: inline-block;
-    padding: 4px 10px;
-    border-radius: var(--radius-sm);
-    background: var(--slate-100);
-    color: var(--slate-700);
-    font-size: 0.78rem;
+    padding: 4px 12px;
+    border-radius: var(--d-pill);
+    background: var(--d-dark-2);
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #cfcfcf;
+}
+
+.date-string { color: #9a9a9a; font-size: 13px; }
+
+/* Status chips: lime / lavender / coral */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 14px;
+    border-radius: var(--d-pill);
+    font-size: 11.5px;
     font-weight: 600;
-    letter-spacing: 0.02em;
+    color: var(--d-ink);
 }
+.status-indicator-dot { display: none; }
 
-.col-date .date-string {
-    color: var(--slate-500);
-    font-size: 0.85rem;
-}
+.status-pill.status-approved { background: var(--d-lime); }
+.status-pill.status-declined { background: var(--d-lav); }
+.status-pill.status-blocked  { background: var(--d-coral); }
 
-/* Empty State */
+/* Empty state (inside the black card) */
 .empty-state-container {
-    padding: 64px 32px;
-    text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    max-width: 480px;
-    margin: 0 auto;
+    padding: 40px 24px;
+    text-align: center;
 }
 
 .empty-state-icon-box {
-    width: 60px;
-    height: 60px;
+    width: 72px;
+    height: 72px;
+    display: grid;
+    place-items: center;
     border-radius: 50%;
-    background: var(--safepay-blue-50);
-    color: var(--safepay-blue-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 8px;
+    background: var(--d-lime);
+    color: var(--d-ink);
 }
 
-.empty-state-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--slate-900);
-}
+.empty-state-title { font-size: 19px; font-weight: 500; }
+.empty-state-desc { max-width: 46ch; color: #9a9a9a; margin-bottom: 8px; }
+.empty-state-container .btn-primary-action { background: var(--d-lime); color: var(--d-ink); }
+.empty-state-container .btn-primary-action:hover { background: #cbe84a; }
 
-.empty-state-desc {
-    font-size: 0.9rem;
-    color: var(--slate-500);
-    line-height: 1.5;
-    margin-bottom: 12px;
-}
-
-/* ----------------------------------------------------------------------
-   Responsive Dashboard Styles
-   ---------------------------------------------------------------------- */
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
 @media (max-width: 1100px) {
-    .kpi-cards-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+    .kpi-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    .overview-grid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 868px) {
-    .overview-grid {
-        grid-template-columns: 1fr;
-    }
+@media (max-width: 900px) {
+    .app-shell { grid-template-columns: minmax(0, 1fr); padding: 8px; }
+    .top-nav, .main-viewport { grid-column: 1; }
+    .top-nav { grid-row: 1; padding: 16px 20px 0; }
+    .main-viewport { grid-row: 2; padding: 12px 20px 24px; }
 
-    .welcome-banner {
-        padding: 20px 24px;
-    }
+    .mobile-toggle-btn { display: inline-flex; }
+    .nav-security-status { display: none; }
 
-    .account-card-fintech,
-    .security-card-fintech {
-        min-height: auto;
+    /* Sidebar becomes a slide-in drawer */
+    .sidebar-nav {
+        position: fixed;
+        top: 8px;
+        bottom: 8px;
+        left: 8px;
+        z-index: 60;
+        width: 270px;
+        height: auto;
+        grid-column: auto;
+        grid-row: auto;
+        padding: 24px 16px 16px;
+        border-radius: 28px;
+        background: var(--d-dark);
+        transform: translateX(-115%);
+        transition: transform 0.25s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
     }
+    .sidebar-nav.open { transform: translateX(0); }
+
+    .sidebar-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        background: rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+    }
+    .sidebar-backdrop.active { opacity: 1; pointer-events: auto; }
 }
 
 @media (max-width: 640px) {
-    .kpi-cards-grid {
-        grid-template-columns: 1fr;
-    }
+    .brand-badge-fintech { display: none; }
+    .user-meta-details { display: none; }
 
-    .welcome-heading {
-        font-size: 1.35rem;
-    }
+    .welcome-actions-row { width: 100%; }
+    .welcome-actions-row .btn-cta { flex: 1; justify-content: center; padding: 0 14px; }
 
-    .balance-number {
-        font-size: 2.1rem;
-    }
+    .account-card-fintech, .security-card-fintech, .transactions-container-card { padding: 20px; }
+    .kpi-card-number { font-size: 38px; }
 
-    .fintech-data-table thead th,
-    .fintech-data-table td {
-        padding: 14px 16px;
+    /* Circles would collide with text on narrow screens */
+    .account-card-fintech { background: var(--d-lav); }
+
+    /* Table rows become stacked rows with CSS-generated labels */
+    .fintech-data-table thead { display: none; }
+    .fintech-data-table, .fintech-data-table tbody,
+    .fintech-data-table tr, .fintech-data-table td { display: block; width: 100%; }
+
+    .fintech-data-table tr { padding: 6px 0; border-top: 1px solid #2f2f2f; }
+    .fintech-data-table tbody td {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 7px 4px;
+        border-top: 0;
     }
+    .fintech-data-table tbody td::before { font-size: 12px; font-weight: 500; color: #8c8c8c; }
+    .fintech-data-table tbody td:nth-child(1)::before { content: "Transaction"; }
+    .fintech-data-table tbody td:nth-child(2)::before { content: "Amount"; }
+    .fintech-data-table tbody td:nth-child(3)::before { content: "Type"; }
+    .fintech-data-table tbody td:nth-child(4)::before { content: "Date"; }
+    .fintech-data-table tbody td:nth-child(5)::before { content: "Status"; }
+    .fintech-data-table tbody tr:hover td { background: transparent; }
+}
+
+@media (max-width: 480px) {
+    .kpi-cards-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pulse-indicator::after { animation: none; }
+    .sidebar-nav, .sidebar-backdrop, .btn-cta { transition: none; }
 }

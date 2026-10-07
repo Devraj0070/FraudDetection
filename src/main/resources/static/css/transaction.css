@@ -1,305 +1,401 @@
-/* ==========================================================================
-   SAFE PAY - New Transaction Stylesheet
-   Modern Banking Transfer Interface
-   ========================================================================== */
+/* =========================================================
+   SAFE PAY — transaction.css  (New Transaction page)
+   Matches dashboard: dark ink, lime + lavender accents,
+   white rounded cards on a grey panel.
+   App shell (top-nav, sidebar) is expected in global.css.
+   ========================================================= */
+
+:root {
+    --sp-ink: #1c1c1c;
+    --sp-ink-soft: #2a2a2a;
+    --sp-lime: #dcf254;
+    --sp-lime-deep: #c9e03a;
+    --sp-lavender: #b8a9f0;
+    --sp-violet: #6b4fd8;
+    --sp-white: #ffffff;
+    --sp-muted: #6b6b6b;
+    --sp-border: #ececec;
+    --sp-field: #f4f4f4;
+    --sp-danger: #d64545;
+}
 
 .transaction-page-wrapper {
-    max-width: 680px;
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 20px;
+    max-width: 760px;
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--sp-ink);
 }
 
-/* Page Header */
-.page-title-banner {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
+/* ---------- Title ---------- */
 .page-title-banner h1 {
-    font-size: 1.65rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
 }
 
 .page-title-banner p {
+    margin: 0;
+    max-width: 520px;
     font-size: 0.95rem;
-    color: var(--slate-500);
+    color: var(--sp-muted);
 }
 
-/* Available Balance Quick Banner */
+/* =========================================================
+   BALANCE REMINDER  (lavender, like the dashboard balance card)
+   ========================================================= */
 .balance-reminder-card {
-    background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(6, 182, 212, 0.05) 100%);
-    border: 1px solid rgba(14, 165, 233, 0.25);
-    border-radius: var(--radius-xl);
-    padding: 18px 24px;
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: var(--shadow-xs);
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 24px 28px;
+    overflow: hidden;
+    background: var(--sp-lavender);
+    border-radius: 28px;
+}
+
+/* decorative circles, echoing the dashboard card */
+.balance-reminder-card::after {
+    content: "";
+    position: absolute;
+    right: -40px;
+    bottom: -70px;
+    width: 160px;
+    height: 160px;
+    background: var(--sp-ink);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.balance-reminder-card::before {
+    content: "";
+    position: absolute;
+    right: 30px;
+    bottom: -30px;
+    z-index: 1;
+    width: 70px;
+    height: 70px;
+    background: var(--sp-lime);
+    border-radius: 50%;
+    pointer-events: none;
 }
 
 .balance-reminder-left {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
 }
 
 .balance-reminder-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: var(--radius-md);
-    background: rgba(14, 165, 233, 0.15);
-    color: var(--safepay-blue-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    color: var(--sp-ink);
+    background: rgba(255, 255, 255, 0.55);
+    border-radius: 50%;
 }
 
 .balance-reminder-label {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--slate-600);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
     display: block;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
 .balance-account-ref {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--slate-400);
+    display: block;
+    margin-top: 2px;
+    font-size: 0.82rem;
+    color: rgba(28, 28, 28, 0.7);
 }
 
 .balance-reminder-amount {
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.02em;
-    font-variant-numeric: tabular-nums;
+    position: relative;
+    z-index: 2;
+    padding-right: 110px;
+    font-size: 2.25rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
 }
 
 .balance-reminder-amount .curr-sym {
-    color: var(--safepay-blue-600);
-    font-weight: 600;
-    margin-right: 2px;
+    margin-right: 3px;
+    font-weight: 400;
 }
 
-/* Main Form Card */
+/* =========================================================
+   FORM CARD
+   ========================================================= */
 .transaction-form-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-2xl);
-    padding: 36px 40px;
-    box-shadow: var(--shadow-sm);
+    padding: 36px;
+    background: var(--sp-white);
+    border-radius: 32px;
 }
 
 .transaction-form {
     display: flex;
     flex-direction: column;
-    gap: 28px;
+    gap: 26px;
 }
 
 .form-group-block {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .form-label-title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--slate-800);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 4px;
+    font-size: 0.92rem;
+    font-weight: 600;
 }
 
 .label-required-marker {
-    color: var(--safepay-blue-600);
+    color: var(--sp-violet);
 }
 
-/* Currency Input Styling */
+.input-helper-text {
+    padding-left: 6px;
+    font-size: 0.82rem;
+    color: var(--sp-muted);
+}
+
+/* ---------- Amount input ---------- */
 .currency-input-container {
     position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .currency-input-symbol {
     position: absolute;
-    left: 20px;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--slate-400);
+    top: 50%;
+    left: 24px;
+    transform: translateY(-50%);
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--sp-muted);
     pointer-events: none;
-    transition: color 0.15s ease;
+    transition: color 0.2s ease;
+}
+
+.currency-input-container:focus-within .currency-input-symbol {
+    color: var(--sp-ink);
 }
 
 .amount-input-control {
     width: 100%;
-    padding: 16px 20px 16px 48px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--slate-900);
-    background-color: var(--slate-50);
-    border: 1.5px solid var(--slate-200);
-    border-radius: var(--radius-lg);
-    transition: all 0.2s ease;
-    font-variant-numeric: tabular-nums;
+    height: 76px;
+    padding: 0 28px 0 58px;
+    font: inherit;
+    font-size: 2rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--sp-ink);
+    background: var(--sp-field);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    appearance: textfield;
+    -moz-appearance: textfield;
+}
+
+.amount-input-control::-webkit-outer-spin-button,
+.amount-input-control::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.amount-input-control::placeholder {
+    color: #b5b5b5;
+}
+
+.amount-input-control:hover {
+    background: #eeeeee;
 }
 
 .amount-input-control:focus {
-    outline: none;
-    background-color: var(--white);
-    border-color: var(--safepay-blue-500);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    background: var(--sp-white);
+    border-color: var(--sp-lime-deep);
+    box-shadow: 0 0 0 4px rgba(220, 242, 84, 0.35);
 }
 
-.currency-input-container:focus-within .currency-input-symbol {
-    color: var(--safepay-blue-600);
-}
-
-/* Select Dropdown Styling */
+/* ---------- Select ---------- */
 .select-wrapper {
     position: relative;
-    display: flex;
-    align-items: center;
 }
 
 .type-select-control {
     width: 100%;
-    padding: 14px 44px 14px 18px;
-    font-size: 0.95rem;
+    height: 56px;
+    padding: 0 52px 0 24px;
+    font: inherit;
+    font-size: 0.98rem;
     font-weight: 500;
-    color: var(--slate-900);
-    background-color: var(--slate-50);
-    border: 1.5px solid var(--slate-200);
-    border-radius: var(--radius-lg);
+    color: var(--sp-ink);
+    background: var(--sp-field);
+    border: 2px solid transparent;
+    border-radius: 999px;
+    outline: none;
     cursor: pointer;
     appearance: none;
     -webkit-appearance: none;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.type-select-control:hover {
+    background: #eeeeee;
 }
 
 .type-select-control:focus {
-    outline: none;
-    background-color: var(--white);
-    border-color: var(--safepay-blue-500);
-    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    background: var(--sp-white);
+    border-color: var(--sp-lime-deep);
+    box-shadow: 0 0 0 4px rgba(220, 242, 84, 0.35);
 }
 
 .select-arrow-icon {
     position: absolute;
-    right: 18px;
-    color: var(--slate-400);
+    top: 50%;
+    right: 20px;
+    transform: translateY(-50%);
+    color: var(--sp-ink);
     pointer-events: none;
 }
 
-.input-helper-text {
-    font-size: 0.78rem;
-    color: var(--slate-500);
-}
-
-/* Security Trust Banner */
+/* =========================================================
+   SECURITY TRUST BOX  (lime, like the sidebar AI card)
+   ========================================================= */
 .security-trust-box {
-    background: var(--slate-50);
-    border: 1px solid var(--slate-200);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
     display: flex;
     align-items: flex-start;
     gap: 14px;
+    padding: 20px 22px;
+    background: var(--sp-lime);
+    border-radius: 24px;
 }
 
 .trust-shield-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-sm);
-    background: rgba(16, 185, 129, 0.12);
-    color: var(--status-approved);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     flex-shrink: 0;
-    margin-top: 2px;
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    color: var(--sp-lime);
+    background: var(--sp-ink);
+    border-radius: 50%;
 }
 
 .trust-text-content h4 {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--slate-800);
-    margin-bottom: 2px;
+    margin: 0 0 4px;
+    font-size: 0.98rem;
+    font-weight: 600;
 }
 
 .trust-text-content p {
-    font-size: 0.76rem;
-    color: var(--slate-500);
-    line-height: 1.4;
     margin: 0;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: rgba(28, 28, 28, 0.75);
 }
 
-/* Action Buttons */
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 .form-buttons-row {
     display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
-.btn-submit-transfer {
-    flex: 1;
-    padding: 14px 28px;
-    background: var(--grad-primary);
-    color: var(--white);
-    font-size: 0.95rem;
-    font-weight: 700;
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
-    transition: all 0.2s ease;
+.transaction-form .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    height: 56px;
+    padding: 0 32px;
+    font: inherit;
+    font-size: 0.98rem;
+    font-weight: 600;
+    text-decoration: none;
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.transaction-form .btn:active {
+    transform: scale(0.98);
+}
+
+.transaction-form .btn:focus-visible {
+    outline: 3px solid var(--sp-violet);
+    outline-offset: 3px;
+}
+
+.btn-submit-transfer {
+    flex: 1 1 220px;
+    color: var(--sp-white);
+    background: var(--sp-ink);
 }
 
 .btn-submit-transfer:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+    color: var(--sp-ink);
+    background: var(--sp-lime);
 }
 
 .btn-cancel-transfer {
-    padding: 14px 24px;
-    background: var(--white);
-    color: var(--slate-700);
-    border: 1.5px solid var(--slate-200);
-    border-radius: var(--radius-md);
-    font-size: 0.95rem;
-    font-weight: 600;
-    transition: all 0.2s ease;
+    color: var(--sp-ink);
+    background: var(--sp-field);
 }
 
 .btn-cancel-transfer:hover {
-    background: var(--slate-50);
-    border-color: var(--slate-300);
+    background: var(--sp-lavender);
 }
 
-/* Responsive */
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
 @media (max-width: 640px) {
     .transaction-form-card {
         padding: 24px 20px;
+        border-radius: 28px;
     }
 
-    .form-buttons-row {
-        flex-direction: column;
+    .balance-reminder-card {
+        padding: 22px 20px;
     }
 
-    .btn-submit-transfer,
-    .btn-cancel-transfer {
+    .balance-reminder-amount {
+        padding-right: 0;
+        font-size: 1.9rem;
+    }
+
+    .balance-reminder-card::before,
+    .balance-reminder-card::after {
+        display: none;
+    }
+
+    .amount-input-control {
+        height: 68px;
+        font-size: 1.6rem;
+    }
+
+    .form-buttons-row .btn {
         width: 100%;
-        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
     }
 }

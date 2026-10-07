@@ -1,236 +1,227 @@
-/* ==========================================================================
-   SAFE PAY - Transaction Result Stylesheet
-   Professional Banking Security Decision UI
-   ========================================================================== */
+/* =========================================================
+   SAFE PAY — result.css  (Transaction Result page)
+   Matches dashboard: dark ink, lime + lavender accents,
+   white rounded cards on a grey panel.
+   App shell (top-nav, sidebar) is expected in global.css.
+   ========================================================= */
 
-.result-page-wrapper {
-    max-width: 820px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
+:root {
+    --sp-ink: #1c1c1c;
+    --sp-ink-soft: #2a2a2a;
+    --sp-lime: #dcf254;
+    --sp-lime-deep: #c9e03a;
+    --sp-lavender: #b8a9f0;
+    --sp-violet: #6b4fd8;
+    --sp-white: #ffffff;
+    --sp-muted: #6b6b6b;
+    --sp-border: #ececec;
+    --sp-danger: #d64545;
 }
 
-/* ----------------------------------------------------------------------
-   1. Status Decision Hero Card
-   ---------------------------------------------------------------------- */
+.result-page-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 980px;
+    font-family: "Inter", system-ui, sans-serif;
+    color: var(--sp-ink);
+}
+
+/* =========================================================
+   1. HERO DECISION CARD
+   ========================================================= */
 .result-hero-card {
-    border-radius: var(--radius-2xl);
-    padding: 40px 44px;
+    position: relative;
     display: flex;
     align-items: center;
     gap: 28px;
-    position: relative;
+    padding: 36px;
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: box-shadow 0.2s ease;
+    border-radius: 32px;
 }
 
-/* Status: APPROVED */
-.hero-approved {
-    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-    border: 1.5px solid var(--status-approved-border);
-}
-
-.hero-approved .hero-icon-container {
-    background: linear-gradient(135deg, #059669 0%, #10b981 100%);
-    color: var(--white);
-    box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.4);
-}
-
-.hero-approved .hero-status-title {
-    color: var(--status-approved-text);
-}
-
-.hero-approved .hero-status-pill {
-    background: var(--status-approved-bg);
-    color: var(--status-approved);
-    border: 1px solid var(--status-approved-border);
-}
-
-/* Status: DECLINED */
-.hero-declined {
-    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
-    border: 1.5px solid var(--status-declined-border);
-}
-
-.hero-declined .hero-icon-container {
-    background: linear-gradient(135deg, #d97706 0%, #f59e0b 100%);
-    color: var(--white);
-    box-shadow: 0 8px 20px -4px rgba(245, 158, 11, 0.4);
-}
-
-.hero-declined .hero-status-title {
-    color: var(--status-declined-text);
-}
-
-.hero-declined .hero-status-pill {
-    background: var(--status-declined-bg);
-    color: var(--status-declined);
-    border: 1px solid var(--status-declined-border);
-}
-
-/* Status: BLOCKED */
-.hero-blocked {
-    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
-    border: 1.5px solid var(--status-blocked-border);
-}
-
-.hero-blocked .hero-icon-container {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-    color: var(--white);
-    box-shadow: 0 8px 20px -4px rgba(239, 68, 68, 0.4);
-}
-
-.hero-blocked .hero-status-title {
-    color: var(--status-blocked-text);
-}
-
-.hero-blocked .hero-status-pill {
-    background: var(--status-blocked-bg);
-    color: var(--status-blocked);
-    border: 1px solid var(--status-blocked-border);
+/* decorative circle, like the balance card */
+.result-hero-card::after {
+    content: "";
+    position: absolute;
+    right: -60px;
+    bottom: -90px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: rgba(28, 28, 28, 0.9);
+    pointer-events: none;
 }
 
 .hero-icon-container {
-    width: 68px;
-    height: 68px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    z-index: 1;
     flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    background: var(--sp-ink);
 }
 
 .hero-text-content {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    flex: 1;
+    position: relative;
+    z-index: 1;
+    max-width: 560px;
 }
 
 .hero-badge-row {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 10px;
+    margin-bottom: 12px;
 }
 
 .hero-status-pill {
-    font-size: 0.72rem;
+    padding: 5px 14px;
+    font-size: 0.78rem;
     font-weight: 700;
-    padding: 3px 10px;
-    border-radius: var(--radius-full);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    color: var(--sp-white);
+    background: var(--sp-ink);
+    border-radius: 999px;
+}
+
+.status-indicator-note {
+    font-size: 0.88rem;
+    font-weight: 600;
 }
 
 .hero-status-title {
-    font-size: 1.95rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+    font-size: clamp(1.9rem, 4vw, 2.75rem);
+    font-weight: 500;
+    letter-spacing: -0.03em;
     line-height: 1.1;
 }
 
 .hero-status-desc {
-    font-size: 1rem;
-    color: var(--slate-600);
-    line-height: 1.4;
+    margin: 0;
+    font-size: 0.98rem;
+    line-height: 1.5;
 }
 
-/* ----------------------------------------------------------------------
-   2. Transaction Details Section
-   ---------------------------------------------------------------------- */
+/* --- Approved: lime --- */
+.hero-approved {
+    background: var(--sp-lime);
+    color: var(--sp-ink);
+}
+.hero-approved .hero-icon-container {
+    color: var(--sp-lime);
+}
+
+/* --- Declined: lavender --- */
+.hero-declined {
+    background: var(--sp-lavender);
+    color: var(--sp-ink);
+}
+.hero-declined .hero-icon-container {
+    color: var(--sp-lavender);
+}
+
+/* --- Blocked: dark, with a lime/lavender accent so it still feels on-brand --- */
+.hero-blocked {
+    background: var(--sp-ink);
+    color: var(--sp-white);
+}
+.hero-blocked::after {
+    background: var(--sp-lavender);
+}
+.hero-blocked .hero-icon-container {
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+}
+.hero-blocked .hero-status-pill {
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+}
+
+/* =========================================================
+   2. DETAILS CARD
+   ========================================================= */
 .result-details-card {
-    background-color: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-2xl);
-    padding: 36px 40px;
-    box-shadow: var(--shadow-sm);
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
+    padding: 32px;
+    background: var(--sp-white);
+    border-radius: 32px;
 }
 
 .amount-hero-block {
-    text-align: center;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 24px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--sp-border);
 }
 
 .amount-hero-label {
-    font-size: 0.8rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--slate-400);
-    display: block;
-    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--sp-muted);
 }
 
 .amount-hero-value {
-    font-size: 3rem;
-    font-weight: 800;
-    color: var(--slate-900);
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
+    font-size: clamp(2.75rem, 7vw, 4.5rem);
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
 }
 
-.amount-hero-value .currency-symbol {
-    color: var(--safepay-blue-600);
+.currency-symbol {
     margin-right: 4px;
+    color: var(--sp-muted);
+    font-weight: 400;
 }
 
 .details-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
 }
 
 .detail-item-box {
     display: flex;
     flex-direction: column;
     gap: 6px;
-    background: var(--slate-50);
-    border: 1px solid var(--slate-200);
-    border-radius: var(--radius-lg);
-    padding: 16px 20px;
+    padding: 18px 20px;
+    background: #f4f4f4;
+    border-radius: 20px;
 }
 
 .detail-label-text {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--slate-500);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--sp-muted);
 }
 
 .detail-value-text {
-    font-size: 1rem;
-    font-weight: 700;
-    color: var(--slate-900);
+    font-size: 1.02rem;
+    font-weight: 600;
 }
 
-/* ----------------------------------------------------------------------
-   3. AI Fraud Risk Analysis Card
-   ---------------------------------------------------------------------- */
+/* =========================================================
+   3. AI RISK CARD  (dark, like "Recent Transactions")
+   ========================================================= */
 .ai-analysis-card {
-    background: linear-gradient(135deg, #091224 0%, #112044 100%);
-    border: 1px solid rgba(56, 189, 248, 0.25);
-    border-radius: var(--radius-2xl);
-    padding: 32px 36px;
-    color: var(--white);
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    box-shadow: 0 10px 25px -5px rgba(4, 8, 18, 0.3);
+    padding: 32px;
+    color: var(--sp-white);
+    background: var(--sp-ink);
+    border-radius: 32px;
 }
 
 .ai-card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
 }
 
 .ai-header-left {
@@ -240,203 +231,186 @@
 }
 
 .ai-header-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: var(--radius-sm);
-    background: rgba(34, 211, 238, 0.15);
-    color: var(--safepay-cyan-300);
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+    border-radius: 50%;
 }
 
 .ai-card-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--white);
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
 }
 
 .ai-engine-tag {
-    font-size: 0.72rem;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: var(--radius-full);
-    background: rgba(34, 211, 238, 0.12);
-    border: 1px solid rgba(34, 211, 238, 0.25);
-    color: var(--safepay-cyan-300);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    padding: 5px 14px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+    border-radius: 999px;
 }
 
 .ai-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
 }
 
 .ai-metric-box {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-lg);
-    padding: 18px 20px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 20px;
+    background: var(--sp-ink-soft);
+    border-radius: 20px;
 }
 
 .ai-metric-label {
-    font-size: 0.72rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--slate-400);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.55);
 }
 
+/* ---------- Risk badge ---------- */
 .ai-risk-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+    padding: 8px 16px;
     font-size: 0.85rem;
     font-weight: 700;
-    padding: 4px 12px;
-    border-radius: var(--radius-full);
-    width: fit-content;
-    letter-spacing: 0.04em;
+    border-radius: 999px;
 }
 
 .risk-badge-low {
-    background: rgba(16, 185, 129, 0.2);
-    color: #34d399;
-    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: var(--sp-ink);
+    background: var(--sp-lime);
 }
 
 .risk-badge-medium {
-    background: rgba(245, 158, 11, 0.2);
-    color: #fbbf24;
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    color: var(--sp-ink);
+    background: var(--sp-lavender);
 }
 
 .risk-badge-high {
-    background: rgba(239, 68, 68, 0.2);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.35);
+    color: var(--sp-white);
+    background: var(--sp-danger);
 }
 
+/* ---------- Probability meter ---------- */
 .ai-prob-value {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--white);
-    font-variant-numeric: tabular-nums;
+    font-size: 2.25rem;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    line-height: 1;
 }
 
-/* Probability Bar */
 .prob-meter-wrap {
     width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-full);
+    height: 10px;
     overflow: hidden;
-    margin-top: 4px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
 }
 
 .prob-meter-fill {
     height: 100%;
-    border-radius: var(--radius-full);
+    min-width: 4px;
+    border-radius: 999px;
     transition: width 0.6s ease;
 }
 
-.prob-fill-low {
-    background: #10b981;
-}
+.prob-fill-low    { background: var(--sp-lime); }
+.prob-fill-medium { background: var(--sp-lavender); }
+.prob-fill-high   { background: var(--sp-danger); }
 
-.prob-fill-medium {
-    background: #f59e0b;
-}
-
-.prob-fill-high {
-    background: #ef4444;
-}
-
+/* ---------- Verdict ---------- */
 .ai-verdict-text {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--white);
+    font-size: 1.1rem;
+    font-weight: 600;
+    line-height: 1.3;
 }
 
 .verdict-legitimate {
-    color: #34d399;
+    color: var(--sp-lime);
 }
 
 .verdict-fraudulent {
-    color: #f87171;
+    color: #ff8a8a;
 }
 
-/* ----------------------------------------------------------------------
-   4. Action Buttons
-   ---------------------------------------------------------------------- */
+/* =========================================================
+   4. ACTIONS
+   ========================================================= */
 .result-actions-row {
     display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.btn-new-txn,
+.btn-return-dash {
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 16px;
-    margin-top: 8px;
+    gap: 8px;
+    height: 54px;
+    padding: 0 30px;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 999px;
+    transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-new-txn:active,
+.btn-return-dash:active {
+    transform: scale(0.98);
+}
+
+.btn-new-txn:focus-visible,
+.btn-return-dash:focus-visible {
+    outline: 3px solid var(--sp-violet);
+    outline-offset: 3px;
 }
 
 .btn-new-txn {
-    padding: 13px 28px;
-    font-size: 0.95rem;
-    font-weight: 700;
-    border-radius: var(--radius-md);
-    background: var(--grad-primary);
-    color: var(--white);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.3);
-    transition: all 0.2s ease;
+    color: var(--sp-white);
+    background: var(--sp-ink);
 }
 
 .btn-new-txn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
-    color: var(--white);
+    color: var(--sp-ink);
+    background: var(--sp-lime);
+}
+
+/* the label already has a "+", so hide the duplicate icon */
+.btn-new-txn svg {
+    display: none;
 }
 
 .btn-return-dash {
-    padding: 13px 24px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    border-radius: var(--radius-md);
-    background: var(--white);
-    color: var(--slate-700);
-    border: 1.5px solid var(--slate-200);
-    transition: all 0.2s ease;
+    color: var(--sp-ink);
+    background: var(--sp-white);
 }
 
 .btn-return-dash:hover {
-    background: var(--slate-50);
-    border-color: var(--slate-300);
+    background: var(--sp-lavender);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 640px) {
     .result-hero-card {
         flex-direction: column;
-        text-align: center;
-        padding: 32px 24px;
-    }
-
-    .hero-badge-row {
-        justify-content: center;
-    }
-
-    .details-grid,
-    .ai-metrics-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .amount-hero-value {
-        font-size: 2.3rem;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 28px 24px;
     }
 
     .result-details-card,
@@ -444,15 +418,15 @@
         padding: 24px 20px;
     }
 
-    .result-actions-row {
-        flex-direction: column;
-        width: 100%;
-    }
-
+    .result-actions-row,
     .btn-new-txn,
     .btn-return-dash {
         width: 100%;
-        text-align: center;
-        justify-content: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
     }
 }
