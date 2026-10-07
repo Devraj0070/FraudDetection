@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FraudGuard - Enterprise Fraud Detection Dashboard</title>
+    <title>Dashboard — SAFE PAY</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
@@ -23,25 +27,17 @@
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
-            <a th:href="@{/dashboard}" class="brand-container">
-                <div class="brand-shield-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                        <path d="m9 12 2 2 4-4"></path>
-                    </svg>
-                </div>
-                <div class="brand-naming">
-                    <span class="brand-title">FraudGuard</span>
-                    <span class="brand-caption">Risk Management Console</span>
-                </div>
+            <a th:href="@{/dashboard}" class="brand-link">
+                <img th:src="@{/images/safepay-logo.png}" alt="SAFE PAY" class="brand-logo-img">
+                <span class="brand-badge-fintech">Security Cloud</span>
             </a>
         </div>
 
         <div class="nav-right">
             <!-- System Security Indicator -->
-            <div class="nav-security-status" title="Continuous AI monitoring is active">
+            <div class="nav-security-status" title="Continuous SafePay AI monitoring is active">
                 <span class="pulse-indicator"></span>
-                <span class="security-status-text">AI Monitoring Active</span>
+                <span>AI Fraud Protection Active</span>
             </div>
 
             <!-- User Profile Chip -->
@@ -56,7 +52,7 @@
                 </div>
             </div>
 
-            <!-- Sign Out -->
+            <!-- Sign Out Form -->
             <form th:action="@{/logout}" method="post" class="nav-logout-form">
                 <button type="submit" class="btn-logout" title="Sign out of your session">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -132,20 +128,21 @@
                     </ul>
                 </div>
 
-                <!-- Sidebar Protection Status Box -->
+                <!-- SafePay Protection Status Widget -->
                 <div class="sidebar-footer-card">
                     <div class="sidebar-footer-header">
                         <div class="footer-shield-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path d="m9 12 2 2 4-4"></path>
                             </svg>
                         </div>
-                        <span class="footer-card-title">AI Fraud Protection</span>
+                        <span class="footer-card-title">SafePay AI Engine</span>
                     </div>
-                    <p class="footer-card-text">Every transfer is analyzed in real time for suspicious behavioral anomalies.</p>
+                    <p class="footer-card-text">Every transfer is analyzed in real time for suspicious behavioral patterns.</p>
                     <div class="footer-status-pill">
                         <span class="status-green-dot"></span>
-                        <span>Surveillance Active</span>
+                        <span>Defense Active</span>
                     </div>
                 </div>
             </div>
@@ -162,9 +159,9 @@
                 <section class="welcome-banner">
                     <div class="welcome-intro">
                         <h1 class="welcome-heading">
-                            <span id="greetingLead">Good afternoon</span>, <span th:text="${username != null ? username : 'User'}">demouser</span>
+                            <span id="greetingLead">Welcome</span>, <span class="welcome-user-highlight" th:text="${username != null ? username : 'User'}">demouser</span>
                         </h1>
-                        <p class="welcome-subtext">Your account is protected by continuous transaction monitoring.</p>
+                        <p class="welcome-subtext">Your account is fully protected by continuous real-time transaction monitoring.</p>
                     </div>
                     <div class="welcome-actions-row">
                         <a th:href="@{/transaction}" class="btn-cta btn-primary-action">
@@ -196,70 +193,74 @@
                 <section class="overview-grid">
 
                     <!-- Account Summary Card -->
-                    <div class="summary-card account-summary-card">
-                        <div class="summary-card-header">
-                            <div class="header-label-box">
-                                <div class="header-icon-container">
+                    <div class="account-card-fintech">
+                        <div class="account-card-top">
+                            <div class="balance-title-group">
+                                <div class="balance-card-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                         <line x1="2" y1="10" x2="22" y2="10"></line>
                                     </svg>
                                 </div>
-                                <span class="summary-header-label">Available Balance</span>
+                                <span class="balance-card-label">Available Balance</span>
                             </div>
-                            <div class="account-badge-group">
+                            <div class="account-tags-group">
                                 <span class="badge-account-type" th:text="${account != null and account.accountType != null ? account.accountType : 'SAVINGS'}">SAVINGS</span>
                                 <span class="badge-account-status"
-                                      th:classappend="${account != null and account.status == 'ACTIVE' ? 'status-active' : ''}"
                                       th:text="${account != null and account.status != null ? account.status : 'ACTIVE'}">ACTIVE</span>
                             </div>
                         </div>
 
-                        <div class="balance-display-block">
+                        <div class="balance-figure-wrap">
                             <span class="currency-symbol">₹</span>
                             <span class="balance-number" th:text="${balance != null ? #numbers.formatDecimal(balance, 1, 2) : '0.00'}">0.00</span>
                         </div>
 
-                        <div class="summary-card-footer">
-                            <div class="account-number-display">
-                                <span class="account-num-label">Account No.</span>
+                        <div class="account-card-bottom">
+                            <div class="account-num-group">
+                                <span class="account-num-label">Account Number</span>
                                 <span class="account-num-mono" th:text="${account != null and account.accountNumber != null ? account.accountNumber : '—'}">100000000001</span>
                             </div>
-                            <span class="ledger-indicator">Real-time ledger balance</span>
+                            <div class="ledger-status-note">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Real-time Ledger</span>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Security Status Card -->
-                    <div class="summary-card security-status-card">
-                        <div class="summary-card-header">
-                            <div class="header-label-box">
-                                <div class="header-icon-container security-icon-box">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <div class="security-card-fintech">
+                        <div class="security-card-top">
+                            <div class="security-title-group">
+                                <div class="security-card-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
                                         <path d="m9 12 2 2 4-4"></path>
                                     </svg>
                                 </div>
-                                <span class="summary-header-label">Security Status</span>
+                                <span class="security-card-label">Fraud Defense Status</span>
                             </div>
                             <div class="security-badge-protected">
-                                <span class="pulse-beacon"></span>
+                                <span class="pulse-indicator" style="width:6px;height:6px;background:#059669;box-shadow:0 0 6px #059669;"></span>
                                 <span>PROTECTED</span>
                             </div>
                         </div>
 
                         <div class="security-body-block">
-                            <h3 class="security-title">AI Transaction Monitoring</h3>
-                            <p class="security-description">Continuous transaction monitoring is active. Machine learning algorithms evaluate risk vectors on every transaction in real time.</p>
+                            <h3 class="security-title">AI Behavioral Risk Engine</h3>
+                            <p class="security-description">Continuous multi-vector surveillance is active. Machine learning algorithms evaluate risk probabilities and anomalies on every transaction in real time.</p>
                         </div>
 
-                        <div class="security-card-footer">
+                        <div class="security-card-bottom">
                             <div class="security-metric-tag">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
-                                <span>AI Fraud Protection</span>
+                                <span>SafePay AI Verification</span>
                             </div>
-                            <span class="security-subtext">Active &amp; Enforced</span>
+                            <span class="security-subtext">Active &bull; Enforced</span>
                         </div>
                     </div>
 
@@ -369,22 +370,22 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:each="tx : ${recentTransactions}" class="table-data-row">
-                                    <td class="col-txn-id" data-label="Transaction">
+                                <tr th:each="tx : ${recentTransactions}">
+                                    <td class="col-txn-id">
                                         <div class="txn-tag">
                                             <span class="hash-symbol">#</span><span th:text="${tx.id}">1</span>
                                         </div>
                                     </td>
-                                    <td class="col-amount" data-label="Amount">
-                                        <span class="currency-prefix">₹</span><span class="amount-val" th:text="${tx.amount != null ? #numbers.formatDecimal(tx.amount, 1, 2) : '0.00'}">0.00</span>
+                                    <td class="col-amount">
+                                        <span class="currency-prefix">₹</span><span th:text="${tx.amount != null ? #numbers.formatDecimal(tx.amount, 1, 2) : '0.00'}">0.00</span>
                                     </td>
-                                    <td class="col-type" data-label="Type">
+                                    <td class="col-type">
                                         <span class="type-pill-badge" th:text="${tx.transactionType != null ? tx.transactionType.toModelValue() : 'PAYMENT'}">PAYMENT</span>
                                     </td>
-                                    <td class="col-date" data-label="Date">
+                                    <td class="col-date">
                                         <span class="date-string" th:text="${tx.transactionTime != null ? #temporals.format(tx.transactionTime, 'dd MMM yyyy, hh:mm a') : '—'}">06 Oct 2026, 04:30 PM</span>
                                     </td>
-                                    <td class="col-status" data-label="Status">
+                                    <td class="col-status">
                                         <span class="status-pill"
                                               th:classappend="${tx.status == 'APPROVED' ? 'status-approved' : (tx.status == 'DECLINED' ? 'status-declined' : 'status-blocked')}">
                                             <span class="status-indicator-dot"></span>
@@ -399,13 +400,13 @@
                     <!-- Empty State When No Transactions -->
                     <div th:if="${recentTransactions == null or recentTransactions.empty}" class="empty-state-container">
                         <div class="empty-state-icon-box">
-                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <rect x="2" y="5" width="20" height="14" rx="2"></rect>
                                 <line x1="2" y1="10" x2="22" y2="10"></line>
                             </svg>
                         </div>
                         <h3 class="empty-state-title">No Transactions Yet</h3>
-                        <p class="empty-state-desc">You have not executed any transactions yet. Submit a new transaction to test real-time AI fraud monitoring and risk classification.</p>
+                        <p class="empty-state-desc">You have not executed any transactions yet. Submit a transaction to experience real-time SafePay AI risk assessment.</p>
                         <a th:href="@{/transaction}" class="btn-cta btn-primary-action">+ Create First Transaction</a>
                     </div>
                 </section>
@@ -419,7 +420,6 @@
 <!-- Interactive Greeting & Mobile Navigation Script -->
 <script>
     (function () {
-        // Dynamic Greeting adjustment (defaults to Good afternoon on server)
         try {
             const hour = new Date().getHours();
             const greetingEl = document.getElementById('greetingLead');
@@ -432,11 +432,8 @@
                     greetingEl.textContent = 'Good evening';
                 }
             }
-        } catch (e) {
-            // gracefully fallback
-        }
+        } catch (e) {}
 
-        // Mobile Sidebar Drawer Toggle
         const mobileToggle = document.getElementById('mobileMenuToggle');
         const sidebarNav = document.getElementById('sidebarNav');
         const backdrop = document.getElementById('sidebarBackdrop');

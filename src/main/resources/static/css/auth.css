@@ -1,179 +1,314 @@
-body {
+/* ==========================================================================
+   SAFE PAY - Authentication Stylesheet (Login & Register)
+   Clean Banking Aesthetics & Focused Form Layout
+   ========================================================================== */
+
+body.auth-page {
     min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.auth-container {
-    width: 100%;
-    max-width: 450px;
-}
-
-/* Header */
-.auth-header {
-    background: #111827;
-    color: white;
-    padding: 40px 30px;
-    border-radius: 16px 16px 0 0;
-    text-align: center;
-}
-
-.auth-header h1 {
-    margin: 0 0 8px;
-    font-size: 28px;
-    font-weight: 600;
-}
-
-.auth-header .app-name {
-    font-size: 14px;
-    color: #9ca3af;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-}
-
-.auth-header p {
     margin: 0;
-    color: #d1d5db;
-    font-size: 15px;
+    padding: 0;
+    background-color: #040814;
+    display: flex;
+    font-family: var(--font-sans, 'Inter', -apple-system, BlinkMacSystemFont, sans-serif);
+    -webkit-font-smoothing: antialiased;
 }
 
-/* Card */
-.auth-card {
-    background: white;
-    padding: 40px;
-    border-radius: 0 0 16px 16px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+/* ----------------------------------------------------------------------
+   Split-Screen Layout Container
+   ---------------------------------------------------------------------- */
+.auth-split-wrapper {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
 }
 
-/* Alert Messages */
-.alert {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin-bottom: 24px;
-    font-size: 14px;
+/* ----------------------------------------------------------------------
+   Left Side: Dark Navy Brand Pane & 3D Payment Flow Hero Composition
+   ---------------------------------------------------------------------- */
+.auth-brand-pane {
+    flex: 0 0 42%;
+    background-color: #040814;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 48px 40px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Designed Abstract Digital Payment Flow Hero Visual */
+.brand-hero-visual {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    background-image: url("../images/safepay-flow.svg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 1;
+}
+
+.brand-flow-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Foreground Brand Anchor Content */
+.brand-pane-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.brand-logo-link {
+    display: inline-block;
+    line-height: 0;
+    text-decoration: none;
+}
+
+/* Official SafePay Transparent Logo */
+.auth-brand-logo {
+    width: 140px;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    border: none;
+    outline: none;
+    box-shadow: none;
+    filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.55));
+    margin: 0 auto;
+}
+
+/* Small Neutral Brand Tagline */
+.brand-tagline {
+    font-size: 0.95rem;
+    color: #e2e8f0;
+    margin: 0;
+    font-weight: 500;
+    letter-spacing: 0.015em;
+    line-height: 1.4;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+}
+
+/* ----------------------------------------------------------------------
+   Right Side: Clean Form Pane
+   ---------------------------------------------------------------------- */
+.auth-form-pane {
+    flex: 1;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 48px 40px;
+}
+
+.form-pane-container {
+    width: 100%;
+    max-width: 380px;
+}
+
+/* Form Headings */
+.auth-form-header {
+    margin-bottom: 28px;
+}
+
+.auth-form-header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+}
+
+.auth-form-header p {
+    font-size: 0.95rem;
+    color: #64748b;
+    margin: 0;
     line-height: 1.5;
 }
 
+/* Feedback Alerts */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
 .alert-error {
-    background: #fee2e2;
-    color: #991b1b;
+    background-color: #fef2f2;
+    color: #b91c1c;
     border: 1px solid #fecaca;
 }
 
 .alert-success {
-    background: #d1fae5;
-    color: #065f46;
-    border: 1px solid #a7f3d0;
+    background-color: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
 }
 
 .alert-info {
-    background: #dbeafe;
-    color: #1e40af;
+    background-color: #eff6ff;
+    color: #1d4ed8;
     border: 1px solid #bfdbfe;
 }
 
-/* Form */
+/* Clean Form */
 .auth-form {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
 
-.form-group {
+.form-field {
     display: flex;
     flex-direction: column;
+    gap: 6px;
 }
 
-.form-group label {
-    margin-bottom: 8px;
+.form-field label {
+    font-size: 0.875rem;
     font-weight: 600;
-    color: #1f2937;
-    font-size: 14px;
+    color: #334155;
 }
 
-.form-group input {
-    padding: 12px 16px;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-size: 15px;
-    transition: all 0.2s;
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.form-group input:focus {
-    outline: none;
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+.input-icon-left {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+    pointer-events: none;
+    flex-shrink: 0;
 }
 
-.form-group input::placeholder {
-    color: #d1d5db;
-}
-
-/* Button */
-.btn-submit {
+.auth-input {
     width: 100%;
-    padding: 14px 24px;
-    background: #2563eb;
-    color: white;
+    height: 44px;
+    padding: 10px 14px 10px 42px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    color: #0f172a;
+    background-color: #ffffff;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    outline: none;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+
+.auth-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.auth-input::placeholder {
+    color: #94a3b8;
+}
+
+/* Primary Button */
+.btn-auth-submit {
+    height: 44px;
+    width: 100%;
+    background-color: #2563eb;
+    color: #ffffff;
     border: none;
     border-radius: 8px;
-    font-size: 16px;
+    font-size: 0.95rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
-    margin-top: 8px;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 4px;
 }
 
-.btn-submit:hover {
-    background: #1d4ed8;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+.btn-auth-submit:hover {
+    background-color: #1d4ed8;
 }
 
-/* Footer Link */
-.auth-footer {
+.btn-auth-submit:active {
+    transform: translateY(1px);
+}
+
+/* Switcher Footer */
+.auth-switch-footer {
     margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid #e5e7eb;
     text-align: center;
-    color: #6b7280;
-    font-size: 14px;
+    font-size: 0.875rem;
+    color: #64748b;
 }
 
-.auth-footer a {
+.auth-switch-footer a {
     color: #2563eb;
     font-weight: 600;
     text-decoration: none;
+    margin-left: 4px;
 }
 
-.auth-footer a:hover {
+.auth-switch-footer a:hover {
     text-decoration: underline;
 }
 
-/* Responsive Design */
-@media (max-width: 640px) {
-    body {
-        padding: 0;
+/* ----------------------------------------------------------------------
+   Responsive: Mobile Stacking
+   ---------------------------------------------------------------------- */
+@media (max-width: 840px) {
+    .auth-split-wrapper {
+        flex-direction: column;
+        min-height: 100vh;
     }
 
-    .auth-container {
+    .auth-brand-pane {
+        flex: 0 0 auto;
+        width: 100%;
         max-width: 100%;
+        min-height: 150px;
+        padding: 28px 24px 24px;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        box-sizing: border-box;
     }
 
-    .auth-header {
-        border-radius: 0;
-        padding: 32px 24px;
+    .auth-brand-logo {
+        width: 125px;
     }
 
-    .auth-header h1 {
-        font-size: 24px;
+    .brand-tagline {
+        font-size: 0.875rem;
     }
 
-    .auth-card {
-        border-radius: 0;
-        padding: 32px 24px;
+    .auth-form-pane {
+        flex: 1;
+        width: 100%;
+        padding: 36px 24px 48px;
+        box-sizing: border-box;
+    }
+
+    .form-pane-container {
+        max-width: 100%;
     }
 }

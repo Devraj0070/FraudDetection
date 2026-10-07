@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Result — SAFE PAY</title>
 
-    <title>Transaction Result - Fraud Detection System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/result.css}">
@@ -12,102 +15,318 @@
 
 <body>
 
-<div class="result-container">
+<div class="app-shell">
 
-    <!-- Status Badge -->
-    <div class="status-badge"
-         th:classappend="${transactionStatus == 'APPROVED' ? 'approved' : (transactionStatus == 'DECLINED' ? 'declined' : 'blocked')}">
-
-        <span class="status-icon" th:text="${transactionStatus == 'APPROVED' ? '✓' : (transactionStatus == 'BLOCKED' ? '⚠' : '✕')}">✓</span>
-
-        <h1 th:text="${transactionStatus}">APPROVED</h1>
-
-        <p th:text="${message}">Your transaction was approved.</p>
-    </div>
-
-    <!-- Result Card -->
-    <div class="result-card">
-
-        <!-- Transaction Details -->
-        <div class="transaction-details">
-
-            <div class="amount-display">
-                <span class="amount-label">Transaction Amount</span>
-                <div class="amount-value">
-                    ₹<span th:text="${#numbers.formatDecimal(transactionAmount, 1, 2)}">0.00</span>
-                </div>
-            </div>
-
-            <div class="detail-grid">
-
-                <div class="detail-item">
-                    <span class="detail-label">Transaction Type</span>
-                    <span class="detail-value" th:text="${transactionType != null ? (transactionType.name != null ? transactionType.name() : transactionType) : 'PAYMENT'}">PAYMENT</span>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-label">Transaction Time</span>
-                    <span class="detail-value" th:text="${#temporals.format(transactionTime, 'dd MMM yyyy, hh:mm a')}">
-                        06 Oct 2026, 04:30 PM
-                    </span>
-                </div>
-
-                <div class="detail-item">
-                    <span class="detail-label">Status</span>
-                    <span class="detail-value" th:text="${transactionStatus}">APPROVED</span>
-                </div>
-
-            </div>
-
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <button type="button" class="mobile-toggle-btn" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <a th:href="@{/dashboard}" class="brand-link">
+                <img th:src="@{/images/safepay-logo.png}" alt="SAFE PAY" class="brand-logo-img">
+                <span class="brand-badge-fintech">Security Cloud</span>
+            </a>
         </div>
 
-        <!-- Fraud Analysis -->
-        <div class="fraud-analysis">
+        <div class="nav-right">
+            <div class="nav-security-status" title="Continuous SafePay AI monitoring is active">
+                <span class="pulse-indicator"></span>
+                <span>AI Fraud Protection Active</span>
+            </div>
 
-            <h2>Fraud Risk Analysis</h2>
+            <!-- User Profile Chip -->
+            <div class="user-profile-badge">
+                <div class="user-avatar-initial"
+                     th:text="${username != null and !username.isEmpty() ? #strings.substring(username, 0, 1).toUpperCase() : 'U'}">U</div>
+                <div class="user-meta-details">
+                    <span class="user-display-name" th:text="${username != null ? username : 'User'}">User</span>
+                    <span class="user-role-tag"
+                          th:classappend="${user != null and user.role == 'ADMIN' ? 'role-tag-admin' : 'role-tag-user'}"
+                          th:text="${user != null and user.role != null ? user.role : 'USER'}">USER</span>
+                </div>
+            </div>
 
-            <div class="analysis-grid">
+            <!-- Sign Out Form -->
+            <form th:action="@{/logout}" method="post" class="nav-logout-form">
+                <button type="submit" class="btn-logout" title="Sign out of your session">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Sign Out</span>
+                </button>
+            </form>
+        </div>
+    </header>
 
-                <div class="analysis-item">
-                    <span class="analysis-label">Prediction</span>
-                    <span class="prediction-badge"
-                          th:classappend="${prediction == 'LEGITIMATE' ? 'legitimate' : 'fraudulent'}"
-                          th:text="${prediction}">
-                        LEGITIMATE
-                    </span>
+    <!-- App Body: Sidebar + Main Content -->
+    <div class="app-body">
+
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav" id="sidebarNav">
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <span class="sidebar-section-title">Navigation</span>
+                    <ul class="nav-menu">
+                        <li class="nav-menu-item">
+                            <a th:href="@{/dashboard}" class="nav-link">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-menu-item">
+                            <a th:href="@{/transaction}" class="nav-link active">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                    <line x1="12" y1="14" x2="12" y2="18"></line>
+                                    <line x1="10" y1="16" x2="14" y2="16"></line>
+                                </svg>
+                                <span>New Transaction</span>
+                            </a>
+                        </li>
+                        <li class="nav-menu-item">
+                            <a th:href="@{/history}" class="nav-link">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <span>Transaction History</span>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
 
-                <div class="analysis-item">
-                    <span class="analysis-label">Fraud Probability</span>
-                    <div class="analysis-value" th:text="${#numbers.formatPercent(fraudProbability, 1, 2)}">
-                        0.5%
-                    </div>
-                    <div class="probability-bar">
-                        <div class="probability-fill"
-                             th:classappend="${fraudProbability < 0.3 ? 'probability-low' : (fraudProbability < 0.7 ? 'probability-medium' : 'probability-high')}"
-                             th:style="'width: ' + ${fraudProbability * 100} + '%'">
+                <div sec:authorize="hasRole('ADMIN')" class="sidebar-section admin-section">
+                    <span class="sidebar-section-title">Administration</span>
+                    <ul class="nav-menu">
+                        <li class="nav-menu-item">
+                            <a th:href="@{/admin/alerts}" class="nav-link admin-nav-link">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span>Fraud Alerts</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- SafePay Protection Widget -->
+                <div class="sidebar-footer-card">
+                    <div class="sidebar-footer-header">
+                        <div class="footer-shield-icon">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <path d="m9 12 2 2 4-4"></path>
+                            </svg>
                         </div>
+                        <span class="footer-card-title">SafePay AI Engine</span>
+                    </div>
+                    <p class="footer-card-text">Every transfer is analyzed in real time for suspicious behavioral patterns.</p>
+                    <div class="footer-status-pill">
+                        <span class="status-green-dot"></span>
+                        <span>Defense Active</span>
                     </div>
                 </div>
+            </div>
+        </aside>
 
-                <div class="analysis-item">
-                    <span class="analysis-label">Model Used</span>
-                    <div class="analysis-value" th:text="${modelName}">Random Forest</div>
+        <!-- Mobile Backdrop -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- Main Viewport -->
+        <main class="main-viewport">
+            <div class="content-wrapper">
+
+                <div class="result-page-wrapper">
+
+                    <!-- 1. Status Decision Hero Card -->
+                    <div class="result-hero-card"
+                         th:classappend="${transactionStatus == 'APPROVED' ? 'hero-approved' : (transactionStatus == 'DECLINED' ? 'hero-declined' : 'hero-blocked')}">
+
+                        <div class="hero-icon-container">
+                            <!-- Approved Icon -->
+                            <svg th:if="${transactionStatus == 'APPROVED'}" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+
+                            <!-- Declined Icon -->
+                            <svg th:if="${transactionStatus == 'DECLINED'}" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+
+                            <!-- Blocked Icon -->
+                            <svg th:if="${transactionStatus == 'BLOCKED'}" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                            </svg>
+                        </div>
+
+                        <div class="hero-text-content">
+                            <div class="hero-badge-row">
+                                <span class="hero-status-pill" th:text="${transactionStatus}">APPROVED</span>
+                                <span class="status-indicator-note" th:if="${transactionStatus == 'APPROVED'}">Funds Settled Safely</span>
+                                <span class="status-indicator-note" th:if="${transactionStatus == 'DECLINED'}">Balance Insufficient</span>
+                                <span class="status-indicator-note" th:if="${transactionStatus == 'BLOCKED'}">Flagged for Fraud Review</span>
+                            </div>
+                            <h1 class="hero-status-title" th:text="${transactionStatus == 'APPROVED' ? 'Transaction Approved' : (transactionStatus == 'DECLINED' ? 'Transaction Declined' : 'Transaction Blocked')}">Transaction Approved</h1>
+                            <p class="hero-status-desc" th:text="${message}">Your transaction was approved and processed safely.</p>
+                        </div>
+
+                    </div>
+
+                    <!-- 2. Transaction Details Summary Card -->
+                    <div class="result-details-card">
+
+                        <div class="amount-hero-block">
+                            <span class="amount-hero-label">Processed Transaction Amount</span>
+                            <div class="amount-hero-value">
+                                <span class="currency-symbol">₹</span><span th:text="${#numbers.formatDecimal(transactionAmount, 1, 2)}">0.00</span>
+                            </div>
+                        </div>
+
+                        <div class="details-grid">
+                            <div class="detail-item-box">
+                                <span class="detail-label-text">Transaction Type</span>
+                                <span class="detail-value-text" th:text="${transactionType != null ? (transactionType.name != null ? transactionType.name() : transactionType) : 'PAYMENT'}">PAYMENT</span>
+                            </div>
+
+                            <div class="detail-item-box">
+                                <span class="detail-label-text">Execution Timestamp</span>
+                                <span class="detail-value-text" th:text="${#temporals.format(transactionTime, 'dd MMM yyyy, hh:mm a')}">06 Oct 2026, 04:30 PM</span>
+                            </div>
+
+                            <div class="detail-item-box">
+                                <span class="detail-label-text">Security Decision</span>
+                                <span class="detail-value-text" th:text="${transactionStatus}">APPROVED</span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- 3. AI Fraud Risk Analysis Card -->
+                    <div class="ai-analysis-card">
+
+                        <div class="ai-card-header">
+                            <div class="ai-header-left">
+                                <div class="ai-header-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                        <path d="m9 12 2 2 4-4"></path>
+                                    </svg>
+                                </div>
+                                <span class="ai-card-title">AI Fraud Risk Assessment</span>
+                            </div>
+                            <span class="ai-engine-tag">SafePay AI Engine</span>
+                        </div>
+
+                        <div class="ai-metrics-grid">
+
+                            <!-- Risk Level -->
+                            <div class="ai-metric-box">
+                                <span class="ai-metric-label">Assessed Risk Level</span>
+                                <span class="ai-risk-badge"
+                                      th:classappend="${riskAssessment == 'LOW' ? 'risk-badge-low' : (riskAssessment == 'MEDIUM' ? 'risk-badge-medium' : 'risk-badge-high')}"
+                                      th:text="${riskAssessment} + ' RISK'">
+                                    LOW RISK
+                                </span>
+                            </div>
+
+                            <!-- Fraud Probability -->
+                            <div class="ai-metric-box">
+                                <span class="ai-metric-label">Fraud Probability</span>
+                                <div class="ai-prob-value" th:text="${#numbers.formatPercent(fraudProbability, 1, 2)}">0.5%</div>
+                                <div class="prob-meter-wrap">
+                                    <div class="prob-meter-fill"
+                                         th:classappend="${fraudProbability < 0.3 ? 'prob-fill-low' : (fraudProbability < 0.7 ? 'prob-fill-medium' : 'prob-fill-high')}"
+                                         th:style="'width: ' + ${fraudProbability * 100} + '%'">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Verification Status -->
+                            <div class="ai-metric-box">
+                                <span class="ai-metric-label">Classification Verdict</span>
+                                <div class="ai-verdict-text"
+                                     th:classappend="${prediction == 'LEGITIMATE' ? 'verdict-legitimate' : 'verdict-fraudulent'}"
+                                     th:text="${prediction == 'LEGITIMATE' ? 'VERIFIED LEGITIMATE' : 'SUSPICIOUS / FLAGGED'}">
+                                    VERIFIED LEGITIMATE
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- 4. Quick Actions -->
+                    <div class="result-actions-row">
+                        <a th:href="@{/transaction}" class="btn-new-txn">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>+ New Transaction</span>
+                        </a>
+                        <a th:href="@{/dashboard}" class="btn-return-dash">
+                            Back to Dashboard
+                        </a>
+                    </div>
+
                 </div>
 
             </div>
-
-        </div>
-
-        <!-- Actions -->
-        <div class="result-actions">
-            <a href="/transaction" class="btn btn-primary">New Transaction</a>
-            <a href="/dashboard" class="btn btn-secondary">Back to Dashboard</a>
-        </div>
-
+        </main>
     </div>
 
 </div>
+
+<!-- Mobile Navigation Script -->
+<script>
+    (function () {
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const sidebarNav = document.getElementById('sidebarNav');
+        const backdrop = document.getElementById('sidebarBackdrop');
+
+        function toggleSidebar() {
+            if (sidebarNav && backdrop) {
+                sidebarNav.classList.toggle('open');
+                backdrop.classList.toggle('active');
+            }
+        }
+
+        function closeSidebar() {
+            if (sidebarNav && backdrop) {
+                sidebarNav.classList.remove('open');
+                backdrop.classList.remove('active');
+            }
+        }
+
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', toggleSidebar);
+        }
+        if (backdrop) {
+            backdrop.addEventListener('click', closeSidebar);
+        }
+    })();
+</script>
 
 </body>
 </html>

@@ -3,25 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Error - Fraud Detection System</title>
+    <title>Notice — SAFE PAY</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/error.css}">
 </head>
 <body>
 
 <div class="error-container">
+
+    <div class="error-brand-header">
+        <a th:href="@{/dashboard}">
+            <img th:src="@{/images/safepay-logo.png}" alt="SAFE PAY" class="error-logo-img">
+        </a>
+    </div>
+
     <div class="error-card">
-        <span class="error-badge badge-generic" th:text="${status != null ? 'Error ' + status : 'Notice'}">Error</span>
-        <div class="error-icon">⚠️</div>
-        <h1 class="error-title" th:text="${errorTitle != null ? errorTitle : 'Request Error'}">Request Error</h1>
-        <p class="error-description" th:text="${errorMessage != null ? errorMessage : (message != null ? message : 'An unexpected error occurred while processing your request.')}">
-            An unexpected error occurred while processing your request.
+        <div class="error-icon-wrapper icon-wrap-warning">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+        </div>
+
+        <span class="error-badge badge-generic" th:text="${status != null ? 'Status Code: ' + status : 'Service Notice'}">Service Notice</span>
+
+        <h1 class="error-title" th:text="${errorTitle != null ? errorTitle : 'Request Not Completed'}">Request Not Completed</h1>
+
+        <p class="error-description" th:text="${errorMessage != null ? errorMessage : (message != null ? message : 'An unexpected condition prevented this operation from completing. Your funds and account remain fully secure.')}">
+            An unexpected condition prevented this operation from completing. Your funds and account remain fully secure.
         </p>
+
         <div class="error-actions">
-            <a href="/transaction" class="btn btn-secondary">Return to Transaction</a>
-            <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+            <a th:href="@{/transaction}" class="btn-error-secondary">Return to Transfer</a>
+            <a th:href="@{/dashboard}" class="btn-error-primary">Go to Dashboard</a>
         </div>
     </div>
+
+    <div class="error-security-footer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            <path d="m9 12 2 2 4-4"></path>
+        </svg>
+        <span>SafePay Security Cloud &bull; End-to-End Encryption</span>
+    </div>
+
 </div>
 
 </body>
