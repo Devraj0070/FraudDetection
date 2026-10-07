@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard - Fraud Detection System</title>
+    <title>FraudGuard - Enterprise Fraud Detection Dashboard</title>
 
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
@@ -12,167 +11,458 @@
 
 <body>
 
-<div class="dashboard-container">
+<div class="app-shell">
 
-    <!-- Header -->
-    <div class="dashboard-header">
-        <div class="dashboard-header-left">
-            <h1>
-                Fraud Detection Console
-                <span class="user-badge" th:text="${user != null and user.role != null ? user.role : 'USER'}">USER</span>
-            </h1>
-            <p>Welcome back, <strong th:text="${username != null ? username : 'User'}">User</strong>. Secure transaction monitoring is active.</p>
+    <!-- Top Navigation Bar -->
+    <header class="top-nav">
+        <div class="nav-left">
+            <button type="button" class="mobile-toggle-btn" id="mobileMenuToggle" aria-label="Toggle navigation menu">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <a th:href="@{/dashboard}" class="brand-container">
+                <div class="brand-shield-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        <path d="m9 12 2 2 4-4"></path>
+                    </svg>
+                </div>
+                <div class="brand-naming">
+                    <span class="brand-title">FraudGuard</span>
+                    <span class="brand-caption">Risk Management Console</span>
+                </div>
+            </a>
         </div>
-        <div class="dashboard-header-right">
-            <form th:action="@{/logout}" method="post" style="margin: 0;">
-                <button class="btn btn-logout" type="submit">Sign Out</button>
+
+        <div class="nav-right">
+            <!-- System Security Indicator -->
+            <div class="nav-security-status" title="Continuous AI monitoring is active">
+                <span class="pulse-indicator"></span>
+                <span class="security-status-text">AI Monitoring Active</span>
+            </div>
+
+            <!-- User Profile Chip -->
+            <div class="user-profile-badge">
+                <div class="user-avatar-initial"
+                     th:text="${username != null and !username.isEmpty() ? #strings.substring(username, 0, 1).toUpperCase() : 'U'}">U</div>
+                <div class="user-meta-details">
+                    <span class="user-display-name" th:text="${username != null ? username : 'User'}">User</span>
+                    <span class="user-role-tag"
+                          th:classappend="${user != null and user.role == 'ADMIN' ? 'role-tag-admin' : 'role-tag-user'}"
+                          th:text="${user != null and user.role != null ? user.role : 'USER'}">USER</span>
+                </div>
+            </div>
+
+            <!-- Sign Out -->
+            <form th:action="@{/logout}" method="post" class="nav-logout-form">
+                <button type="submit" class="btn-logout" title="Sign out of your session">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    <span>Sign Out</span>
+                </button>
             </form>
         </div>
-    </div>
+    </header>
 
-    <!-- Account Overview Bar -->
-    <div class="account-info-bar">
-        <div class="account-details">
-            <div class="account-item">
-                <span class="account-label">Account Number</span>
-                <span class="account-val" th:text="${account != null ? account.accountNumber : '—'}">100000000001</span>
-            </div>
-            <div class="account-item">
-                <span class="account-label">Account Type</span>
-                <span class="account-val" th:text="${account != null ? account.accountType : 'SAVINGS'}">SAVINGS</span>
-            </div>
-            <div class="account-item">
-                <span class="account-label">Account Status</span>
-                <span class="account-status-badge" th:text="${account != null ? account.status : 'ACTIVE'}">ACTIVE</span>
-            </div>
-        </div>
-        <div class="account-security">
-            <span class="account-label" style="text-align: right;">AI Protection</span>
-            <span style="font-size: 13px; font-weight: 600; color: #10b981;">● Active (Random Forest)</span>
-        </div>
-    </div>
+    <!-- App Body: Sidebar + Main Content -->
+    <div class="app-body">
 
-    <!-- Metrics Row -->
-    <div class="metrics-grid">
-        <div class="metric-card balance-card">
-            <div>
-                <div class="metric-label">Available Balance</div>
-                <div class="metric-value">
-                    ₹<span th:text="${balance != null ? #numbers.formatDecimal(balance, 1, 2) : '0.00'}">0.00</span>
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar-nav" id="sidebarNav">
+            <div class="sidebar-content">
+                <div class="sidebar-section">
+                    <span class="sidebar-section-title">Navigation</span>
+                    <ul class="nav-menu">
+                        <li class="nav-menu-item">
+                            <a th:href="@{/dashboard}" class="nav-link active">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-menu-item">
+                            <a th:href="@{/transaction}" class="nav-link">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                    <line x1="1" y1="10" x2="23" y2="10"></line>
+                                    <line x1="12" y1="14" x2="12" y2="18"></line>
+                                    <line x1="10" y1="16" x2="14" y2="16"></line>
+                                </svg>
+                                <span>New Transaction</span>
+                            </a>
+                        </li>
+                        <li class="nav-menu-item">
+                            <a th:href="@{/history}" class="nav-link">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                    <polyline points="10 9 9 9 8 9"></polyline>
+                                </svg>
+                                <span>Transaction History</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div sec:authorize="hasRole('ADMIN')" class="sidebar-section admin-section">
+                    <span class="sidebar-section-title">Administration</span>
+                    <ul class="nav-menu">
+                        <li class="nav-menu-item">
+                            <a th:href="@{/admin/alerts}" class="nav-link admin-nav-link">
+                                <svg class="nav-link-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <span>Fraud Alerts</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Sidebar Protection Status Box -->
+                <div class="sidebar-footer-card">
+                    <div class="sidebar-footer-header">
+                        <div class="footer-shield-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                        </div>
+                        <span class="footer-card-title">AI Fraud Protection</span>
+                    </div>
+                    <p class="footer-card-text">Every transfer is analyzed in real time for suspicious behavioral anomalies.</p>
+                    <div class="footer-status-pill">
+                        <span class="status-green-dot"></span>
+                        <span>Surveillance Active</span>
+                    </div>
                 </div>
             </div>
-            <div class="metric-subtext">Real-time ledger balance</div>
-        </div>
+        </aside>
 
-        <div class="metric-card">
-            <div>
-                <div class="metric-label">Total Transactions</div>
-                <div class="metric-value" th:text="${totalTransactions}">0</div>
+        <!-- Mobile Backdrop -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- Main Content Area -->
+        <main class="main-viewport">
+            <div class="content-wrapper">
+
+                <!-- Welcome Header & Action Buttons -->
+                <section class="welcome-banner">
+                    <div class="welcome-intro">
+                        <h1 class="welcome-heading">
+                            <span id="greetingLead">Good afternoon</span>, <span th:text="${username != null ? username : 'User'}">demouser</span>
+                        </h1>
+                        <p class="welcome-subtext">Your account is protected by continuous transaction monitoring.</p>
+                    </div>
+                    <div class="welcome-actions-row">
+                        <a th:href="@{/transaction}" class="btn-cta btn-primary-action">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>+ New Transaction</span>
+                        </a>
+                        <a th:href="@{/history}" class="btn-cta btn-secondary-action">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                            <span>View Full History</span>
+                        </a>
+                        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/alerts}" class="btn-cta btn-admin-action">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                            <span>Admin Alerts</span>
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Account Summary & Security Status Cards -->
+                <section class="overview-grid">
+
+                    <!-- Account Summary Card -->
+                    <div class="summary-card account-summary-card">
+                        <div class="summary-card-header">
+                            <div class="header-label-box">
+                                <div class="header-icon-container">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                        <line x1="2" y1="10" x2="22" y2="10"></line>
+                                    </svg>
+                                </div>
+                                <span class="summary-header-label">Available Balance</span>
+                            </div>
+                            <div class="account-badge-group">
+                                <span class="badge-account-type" th:text="${account != null and account.accountType != null ? account.accountType : 'SAVINGS'}">SAVINGS</span>
+                                <span class="badge-account-status"
+                                      th:classappend="${account != null and account.status == 'ACTIVE' ? 'status-active' : ''}"
+                                      th:text="${account != null and account.status != null ? account.status : 'ACTIVE'}">ACTIVE</span>
+                            </div>
+                        </div>
+
+                        <div class="balance-display-block">
+                            <span class="currency-symbol">₹</span>
+                            <span class="balance-number" th:text="${balance != null ? #numbers.formatDecimal(balance, 1, 2) : '0.00'}">0.00</span>
+                        </div>
+
+                        <div class="summary-card-footer">
+                            <div class="account-number-display">
+                                <span class="account-num-label">Account No.</span>
+                                <span class="account-num-mono" th:text="${account != null and account.accountNumber != null ? account.accountNumber : '—'}">100000000001</span>
+                            </div>
+                            <span class="ledger-indicator">Real-time ledger balance</span>
+                        </div>
+                    </div>
+
+                    <!-- Security Status Card -->
+                    <div class="summary-card security-status-card">
+                        <div class="summary-card-header">
+                            <div class="header-label-box">
+                                <div class="header-icon-container security-icon-box">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                        <path d="m9 12 2 2 4-4"></path>
+                                    </svg>
+                                </div>
+                                <span class="summary-header-label">Security Status</span>
+                            </div>
+                            <div class="security-badge-protected">
+                                <span class="pulse-beacon"></span>
+                                <span>PROTECTED</span>
+                            </div>
+                        </div>
+
+                        <div class="security-body-block">
+                            <h3 class="security-title">AI Transaction Monitoring</h3>
+                            <p class="security-description">Continuous transaction monitoring is active. Machine learning algorithms evaluate risk vectors on every transaction in real time.</p>
+                        </div>
+
+                        <div class="security-card-footer">
+                            <div class="security-metric-tag">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>AI Fraud Protection</span>
+                            </div>
+                            <span class="security-subtext">Active &amp; Enforced</span>
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- KPI Metric Cards Grid -->
+                <section class="kpi-cards-grid">
+
+                    <!-- Total Transactions -->
+                    <div class="kpi-card">
+                        <div class="kpi-card-header">
+                            <span class="kpi-card-title">Total Transactions</span>
+                            <div class="kpi-icon-wrap kpi-icon-total">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-card-number" th:text="${totalTransactions}">0</div>
+                        <div class="kpi-card-footer">
+                            <span class="kpi-meta-text">Lifetime account activity</span>
+                        </div>
+                    </div>
+
+                    <!-- Approved -->
+                    <div class="kpi-card kpi-border-approved">
+                        <div class="kpi-card-header">
+                            <span class="kpi-card-title">Approved</span>
+                            <div class="kpi-icon-wrap kpi-icon-approved">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-card-number text-approved" th:text="${approvedTransactions}">0</div>
+                        <div class="kpi-card-footer">
+                            <span class="kpi-meta-text">Completed safely</span>
+                        </div>
+                    </div>
+
+                    <!-- Declined -->
+                    <div class="kpi-card kpi-border-declined">
+                        <div class="kpi-card-header">
+                            <span class="kpi-card-title">Declined</span>
+                            <div class="kpi-icon-wrap kpi-icon-declined">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="15" y1="9" x2="9" y2="15"></line>
+                                    <line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-card-number text-declined" th:text="${declinedTransactions}">0</div>
+                        <div class="kpi-card-footer">
+                            <span class="kpi-meta-text">Insufficient balance</span>
+                        </div>
+                    </div>
+
+                    <!-- Blocked -->
+                    <div class="kpi-card kpi-border-blocked">
+                        <div class="kpi-card-header">
+                            <span class="kpi-card-title">Blocked</span>
+                            <div class="kpi-icon-wrap kpi-icon-blocked">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="kpi-card-number text-blocked" th:text="${blockedTransactions}">0</div>
+                        <div class="kpi-card-footer">
+                            <span class="kpi-meta-text">AI fraud prevention</span>
+                        </div>
+                    </div>
+
+                </section>
+
+                <!-- Recent Transactions Section -->
+                <section class="transactions-container-card">
+                    <div class="transactions-card-header">
+                        <div class="section-heading-group">
+                            <h2 class="section-heading-title">Recent Transactions</h2>
+                            <span class="transactions-count-badge"
+                                  th:if="${recentTransactions != null and !recentTransactions.empty}"
+                                  th:text="${recentTransactions.size()} + ' recent'">5 recent</span>
+                        </div>
+                        <a th:href="@{/history}" class="link-view-all">
+                            <span>View All History</span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
+                    </div>
+
+                    <!-- Table When Transactions Exist -->
+                    <div th:if="${recentTransactions != null and !recentTransactions.empty}" class="table-scroll-wrapper">
+                        <table class="fintech-data-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Transaction</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="tx : ${recentTransactions}" class="table-data-row">
+                                    <td class="col-txn-id" data-label="Transaction">
+                                        <div class="txn-tag">
+                                            <span class="hash-symbol">#</span><span th:text="${tx.id}">1</span>
+                                        </div>
+                                    </td>
+                                    <td class="col-amount" data-label="Amount">
+                                        <span class="currency-prefix">₹</span><span class="amount-val" th:text="${tx.amount != null ? #numbers.formatDecimal(tx.amount, 1, 2) : '0.00'}">0.00</span>
+                                    </td>
+                                    <td class="col-type" data-label="Type">
+                                        <span class="type-pill-badge" th:text="${tx.transactionType != null ? tx.transactionType.toModelValue() : 'PAYMENT'}">PAYMENT</span>
+                                    </td>
+                                    <td class="col-date" data-label="Date">
+                                        <span class="date-string" th:text="${tx.transactionTime != null ? #temporals.format(tx.transactionTime, 'dd MMM yyyy, hh:mm a') : '—'}">06 Oct 2026, 04:30 PM</span>
+                                    </td>
+                                    <td class="col-status" data-label="Status">
+                                        <span class="status-pill"
+                                              th:classappend="${tx.status == 'APPROVED' ? 'status-approved' : (tx.status == 'DECLINED' ? 'status-declined' : 'status-blocked')}">
+                                            <span class="status-indicator-dot"></span>
+                                            <span th:text="${tx.status}">APPROVED</span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Empty State When No Transactions -->
+                    <div th:if="${recentTransactions == null or recentTransactions.empty}" class="empty-state-container">
+                        <div class="empty-state-icon-box">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            </svg>
+                        </div>
+                        <h3 class="empty-state-title">No Transactions Yet</h3>
+                        <p class="empty-state-desc">You have not executed any transactions yet. Submit a new transaction to test real-time AI fraud monitoring and risk classification.</p>
+                        <a th:href="@{/transaction}" class="btn-cta btn-primary-action">+ Create First Transaction</a>
+                    </div>
+                </section>
+
             </div>
-            <div class="metric-subtext">Lifetime activity</div>
-        </div>
-
-        <div class="metric-card">
-            <div>
-                <div class="metric-label">
-                    <span class="metric-indicator ind-approved"></span>Approved
-                </div>
-                <div class="metric-value" th:text="${approvedTransactions}">0</div>
-            </div>
-            <div class="metric-subtext">Completed safely</div>
-        </div>
-
-        <div class="metric-card">
-            <div>
-                <div class="metric-label">
-                    <span class="metric-indicator ind-declined"></span>Declined
-                </div>
-                <div class="metric-value" th:text="${declinedTransactions}">0</div>
-            </div>
-            <div class="metric-subtext">Insufficient funds</div>
-        </div>
-
-        <div class="metric-card">
-            <div>
-                <div class="metric-label">
-                    <span class="metric-indicator ind-blocked"></span>Blocked
-                </div>
-                <div class="metric-value" th:text="${blockedTransactions}">0</div>
-            </div>
-            <div class="metric-subtext">AI fraud prevention</div>
-        </div>
-    </div>
-
-    <!-- Quick Actions -->
-    <div class="actions-row">
-        <a href="/transaction" class="btn btn-primary">
-            + New Transaction
-        </a>
-        <a href="/history" class="btn btn-secondary">
-            📋 Full History
-        </a>
-        <a sec:authorize="hasRole('ADMIN')" href="/admin/alerts" class="btn btn-admin">
-            🛡️ Admin Fraud Alerts
-        </a>
-    </div>
-
-    <!-- Recent Transactions -->
-    <div class="transactions-card">
-        <div class="transactions-card-header">
-            <h2>Recent Transactions</h2>
-            <a href="/history" class="view-all-link">View All History →</a>
-        </div>
-
-        <!-- Table if transactions exist -->
-        <div th:if="${recentTransactions != null and !recentTransactions.empty}">
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Txn ID</th>
-                        <th>Amount</th>
-                        <th>Type</th>
-                        <th>Date & Time</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="tx : ${recentTransactions}">
-                        <td class="cell-id" data-label="Txn ID">
-                            #<span th:text="${tx.id}">1</span>
-                        </td>
-                        <td class="cell-amount" data-label="Amount">
-                            ₹<span th:text="${tx.amount != null ? #numbers.formatDecimal(tx.amount, 1, 2) : '0.00'}">0.00</span>
-                        </td>
-                        <td class="cell-type" data-label="Type">
-                            <span th:text="${tx.transactionType != null ? tx.transactionType.toModelValue() : 'PAYMENT'}">PAYMENT</span>
-                        </td>
-                        <td class="cell-time" data-label="Date & Time">
-                            <span th:text="${tx.transactionTime != null ? #temporals.format(tx.transactionTime, 'dd MMM yyyy, hh:mm a') : '—'}">
-                                06 Oct 2026, 04:30 PM
-                            </span>
-                        </td>
-                        <td data-label="Status">
-                            <span class="status-badge"
-                                  th:classappend="${tx.status == 'APPROVED' ? 'approved' : (tx.status == 'DECLINED' ? 'declined' : 'blocked')}"
-                                  th:text="${tx.status}">
-                                APPROVED
-                            </span>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Empty state -->
-        <div th:if="${recentTransactions == null or recentTransactions.empty}" class="empty-state">
-            <div class="empty-state-icon">💳</div>
-            <h3>No Transactions Yet</h3>
-            <p>You have not executed any transactions. Submit a new transaction to test fraud detection analysis.</p>
-            <a href="/transaction" class="btn btn-primary">+ Create First Transaction</a>
-        </div>
+        </main>
     </div>
 
 </div>
+
+<!-- Interactive Greeting & Mobile Navigation Script -->
+<script>
+    (function () {
+        // Dynamic Greeting adjustment (defaults to Good afternoon on server)
+        try {
+            const hour = new Date().getHours();
+            const greetingEl = document.getElementById('greetingLead');
+            if (greetingEl) {
+                if (hour >= 5 && hour < 12) {
+                    greetingEl.textContent = 'Good morning';
+                } else if (hour >= 12 && hour < 18) {
+                    greetingEl.textContent = 'Good afternoon';
+                } else {
+                    greetingEl.textContent = 'Good evening';
+                }
+            }
+        } catch (e) {
+            // gracefully fallback
+        }
+
+        // Mobile Sidebar Drawer Toggle
+        const mobileToggle = document.getElementById('mobileMenuToggle');
+        const sidebarNav = document.getElementById('sidebarNav');
+        const backdrop = document.getElementById('sidebarBackdrop');
+
+        function toggleSidebar() {
+            if (sidebarNav && backdrop) {
+                sidebarNav.classList.toggle('open');
+                backdrop.classList.toggle('active');
+            }
+        }
+
+        function closeSidebar() {
+            if (sidebarNav && backdrop) {
+                sidebarNav.classList.remove('open');
+                backdrop.classList.remove('active');
+            }
+        }
+
+        if (mobileToggle) {
+            mobileToggle.addEventListener('click', toggleSidebar);
+        }
+        if (backdrop) {
+            backdrop.addEventListener('click', closeSidebar);
+        }
+    })();
+</script>
 
 </body>
 </html>

@@ -127,6 +127,13 @@ public class TransactionService {
             throw new TransactionException("Fraud prediction returned an unsupported result.");
         }
 
+        if (transaction.getTransactionType() == TransactionType.CASH_IN) {
+            account.setBalance(balance.add(transaction.getAmount()));
+            accountRepository.save(account);
+            transaction.setStatus(STATUS_APPROVED);
+            return;
+        }
+
         if (balance.compareTo(transaction.getAmount()) < 0) {
             transaction.setStatus(STATUS_DECLINED);
             return;

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 import com.frauddetection.frauddetection.entity.User;
+import com.frauddetection.frauddetection.exception.ApplicationException;
 import com.frauddetection.frauddetection.service.UserService;
 
 @Controller
@@ -20,15 +21,23 @@ public class AuthController {
 
     @GetMapping("/register")
     public String showRegisterPage(Model model) {
-        model.addAttribute("user", new User());
+        if (!model.containsAttribute("user")) {
+            model.addAttribute("user", new User());
+        }
         return "auth/register";
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user) {
-        user.setRole("USER");
-        userService.registerUser(user);
-        return "redirect:/login";
+    public String registerUser(@ModelAttribute User user, Model model) {
+        try {
+            user.setRole("USER");
+            userService.registerUser(user);
+            return "redirect:/login?registered=true";
+        } catch (ApplicationException ex) {
+            model.addAttribute("user", user);
+            model.addAttribute("errorMessage", ex.getMessage());
+            return "auth/register";
+        }
     }
 
     @GetMapping("/login")
