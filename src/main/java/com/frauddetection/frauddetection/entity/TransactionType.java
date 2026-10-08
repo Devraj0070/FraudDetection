@@ -1,12 +1,24 @@
 package com.frauddetection.frauddetection.entity;
 
+import java.math.BigDecimal;
+
 public enum TransactionType {
 
-    PAYMENT,
-    TRANSFER,
-    CASH_OUT,
-    DEBIT,
-    CASH_IN;
+    PAYMENT(new BigDecimal("100000.00")),
+    TRANSFER(new BigDecimal("200000.00")),
+    CASH_OUT(new BigDecimal("50000.00")),
+    DEBIT(new BigDecimal("100000.00")),
+    CASH_IN(new BigDecimal("50000.00"));
+
+    private final BigDecimal transactionLimit;
+
+    TransactionType(BigDecimal transactionLimit) {
+        this.transactionLimit = transactionLimit;
+    }
+
+    public BigDecimal getTransactionLimit() {
+        return transactionLimit;
+    }
 
     /**
      * Returns the canonical string value expected by the ML model.

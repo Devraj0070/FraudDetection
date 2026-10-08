@@ -90,6 +90,9 @@ class TransactionControllerTest {
         verify(model).addAttribute("transactionStatus", "APPROVED");
         verify(model).addAttribute("transactionAmount", amount);
         verify(model).addAttribute("transactionType", TransactionType.PAYMENT);
+        verify(model).addAttribute("riskAssessment", "LOW");
+        verify(model).addAttribute("classificationVerdict", "VERIFIED LEGITIMATE");
+        verify(model).addAttribute("detectionReason", "Normal / Legitimate");
         verify(model).addAttribute("message", "Your transaction was approved.");
         verify(transactionService).processPayment(
                 eq(user),
@@ -116,6 +119,9 @@ class TransactionControllerTest {
 
         assertEquals("user/result", view);
         verify(model).addAttribute("transactionStatus", "DECLINED");
+        verify(model).addAttribute("riskAssessment", "LOW");
+        verify(model).addAttribute("classificationVerdict", "VERIFIED LEGITIMATE");
+        verify(model).addAttribute("detectionReason", "Balance Insufficient");
         verify(model).addAttribute(
                 "message",
                 "Your transaction was declined because the account balance is insufficient."
@@ -158,6 +164,120 @@ class TransactionControllerTest {
 
         assertEquals("user/history", view);
         verify(model).addAttribute("transactions", java.util.Collections.emptyList());
+    }
+
+    @Test
+    void shouldShowLimitExceededDeclinedMessage() {
+        BigDecimal amount = new BigDecimal("150000.00");
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TransactionType.PAYMENT);
+        transaction.setStatus("DECLINED");
+        transaction.setTransactionTime(LocalDateTime.of(2026, 10, 5, 12, 0));
+
+        FraudPrediction fraudPrediction = new FraudPrediction();
+        fraudPrediction.setPrediction("LEGITIMATE");
+        fraudPrediction.setProbability(0.05);
+        fraudPrediction.setModelName("Random Forest");
+        fraudPrediction.setTransaction(transaction);
+
+        when(transactionService.processPayment(
+                user,
+                amount,
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"))
+                .thenReturn(fraudPrediction);
+
+        String view = controller.submitTransaction(amount, TransactionType.PAYMENT, authentication, request, model);
+
+        assertEquals("user/result", view);
+        verify(model).addAttribute("transactionStatus", "DECLINED");
+        verify(model).addAttribute("riskAssessment", "LOW");
+        verify(model).addAttribute("classificationVerdict", "VERIFIED LEGITIMATE");
+        verify(model).addAttribute("detectionReason", "Limit Exceeded");
+        verify(model).addAttribute(
+                "message",
+                "Your transaction was declined because it exceeds the maximum limit for this transaction type."
+        );
+    }
+
+    @Test
+    void shouldShowBlockedFraudResultMessage() {
+        BigDecimal amount = new BigDecimal("50000.00");
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TransactionType.PAYMENT);
+        transaction.setStatus("BLOCKED");
+        transaction.setTransactionTime(LocalDateTime.of(2026, 10, 5, 12, 0));
+
+        FraudPrediction fraudPrediction = new FraudPrediction();
+        fraudPrediction.setPrediction("FRAUD");
+        fraudPrediction.setProbability(0.95);
+        fraudPrediction.setModelName("Random Forest");
+        fraudPrediction.setTransaction(transaction);
+
+        when(transactionService.processPayment(
+                user,
+                amount,
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"))
+                .thenReturn(fraudPrediction);
+
+        String view = controller.submitTransaction(amount, TransactionType.PAYMENT, authentication, request, model);
+
+        assertEquals("user/result", view);
+        verify(model).addAttribute("transactionStatus", "BLOCKED");
+        verify(model).addAttribute("riskAssessment", "HIGH");
+        verify(model).addAttribute("prediction", "FRAUD");
+        verify(model).addAttribute("classificationVerdict", "SUSPICIOUS / FLAGGED");
+        verify(model).addAttribute("detectionReason", "Machine Learning Fraud Detection");
+        verify(model).addAttribute(
+                "message",
+                "Your transaction was blocked because it was flagged for fraud review."
+        );
+    }
+
+    @Test
+    void shouldShowBlockedBehavioralAnomalyResultWithoutContradiction() {
+        BigDecimal amount = new BigDecimal("1500000.00");
+        Transaction transaction = new Transaction();
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TransactionType.CASH_OUT);
+        transaction.setStatus("BLOCKED");
+        transaction.setTransactionTime(LocalDateTime.of(2026, 10, 5, 12, 0));
+
+        FraudPrediction fraudPrediction = new FraudPrediction();
+        fraudPrediction.setPrediction("LEGITIMATE");
+        fraudPrediction.setProbability(0.00);
+        fraudPrediction.setModelName("Random Forest");
+        fraudPrediction.setRuleAnomaly(true);
+        fraudPrediction.setDetectionReason("Behavioral Anomaly / Suspicious Activity");
+        fraudPrediction.setTransaction(transaction);
+
+        when(transactionService.processPayment(
+                user,
+                amount,
+                TransactionType.CASH_OUT,
+                "127.0.0.1",
+                "test-agent"))
+                .thenReturn(fraudPrediction);
+
+        String view = controller.submitTransaction(amount, TransactionType.CASH_OUT, authentication, request, model);
+
+        assertEquals("user/result", view);
+        verify(model).addAttribute("transactionStatus", "BLOCKED");
+        verify(model).addAttribute("riskAssessment", "HIGH");
+        verify(model).addAttribute("prediction", "LEGITIMATE");
+        verify(model).addAttribute("mlPrediction", "LEGITIMATE");
+        verify(model).addAttribute("fraudProbability", 0.00);
+        verify(model).addAttribute("detectionReason", "Behavioral Anomaly / Suspicious Activity");
+        verify(model).addAttribute("classificationVerdict", "BEHAVIORAL ANOMALY / FLAGGED");
+        verify(model).addAttribute(
+                "message",
+                "Your transaction was blocked because it was flagged for fraud review."
+        );
     }
 
     private FraudPrediction predictionFor(

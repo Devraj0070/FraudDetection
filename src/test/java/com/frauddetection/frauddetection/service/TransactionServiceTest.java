@@ -1,7 +1,9 @@
 package com.frauddetection.frauddetection.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
@@ -30,6 +32,7 @@ import com.frauddetection.frauddetection.entity.FraudPrediction;
 import com.frauddetection.frauddetection.entity.Transaction;
 import com.frauddetection.frauddetection.entity.User;
 import com.frauddetection.frauddetection.exception.TransactionException;
+import com.frauddetection.frauddetection.fraud.FraudRuleEngine;
 import com.frauddetection.frauddetection.fraud.prediction.FraudPredictionResult;
 import com.frauddetection.frauddetection.fraud.prediction.FraudPredictionService;
 import com.frauddetection.frauddetection.repository.AccountRepository;
@@ -55,6 +58,9 @@ class TransactionServiceTest {
     @Mock
     private FraudAlertRepository fraudAlertRepository;
 
+    @Mock
+    private FraudRuleEngine fraudRuleEngine;
+
     @InjectMocks
     private TransactionService transactionService;
 
@@ -71,6 +77,8 @@ class TransactionServiceTest {
                 .thenReturn(Optional.of(account));
         Mockito.lenient().when(transactionRepository.save(any(Transaction.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+        Mockito.lenient().when(fraudRuleEngine.isSuspicious(any(Transaction.class)))
+                .thenReturn(false);
     }
 
     @Test
@@ -90,6 +98,8 @@ class TransactionServiceTest {
         assertEquals("APPROVED", result.getTransaction().getStatus());
         assertEquals(new BigDecimal("75.00"), account.getBalance());
         assertEquals(TransactionType.PAYMENT, result.getTransaction().getTransactionType());
+        assertEquals("Normal / Legitimate", result.getDetectionReason());
+        assertFalse(result.isRuleAnomaly());
 
         InOrder order = inOrder(accountRepository, fraudPredictionService);
         order.verify(accountRepository).findFirstByUserOrderByIdAsc(user);
@@ -115,6 +125,9 @@ class TransactionServiceTest {
         );
 
         assertEquals("BLOCKED", result.getTransaction().getStatus());
+        assertEquals("FRAUD", result.getPrediction());
+        assertEquals("Machine Learning Fraud Detection", result.getDetectionReason());
+        assertFalse(result.isRuleAnomaly());
         assertEquals(new BigDecimal("100.00"), account.getBalance());
         verify(accountRepository, never()).save(any(Account.class));
 
@@ -140,6 +153,8 @@ class TransactionServiceTest {
         );
 
         assertEquals("DECLINED", result.getTransaction().getStatus());
+        assertEquals("Balance Insufficient", result.getDetectionReason());
+        assertFalse(result.isRuleAnomaly());
         assertEquals(new BigDecimal("100.00"), account.getBalance());
         verify(accountRepository, never()).save(any(Account.class));
         verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
@@ -270,5 +285,349 @@ class TransactionServiceTest {
         assertEquals("APPROVED", result.getTransaction().getStatus());
         assertEquals(TransactionType.CASH_IN, result.getTransaction().getTransactionType());
         assertEquals(new BigDecimal("130.00"), account.getBalance());
+    }
+
+    // ==========================================
+    // PAYMENT Tests (Limit: ₹100,000)
+    // ==========================================
+
+    @Test
+    void shouldApprovePaymentWithinLimitWhenBalanceSufficient() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50000.00"),
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("50000.00"), account.getBalance());
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldDeclinePaymentExceedingLimitWithoutChangingBalanceOrCreatingAlert() {
+        account.setBalance(new BigDecimal("200000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("150000.00"),
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("DECLINED", result.getTransaction().getStatus());
+        assertEquals("Limit Exceeded", result.getDetectionReason());
+        assertFalse(result.isRuleAnomaly());
+        assertEquals(new BigDecimal("200000.00"), account.getBalance()); // balance unchanged
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldBlockPaymentWhenFraudDetected() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("FRAUD", 0.95, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50000.00"),
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("BLOCKED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository).save(any(FraudAlert.class));
+    }
+
+    // ==========================================
+    // TRANSFER Tests (Limit: ₹200,000)
+    // ==========================================
+
+    @Test
+    void shouldApproveTransferWithinLimit() {
+        account.setBalance(new BigDecimal("200000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("150000.00"),
+                TransactionType.TRANSFER,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("50000.00"), account.getBalance());
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldDeclineTransferExceedingLimit() {
+        account.setBalance(new BigDecimal("300000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("250000.00"),
+                TransactionType.TRANSFER,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("DECLINED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("300000.00"), account.getBalance());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldBlockTransferWhenFraudDetected() {
+        account.setBalance(new BigDecimal("200000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("FRAUD", 0.92, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("100000.00"),
+                TransactionType.TRANSFER,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("BLOCKED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("200000.00"), account.getBalance());
+        verify(fraudAlertRepository).save(any(FraudAlert.class));
+    }
+
+    // ==========================================
+    // CASH_OUT Tests (Limit: ₹50,000)
+    // ==========================================
+
+    @Test
+    void shouldApproveCashOutWithinLimit() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("30000.00"),
+                TransactionType.CASH_OUT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("70000.00"), account.getBalance());
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldDeclineCashOutExceedingLimit() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("60000.00"),
+                TransactionType.CASH_OUT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("DECLINED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    // ==========================================
+    // DEBIT Tests (Limit: ₹100,000)
+    // ==========================================
+
+    @Test
+    void shouldApproveDebitWithinLimit() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50000.00"),
+                TransactionType.DEBIT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("50000.00"), account.getBalance());
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldDeclineDebitExceedingLimit() {
+        account.setBalance(new BigDecimal("200000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("150000.00"),
+                TransactionType.DEBIT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("DECLINED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("200000.00"), account.getBalance());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldBlockDebitWhenFraudDetected() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("FRAUD", 0.94, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50000.00"),
+                TransactionType.DEBIT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("BLOCKED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance());
+        verify(fraudAlertRepository).save(any(FraudAlert.class));
+    }
+
+    // ==========================================
+    // CASH_IN Tests (Credit, Limit: ₹50,000)
+    // ==========================================
+
+    @Test
+    void shouldApproveCashInWithinLimitAndIncreaseBalance() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("40000.00"),
+                TransactionType.CASH_IN,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("140000.00"), account.getBalance());
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldDeclineCashInExceedingLimitWithoutIncreasingBalance() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.05, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("60000.00"),
+                TransactionType.CASH_IN,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("DECLINED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance()); // balance unchanged
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository, never()).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldBlockCashInWhenFraudDetected() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("FRAUD", 0.90, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("30000.00"),
+                TransactionType.CASH_IN,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("BLOCKED", result.getTransaction().getStatus());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance());
+        verify(accountRepository, never()).save(any(Account.class));
+        verify(fraudAlertRepository).save(any(FraudAlert.class));
+    }
+
+    // ==========================================
+    // Deterministic Anomaly & Huge Balance Tests
+    // ==========================================
+
+    @Test
+    void shouldBlockTransactionWhenDeterministicAnomalyRuleTriggersEvenIfMLSaysLegitimate() {
+        account.setBalance(new BigDecimal("100000.00"));
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.12, "Random Forest"));
+        when(fraudRuleEngine.isSuspicious(any(Transaction.class))).thenReturn(true);
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50000.00"),
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("BLOCKED", result.getTransaction().getStatus());
+        // Stored ML prediction remains the actual model prediction ("LEGITIMATE")
+        assertEquals("LEGITIMATE", result.getPrediction());
+        assertTrue(result.isRuleAnomaly());
+        assertEquals("Behavioral Anomaly / Suspicious Activity", result.getDetectionReason());
+        assertEquals(new BigDecimal("100000.00"), account.getBalance());
+        verify(fraudAlertRepository).save(any(FraudAlert.class));
+    }
+
+    @Test
+    void shouldSafelyHandleHugeBigDecimalBalanceWithoutOverflowOrArithmeticError() {
+        BigDecimal hugeBalance = new BigDecimal("6767676767676767676.00");
+        account.setBalance(hugeBalance);
+
+        when(fraudPredictionService.predict(any(Transaction.class)))
+                .thenReturn(new FraudPredictionResult("LEGITIMATE", 0.01, "Random Forest"));
+
+        FraudPrediction result = transactionService.processPayment(
+                user,
+                new BigDecimal("50000.00"),
+                TransactionType.PAYMENT,
+                "127.0.0.1",
+                "test-agent"
+        );
+
+        assertEquals("APPROVED", result.getTransaction().getStatus());
+        BigDecimal expectedBalance = hugeBalance.subtract(new BigDecimal("50000.00"));
+        assertEquals(expectedBalance, account.getBalance());
     }
 }

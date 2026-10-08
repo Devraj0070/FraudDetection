@@ -184,7 +184,7 @@
                             <div class="hero-badge-row">
                                 <span class="hero-status-pill" th:text="${transactionStatus}">APPROVED</span>
                                 <span class="status-indicator-note" th:if="${transactionStatus == 'APPROVED'}">Funds Settled Safely</span>
-                                <span class="status-indicator-note" th:if="${transactionStatus == 'DECLINED'}">Balance Insufficient</span>
+                                <span class="status-indicator-note" th:if="${transactionStatus == 'DECLINED'}" th:text="${detectionReason != null ? detectionReason : (message != null and message.contains('limit') ? 'Limit Exceeded' : 'Balance Insufficient')}">Balance Insufficient</span>
                                 <span class="status-indicator-note" th:if="${transactionStatus == 'BLOCKED'}">Flagged for Fraud Review</span>
                             </div>
                             <h1 class="hero-status-title" th:text="${transactionStatus == 'APPROVED' ? 'Transaction Approved' : (transactionStatus == 'DECLINED' ? 'Transaction Declined' : 'Transaction Blocked')}">Transaction Approved</h1>
@@ -235,7 +235,7 @@
                                 </div>
                                 <span class="ai-card-title">AI Fraud Risk Assessment</span>
                             </div>
-                            <span class="ai-engine-tag">SafePay AI Engine</span>
+                            <span class="ai-engine-tag" th:text="${aiEngineName != null ? aiEngineName : 'SafePay AI Engine'}">SafePay AI Engine</span>
                         </div>
 
                         <div class="ai-metrics-grid">
@@ -252,7 +252,7 @@
 
                             <!-- Fraud Probability -->
                             <div class="ai-metric-box">
-                                <span class="ai-metric-label">Fraud Probability</span>
+                                <span class="ai-metric-label">ML Fraud Probability</span>
                                 <div class="ai-prob-value" th:text="${#numbers.formatPercent(fraudProbability, 1, 2)}">0.5%</div>
                                 <div class="prob-meter-wrap">
                                     <div class="prob-meter-fill"
@@ -262,12 +262,31 @@
                                 </div>
                             </div>
 
-                            <!-- Verification Status -->
+                            <!-- ML Model Prediction -->
+                            <div class="ai-metric-box">
+                                <span class="ai-metric-label">ML Model Prediction</span>
+                                <div class="ai-verdict-text"
+                                     th:classappend="${mlPrediction != null ? (mlPrediction == 'LEGITIMATE' ? 'verdict-legitimate' : 'verdict-fraudulent') : (prediction == 'LEGITIMATE' ? 'verdict-legitimate' : 'verdict-fraudulent')}"
+                                     th:text="${mlPrediction != null ? mlPrediction : prediction}">
+                                    LEGITIMATE
+                                </div>
+                            </div>
+
+                            <!-- Detection Reason / Layer -->
+                            <div class="ai-metric-box">
+                                <span class="ai-metric-label">Detection Reason</span>
+                                <div class="ai-detail-subtext"
+                                     th:text="${detectionReason != null ? detectionReason : (transactionStatus == 'BLOCKED' ? 'Behavioral Anomaly / Suspicious Activity' : 'Normal / Legitimate')}">
+                                    Normal / Legitimate
+                                </div>
+                            </div>
+
+                            <!-- Classification Verdict -->
                             <div class="ai-metric-box">
                                 <span class="ai-metric-label">Classification Verdict</span>
                                 <div class="ai-verdict-text"
-                                     th:classappend="${prediction == 'LEGITIMATE' ? 'verdict-legitimate' : 'verdict-fraudulent'}"
-                                     th:text="${prediction == 'LEGITIMATE' ? 'VERIFIED LEGITIMATE' : 'SUSPICIOUS / FLAGGED'}">
+                                     th:classappend="${transactionStatus == 'BLOCKED' or prediction == 'FRAUD' ? 'verdict-fraudulent' : 'verdict-legitimate'}"
+                                     th:text="${classificationVerdict != null ? classificationVerdict : (transactionStatus == 'BLOCKED' ? (prediction == 'FRAUD' ? 'SUSPICIOUS / FLAGGED' : 'BEHAVIORAL ANOMALY / FLAGGED') : 'VERIFIED LEGITIMATE')}">
                                     VERIFIED LEGITIMATE
                                 </div>
                             </div>

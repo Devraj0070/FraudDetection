@@ -28,6 +28,12 @@ public class FraudPrediction {
     @OneToOne
     private Transaction transaction;
 
+    @jakarta.persistence.Transient
+    private boolean ruleAnomaly;
+
+    @jakarta.persistence.Transient
+    private String detectionReason;
+
     public FraudPrediction() {
     }
 
@@ -73,5 +79,21 @@ public class FraudPrediction {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    public boolean isRuleAnomaly() {
+        return ruleAnomaly;
+    }
+
+    public void setRuleAnomaly(boolean ruleAnomaly) {
+        this.ruleAnomaly = ruleAnomaly;
+    }
+
+    public String getDetectionReason() {
+        return detectionReason;
+    }
+
+    public void setDetectionReason(String detectionReason) {
+        this.detectionReason = detectionReason;
     }
 }

@@ -68,10 +68,25 @@ public class TransactionController {
                 request.getHeader("User-Agent")
         );
         Transaction transaction = fraudPrediction.getTransaction();
+        if (transaction != null) {
+            if (transaction.getAmount() == null) {
+                transaction.setAmount(amount);
+            }
+            if (transaction.getTransactionType() == null) {
+                transaction.setTransactionType(transactionType);
+            }
+        }
+
+        String status = transaction != null ? transaction.getStatus() : null;
+        boolean isBlocked = "BLOCKED".equals(status);
+        boolean isMlFraud = "FRAUD".equals(fraudPrediction.getPrediction());
+        boolean isRuleAnomaly = fraudPrediction.isRuleAnomaly();
 
         double probability = fraudPrediction.getProbability();
         String riskAssessment;
-        if (probability < 0.30) {
+        if (isBlocked) {
+            riskAssessment = "HIGH";
+        } else if (probability < 0.30) {
             riskAssessment = "LOW";
         } else if (probability < 0.70) {
             riskAssessment = "MEDIUM";
@@ -79,8 +94,46 @@ public class TransactionController {
             riskAssessment = "HIGH";
         }
 
-        model.addAttribute("message", transactionMessage(transaction.getStatus()));
+        String detectionReason = fraudPrediction.getDetectionReason();
+        if (detectionReason == null) {
+            if (isBlocked) {
+                if (isMlFraud && isRuleAnomaly) {
+                    detectionReason = "Machine Learning & Behavioral Anomaly";
+                } else if (isMlFraud) {
+                    detectionReason = "Machine Learning Fraud Detection";
+                } else {
+                    detectionReason = "Behavioral Anomaly / Suspicious Activity";
+                }
+            } else if ("DECLINED".equals(status)) {
+                if (transaction != null
+                        && transaction.getAmount() != null
+                        && transaction.getTransactionType() != null
+                        && transaction.getAmount().compareTo(transaction.getTransactionType().getTransactionLimit()) > 0) {
+                    detectionReason = "Limit Exceeded";
+                } else {
+                    detectionReason = "Balance Insufficient";
+                }
+            } else {
+                detectionReason = "Normal / Legitimate";
+            }
+        }
+
+        String classificationVerdict;
+        if (isBlocked) {
+            if (isMlFraud && isRuleAnomaly) {
+                classificationVerdict = "ML FRAUD & BEHAVIORAL ANOMALY";
+            } else if (isMlFraud) {
+                classificationVerdict = "SUSPICIOUS / FLAGGED";
+            } else {
+                classificationVerdict = "BEHAVIORAL ANOMALY / FLAGGED";
+            }
+        } else {
+            classificationVerdict = "VERIFIED LEGITIMATE";
+        }
+
+        model.addAttribute("message", transactionMessage(transaction));
         model.addAttribute("prediction", fraudPrediction.getPrediction());
+        model.addAttribute("mlPrediction", fraudPrediction.getPrediction());
         model.addAttribute("fraudProbability", fraudPrediction.getProbability());
         model.addAttribute("modelName", fraudPrediction.getModelName());
         model.addAttribute("transactionStatus", transaction.getStatus());
@@ -90,17 +143,31 @@ public class TransactionController {
         model.addAttribute("riskAssessment", riskAssessment);
         model.addAttribute("riskLevel", riskAssessment);
         model.addAttribute("aiEngineName", "AI Fraud Protection");
+        model.addAttribute("detectionReason", detectionReason);
+        model.addAttribute("ruleAnomaly", isRuleAnomaly);
+        model.addAttribute("classificationVerdict", classificationVerdict);
 
         populateUserAndAccount(authentication, model);
 
         return "user/result";
     }
 
-    private String transactionMessage(String status) {
+    private String transactionMessage(Transaction transaction) {
+        if (transaction == null || transaction.getStatus() == null) {
+            throw new IllegalStateException("Transaction status is missing.");
+        }
+        String status = transaction.getStatus();
         return switch (status) {
             case "APPROVED" -> "Your transaction was approved.";
-            case "DECLINED" -> "Your transaction was declined because the account balance is insufficient.";
-            case "BLOCKED" -> "Your transaction was blocked for fraud review.";
+            case "BLOCKED" -> "Your transaction was blocked because it was flagged for fraud review.";
+            case "DECLINED" -> {
+                if (transaction.getAmount() != null
+                        && transaction.getTransactionType() != null
+                        && transaction.getAmount().compareTo(transaction.getTransactionType().getTransactionLimit()) > 0) {
+                    yield "Your transaction was declined because it exceeds the maximum limit for this transaction type.";
+                }
+                yield "Your transaction was declined because the account balance is insufficient.";
+            }
             default -> throw new IllegalStateException("Unsupported transaction status: " + status);
         };
     }

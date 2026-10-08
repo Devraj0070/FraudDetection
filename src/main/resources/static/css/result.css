@@ -598,7 +598,7 @@ button { font-family: inherit; cursor: pointer; }
 
 .ai-metrics-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
 }
 
@@ -662,6 +662,13 @@ button { font-family: inherit; cursor: pointer; }
     font-weight: 800;
     letter-spacing: 0.02em;
     line-height: 1.35;
+}
+
+.ai-detail-subtext {
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--sp-text);
 }
 
 .verdict-legitimate { color: var(--sp-green); }

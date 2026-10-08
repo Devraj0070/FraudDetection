@@ -206,7 +206,8 @@
                             </div>
                         </div>
 
-                        <div class="balance-figure-wrap">
+                        <div class="balance-figure-wrap"
+                             th:title="${balance != null ? '₹' + #numbers.formatDecimal(balance, 1, 2) : '₹0.00'}">
                             <span class="currency-symbol">₹</span>
                             <span class="balance-number" th:text="${balance != null ? #numbers.formatDecimal(balance, 1, 2) : '0.00'}">0.00</span>
                         </div>
