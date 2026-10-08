@@ -17,20 +17,7 @@
 
 <div class="auth-split-wrapper">
 
-    <!-- LEFT / BRAND PANE -->
-    <aside class="auth-brand-pane">
-        <!-- Abstract Digital Payment Flow Hero Visual -->
-        <div class="brand-hero-visual" aria-hidden="true"></div>
-
-        <div class="brand-pane-content">
-            <a th:href="@{/register}" class="brand-logo-link">
-                <img th:src="@{/images/safepay-logo.png}" alt="SAFE PAY" class="auth-brand-logo">
-            </a>
-            <p class="brand-tagline">Create your SafePay account</p>
-        </div>
-    </aside>
-
-    <!-- RIGHT / CREATE ACCOUNT FORM -->
+    <!-- LEFT / CREATE ACCOUNT FORM -->
     <main class="auth-form-pane">
         <div class="form-pane-container">
 
@@ -84,7 +71,7 @@
                             name="email"
                             class="auth-input"
                             th:value="${user != null ? user.email : ''}"
-                            placeholder="Enter your email address"
+                            placeholder="Email address"
                             required>
                     </div>
                 </div>
@@ -107,7 +94,7 @@
                 </div>
 
                 <button type="submit" class="btn-auth-submit">
-                    Create SafePay Account
+                    Create Account
                 </button>
 
             </form>
@@ -118,7 +105,66 @@
             </div>
 
         </div>
+
+        <p class="auth-copyright">Copyright &copy; 2026 SAFE PAY. All rights reserved.</p>
     </main>
+
+    <!-- RIGHT / BRAND PANE (indigo, curved edge, outline shapes) -->
+    <aside class="auth-brand-pane">
+
+        <!-- Curved indigo background (stretches to fit the pane) -->
+        <svg class="auth-curve" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+            <defs>
+                <linearGradient id="authIndigo" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#2f2f9a"/>
+                    <stop offset="1" stop-color="#232375"/>
+                </linearGradient>
+            </defs>
+            <path d="M4 0 H100 V100 H29 C28 70 19 46 14 32 C11 22 5 10 4 0 Z" fill="url(#authIndigo)"/>
+        </svg>
+
+        <!-- Decorative outline shapes -->
+        <svg class="auth-shapes" viewBox="0 0 436 640" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+            <defs>
+                <linearGradient id="authShapeGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#3b3fb6"/>
+                    <stop offset="1" stop-color="#1c1c66"/>
+                </linearGradient>
+            </defs>
+            <g fill="none" stroke="#4a63d6" stroke-width="2" opacity="0.55">
+                <!-- squiggle top-left -->
+                <path d="M108 78 q16 -26 36 -6 t36 -4" stroke-width="5" stroke-linecap="round"/>
+                <!-- top circle -->
+                <circle cx="228" cy="36" r="24"/>
+                <!-- triangles -->
+                <path d="M338 106 l14 26 h-28 z"/>
+                <path d="M196 524 l30 0 l-30 30 z"/>
+                <!-- big circle -->
+                <circle cx="352" cy="318" r="86"/>
+                <!-- small circles -->
+                <circle cx="366" cy="262" r="9"/>
+                <circle cx="330" cy="470" r="9"/>
+                <circle cx="132" cy="262" r="9"/>
+                <!-- plus signs -->
+                <path d="M196 232 h40 M216 212 v40" stroke-width="2.5"/>
+                <path d="M410 392 h22 M421 381 v22"/>
+                <path d="M358 548 h22 M369 537 v22"/>
+                <!-- S squiggle -->
+                <path d="M174 440 c20 -6 22 12 8 22 c-14 10 -10 26 8 22" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <!-- gradient half circle -->
+            <path d="M150 140 A38 38 0 1 1 150 216 C170 190 170 166 150 140 Z" fill="url(#authShapeGrad)" opacity="0.8"/>
+            <!-- gradient cut inside the big circle -->
+            <path d="M338 236 C376 242 378 284 362 322 C348 356 362 390 384 400 A86 86 0 0 1 338 236 Z" fill="url(#authShapeGrad)" opacity="0.75"/>
+        </svg>
+
+        <div class="brand-pane-content">
+            <a th:href="@{/register}" class="brand-logo-link">
+                <img th:src="@{/images/safepay-logo.png}" alt="SAFE PAY" class="auth-brand-logo">
+            </a>
+            <p class="brand-tagline">Create your SafePay account</p>
+        </div>
+    </aside>
 
 </div>
 

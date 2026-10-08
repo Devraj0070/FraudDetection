@@ -1,119 +1,132 @@
 /* ==========================================================================
-   SAFE PAY — Global Design System  ("flux" theme: charcoal + lime + lavender)
+   SAFE PAY — Global Design System  ("indigo" theme)
+   Pale-blue canvas, deep indigo frame, white rounded cards, navy gradient
+   buttons and royal-blue headings. Matches the new sign-in page.
+
    Shared by every page. All previous variable and class names are kept, so
-   existing pages (auth, transaction, history, admin) pick up the new look.
-   Place at: src/main/resources/static/css/global.css
+   existing pages (auth, transaction, history, result, error, admin) keep
+   working. Place at: src/main/resources/static/css/global.css
    ========================================================================== */
 
 :root {
     /* ----------------------------------------------------------------------
-       1. Charcoal scale (replaces the old navy palette, same names)
+       1. Indigo scale (same names as before)
        ---------------------------------------------------------------------- */
-    --safepay-navy-950: #101010;
-    --safepay-navy-900: #1c1c1c;
-    --safepay-navy-850: #232323;
-    --safepay-navy-800: #2b2b2b;
-    --safepay-navy-700: #3a3a3a;
-    --safepay-navy-600: #4a4a4a;
+    --safepay-navy-950: #14143f;
+    --safepay-navy-900: #1f1f62;
+    --safepay-navy-850: #232375;
+    --safepay-navy-800: #26267f;
+    --safepay-navy-700: #2d2d96;
+    --safepay-navy-600: #3a3fb0;
 
-    /* Neutral scale */
-    --slate-900: #151515;
-    --slate-800: #2b2b2b;
-    --slate-700: #3d3d3d;
-    --slate-600: #5a5a5a;
-    --slate-500: #7b7b7b;
-    --slate-400: #a4a4a4;
-    --slate-300: #cfcfcf;
-    --slate-200: #e3e3e3;
-    --slate-100: #efefef;
-    --slate-50:  #f6f6f6;
+    /* Neutral scale (cool, slightly blue) */
+    --slate-900: #1b1d3a;
+    --slate-800: #25284a;
+    --slate-700: #3b3f66;
+    --slate-600: #5b5f86;
+    --slate-500: #7a7ea3;
+    --slate-400: #a6a9c6;
+    --slate-300: #cfd2ec;
+    --slate-200: #e1e4f3;
+    --slate-100: #eceff9;
+    --slate-50:  #f6f8fd;
     --white:     #ffffff;
 
     /* ----------------------------------------------------------------------
-       2. Accents — lavender (was blue) and lime (was cyan)
+       2. Accents — royal blue / indigo (primary) and sky blue (secondary)
        ---------------------------------------------------------------------- */
-    --safepay-blue-700: #5a46b8;
-    --safepay-blue-600: #6f5bd0;
-    --safepay-blue-500: #8b79e0;
-    --safepay-blue-400: #b9acf2;
-    --safepay-blue-100: #e6e1fa;
-    --safepay-blue-50:  #f2effd;
+    --safepay-blue-700: #232375;
+    --safepay-blue-600: #2a2f8f;
+    --safepay-blue-500: #2b4c9e;
+    --safepay-blue-400: #6f86d6;
+    --safepay-blue-100: #dfe4f8;
+    --safepay-blue-50:  #eef1fc;
 
-    --safepay-cyan-600: #9bb82a;
-    --safepay-cyan-500: #c2dd3f;
-    --safepay-cyan-400: #d9f25c;
-    --safepay-cyan-300: #e6f78f;
-    --safepay-cyan-100: #f1fbc4;
-    --safepay-cyan-50:  #f8fde0;
+    --safepay-cyan-600: #4aa3d6;
+    --safepay-cyan-500: #6dbbe6;
+    --safepay-cyan-400: #9ad2f0;
+    --safepay-cyan-300: #bfe3f6;
+    --safepay-cyan-100: #e1f2fb;
+    --safepay-cyan-50:  #eef8fd;
 
     /* Friendly aliases for new code */
-    --lime:         #d9f25c;
-    --lime-soft:    #eef9b8;
-    --lavender:     #b9acf2;
-    --lavender-soft:#e6e1fa;
-    --lavender-deep:#6f5bd0;
-    --coral:        #ff8a7a;
+    --indigo:        #2a2f8f;
+    --royal:         #2b4c9e;
+    --sky:           #9ad2f0;
+    --sky-soft:      #e1f2fb;
+    --coral:         #ff7d73;
 
-    /* Gradients (primary is now a black pill gradient, white text safe) */
-    --grad-primary: linear-gradient(135deg, #1c1c1c 0%, #2b2b2b 100%);
-    --grad-dark:    linear-gradient(135deg, #101010 0%, #232323 100%);
-    --grad-card:    linear-gradient(135deg, #1c1c1c 0%, #2b2b2b 100%);
-    --grad-lime:    linear-gradient(135deg, #e6f78f 0%, #d9f25c 100%);
-    --grad-lavender:linear-gradient(135deg, #cfc5f7 0%, #b9acf2 100%);
+    /* Legacy alias names, kept so older rules still resolve.
+       (--lime / --lavender now map onto the indigo + sky palette.) */
+    --lime:          var(--sky);
+    --lime-soft:     var(--sky-soft);
+    --lavender:      var(--safepay-blue-400);
+    --lavender-soft: var(--safepay-blue-100);
+    --lavender-deep: var(--safepay-blue-600);
+
+    /* Gradients */
+    --grad-primary:  linear-gradient(90deg, #2e3192 0%, #201f63 100%);
+    --grad-dark:     linear-gradient(135deg, #14143f 0%, #232375 100%);
+    --grad-card:     linear-gradient(135deg, #2f2f9a 0%, #232375 100%);
+    --grad-lime:     linear-gradient(135deg, #bfe3f6 0%, #9ad2f0 100%);
+    --grad-lavender: linear-gradient(135deg, #a9b6ec 0%, #6f86d6 100%);
 
     /* ----------------------------------------------------------------------
-       3. Status semantics — lime / lavender / coral
+       3. Status semantics — green / blue / red
        ---------------------------------------------------------------------- */
-    --status-approved:       #4d7c0f;
-    --status-approved-bg:    #eef9b8;
-    --status-approved-border:#d9f25c;
-    --status-approved-text:  #3f6212;
+    --status-approved:        #1f9d63;
+    --status-approved-bg:     #e6f6ed;
+    --status-approved-border: #bfe6d0;
+    --status-approved-text:   #1a7a4e;
 
-    --status-declined:       #6f5bd0;
-    --status-declined-bg:    #e6e1fa;
-    --status-declined-border:#b9acf2;
-    --status-declined-text:  #4c3aa8;
+    --status-declined:        #2b4c9e;
+    --status-declined-bg:     #e9eefc;
+    --status-declined-border: #c6d2f3;
+    --status-declined-text:   #233f85;
 
-    --status-blocked:        #c2362b;
-    --status-blocked-bg:     #ffe9e5;
-    --status-blocked-border: #ffb4aa;
-    --status-blocked-text:   #8f2a20;
+    --status-blocked:         #d64545;
+    --status-blocked-bg:      #fdeaea;
+    --status-blocked-border:  #f6c3c3;
+    --status-blocked-text:    #a32f2f;
 
     /* ----------------------------------------------------------------------
        4. Canvas & layout tokens
        ---------------------------------------------------------------------- */
-    --bg-canvas:        #e3e3e3;
+    --bg-canvas:        #eef8fd;
     --bg-card:          #ffffff;
-    --bg-card-subtle:   #f6f6f6;
-    --border-color:     #e8e8e8;
-    --border-subtle:    #f0f0f0;
+    --bg-card-subtle:   #f6f8fd;
+    --border-color:     #dde2f3;
+    --border-subtle:    #eceff9;
 
-    --text-primary:     #151515;
-    --text-secondary:   #3d3d3d;
-    --text-muted:       #7b7b7b;
-    --text-light:       #a4a4a4;
+    --text-primary:     #25284a;
+    --text-secondary:   #3b3f66;
+    --text-muted:       #5b5f86;
+    --text-light:       #a6a9c6;
     --text-inverse:     #ffffff;
+    --text-heading:     #2b4c9e;
 
     /* ----------------------------------------------------------------------
-       5. Radii & shadows (rounder, flatter)
+       5. Radii & shadows
        ---------------------------------------------------------------------- */
-    --radius-xs: 6px;
-    --radius-sm: 10px;
+    --radius-xs: 4px;
+    --radius-sm: 8px;
     --radius-md: 14px;
     --radius-lg: 20px;
     --radius-xl: 28px;
-    --radius-2xl: 32px;
+    --radius-2xl: 28px;
     --radius-full: 9999px;
 
-    --shadow-xs: 0 1px 2px 0 rgba(21, 21, 21, 0.04);
-    --shadow-sm: 0 1px 3px 0 rgba(21, 21, 21, 0.05);
-    --shadow-md: 0 8px 20px -10px rgba(21, 21, 21, 0.18);
-    --shadow-lg: 0 14px 30px -14px rgba(21, 21, 21, 0.25);
-    --shadow-xl: 0 22px 44px -18px rgba(21, 21, 21, 0.32);
-    --shadow-glow: 0 0 25px -5px rgba(185, 172, 242, 0.5);
+    --shadow-xs: 0 1px 2px 0 rgba(26, 26, 100, 0.06);
+    --shadow-sm: 0 1px 3px 0 rgba(26, 26, 100, 0.08);
+    --shadow-md: 0 10px 24px -12px rgba(26, 26, 100, 0.3);
+    --shadow-lg: 0 16px 34px -14px rgba(26, 26, 100, 0.38);
+    --shadow-xl: 0 26px 50px -20px rgba(26, 26, 100, 0.45);
+    --shadow-btn: 0 10px 16px -6px rgba(40, 40, 130, 0.5);
+    --shadow-glow: 0 0 25px -5px rgba(42, 47, 143, 0.45);
+    --ring-indigo: 0 0 0 4px rgba(42, 47, 143, 0.16);
 
     /* Typography */
-    --font-sans: 'Poppins', 'DM Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-sans: 'Inter', 'DM Sans', 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
 
     --sidebar-w: 236px;
@@ -178,7 +191,7 @@ ul { list-style: none; }
 
 /* ==========================================================================
    SafePay App Shell (all logged-in views)
-   Dark frame · full-height sidebar · one rounded light panel
+   Deep indigo frame · full-height sidebar · one rounded pale-blue panel
    ========================================================================== */
 .app-shell {
     min-height: 100vh;
@@ -186,7 +199,7 @@ ul { list-style: none; }
     grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     padding: 8px 8px 8px 0;
-    background: var(--safepay-navy-900);
+    background: linear-gradient(180deg, #232375 0%, #1f1f62 55%, #14143f 100%);
 }
 
 .app-body { display: contents; }
@@ -221,10 +234,11 @@ ul { list-style: none; }
     height: 50px;
     border-radius: 50%;
     background: var(--bg-card);
-    color: var(--text-primary);
+    color: var(--safepay-blue-600);
+    box-shadow: var(--shadow-sm);
 }
 
-/* The SAFE PAY logo has light lettering, so it sits on a dark pill */
+/* The SAFE PAY logo has light lettering, so it sits on a dark indigo pill */
 .brand-link {
     display: flex;
     align-items: center;
@@ -246,8 +260,8 @@ ul { list-style: none; }
     align-items: center;
     padding: 4px 12px;
     border-radius: var(--radius-full);
-    background: var(--lime);
-    color: var(--text-primary);
+    background: var(--safepay-blue-400);
+    color: var(--white);
     font-size: 0.72rem;
     font-weight: 600;
     white-space: nowrap;
@@ -265,6 +279,7 @@ ul { list-style: none; }
     color: var(--text-muted);
     font-size: 0.8rem;
     font-weight: 500;
+    box-shadow: var(--shadow-sm);
 }
 
 .pulse-indicator {
@@ -272,7 +287,7 @@ ul { list-style: none; }
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #6fae1b;
+    background-color: var(--status-approved);
     flex-shrink: 0;
 }
 
@@ -302,13 +317,14 @@ ul { list-style: none; }
     width: 46px;
     height: 46px;
     border-radius: 50%;
-    background: var(--lavender);
-    color: var(--text-primary);
+    background: var(--grad-primary);
+    color: var(--white);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.05rem;
-    font-weight: 600;
+    font-weight: 700;
+    box-shadow: var(--shadow-btn);
 }
 
 .user-meta-details {
@@ -323,7 +339,7 @@ ul { list-style: none; }
     color: var(--text-primary);
 }
 
-/* Role label: plain text, dark on the light panel */
+/* Role label: plain text */
 .user-role-tag {
     margin: 0;
     padding: 0;
@@ -337,7 +353,7 @@ ul { list-style: none; }
 }
 
 .role-tag-user  { color: var(--text-muted); }
-.role-tag-admin { color: var(--safepay-blue-600); font-weight: 600; }
+.role-tag-admin { color: var(--safepay-blue-500); font-weight: 600; }
 
 /* Sign out: round icon button */
 .nav-logout-form { margin: 0; }
@@ -350,13 +366,18 @@ ul { list-style: none; }
     padding: 0;
     border-radius: 50%;
     background: var(--bg-card);
-    color: var(--text-primary);
+    color: var(--safepay-blue-600);
+    box-shadow: var(--shadow-sm);
     transition: background 0.15s ease, color 0.15s ease;
 }
 
 .btn-logout span { display: none; }
 .btn-logout svg  { width: 18px; height: 18px; }
-.btn-logout:hover { background: var(--safepay-navy-900); color: var(--lime); }
+
+.btn-logout:hover {
+    background: var(--safepay-navy-900);
+    color: var(--white);
+}
 
 /* ---------- Sidebar ---------- */
 .sidebar-nav {
@@ -392,7 +413,7 @@ ul { list-style: none; }
     font-weight: 500;
     letter-spacing: 0;
     text-transform: none;
-    color: #8c8c8c;
+    color: #8f95d0;
 }
 
 .nav-menu {
@@ -408,8 +429,8 @@ ul { list-style: none; }
     align-items: center;
     gap: 14px;
     padding: 13px 16px;
-    border-radius: 18px;
-    color: rgba(255, 255, 255, 0.88);
+    border-radius: 14px;
+    color: rgba(255, 255, 255, 0.85);
     font-size: 0.9rem;
     font-weight: 500;
     transition: background 0.15s ease, color 0.15s ease;
@@ -424,31 +445,33 @@ ul { list-style: none; }
 
 .nav-link:hover {
     color: var(--white);
-    background: rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.1);
 }
 
+/* Active item = white card-like pill */
 .nav-link.active,
 .nav-link.active:hover {
-    color: var(--text-primary);
+    color: var(--safepay-blue-600);
     background: var(--white);
 }
 
-.nav-link.active .nav-link-icon { color: var(--text-primary); }
+.nav-link.active .nav-link-icon { color: var(--safepay-blue-600); }
 
-.admin-nav-link .nav-link-icon { color: var(--lime); }
-.admin-nav-link.active .nav-link-icon { color: var(--text-primary); }
+.admin-nav-link .nav-link-icon { color: var(--safepay-cyan-400); }
+.admin-nav-link.active .nav-link-icon { color: var(--safepay-blue-600); }
 
-/* Sidebar promo card (lime) */
+/* Sidebar promo card (indigo with outline shapes, echoing the sign-in art) */
 .sidebar-footer-card {
     margin-top: auto;
     padding: 18px;
-    border-radius: 24px;
-    color: var(--text-primary);
+    border-radius: 22px;
+    color: var(--white);
     background:
-        radial-gradient(circle at 86% 56%, var(--lavender) 0 20px, transparent 21px),
-        radial-gradient(circle at 94% 68%, var(--lavender-deep) 0 8px, transparent 9px),
-        radial-gradient(circle at 74% 62%, var(--safepay-navy-900) 0 6px, transparent 7px),
-        var(--lime);
+        radial-gradient(circle at 88% 52%, transparent 0 21px, rgba(120, 150, 255, 0.55) 22px 24px, transparent 25px),
+        radial-gradient(circle at 74% 66%, rgba(120, 150, 255, 0.5) 0 6px, transparent 7px),
+        radial-gradient(circle at 95% 72%, rgba(154, 210, 240, 0.7) 0 7px, transparent 8px),
+        linear-gradient(135deg, #2f2f9a 0%, #232375 100%);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
 }
 
 .sidebar-footer-header {
@@ -462,8 +485,8 @@ ul { list-style: none; }
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--text-primary);
-    color: var(--lime);
+    background: var(--white);
+    color: var(--safepay-blue-600);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -473,7 +496,7 @@ ul { list-style: none; }
     font-size: 1rem;
     font-weight: 600;
     line-height: 1.2;
-    color: var(--text-primary);
+    color: var(--white);
 }
 
 .sidebar-footer-card .footer-card-text {
@@ -481,7 +504,7 @@ ul { list-style: none; }
     margin-bottom: 44px;
     font-size: 0.72rem;
     line-height: 1.4;
-    color: rgba(21, 21, 21, 0.75);
+    color: rgba(255, 255, 255, 0.78);
 }
 
 .footer-status-pill {
@@ -490,18 +513,20 @@ ul { list-style: none; }
     justify-content: center;
     gap: 8px;
     height: 44px;
-    border-radius: var(--radius-full);
-    background: var(--text-primary);
+    border-radius: var(--radius-sm);
+    background: var(--grad-primary);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     color: var(--white);
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
+    box-shadow: var(--shadow-btn);
 }
 
 .status-green-dot {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: var(--lime);
+    background-color: #5ee6a0;
 }
 
 /* ---------- Main viewport ---------- */
@@ -526,53 +551,57 @@ ul { list-style: none; }
    Shared reusable components
    ========================================================================== */
 
-/* Buttons — pill shaped */
+/* Buttons — navy gradient bars, like the Login button */
 .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     height: 46px;
-    padding: 0 24px;
-    border-radius: var(--radius-full);
+    padding: 0 26px;
+    border-radius: var(--radius-sm);
     font-size: 0.88rem;
-    font-weight: 500;
+    font-weight: 600;
+    letter-spacing: 0.01em;
     text-decoration: none;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    transition: filter 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.btn:active { transform: scale(0.97); }
+.btn:active { transform: scale(0.98); }
 
 .btn-primary {
-    background: var(--text-primary);
+    background: var(--grad-primary);
     color: var(--white);
+    box-shadow: var(--shadow-btn);
 }
 
 .btn-primary:hover {
-    background: #333333;
+    filter: brightness(1.12);
     color: var(--white);
 }
 
 .btn-secondary {
     background: var(--white);
-    color: var(--text-primary);
+    color: var(--safepay-blue-600);
+    border-color: var(--border-color);
 }
 
 .btn-secondary:hover {
-    background: var(--lime-soft);
-    color: var(--text-primary);
+    background: var(--safepay-blue-50);
+    border-color: var(--safepay-blue-400);
+    color: var(--safepay-blue-600);
 }
 
 .btn-accent {
-    background: var(--lime);
-    color: var(--text-primary);
+    background: var(--safepay-blue-500);
+    color: var(--white);
 }
 
 .btn-accent:hover {
-    background: #cbe84a;
-    color: var(--text-primary);
+    background: var(--safepay-blue-600);
+    color: var(--white);
 }
 
 .btn-cta {
@@ -580,51 +609,54 @@ ul { list-style: none; }
     align-items: center;
     gap: 8px;
     height: 48px;
-    padding: 0 24px;
-    border-radius: var(--radius-full);
+    padding: 0 26px;
+    border-radius: var(--radius-sm);
     font-size: 0.88rem;
-    font-weight: 500;
+    font-weight: 600;
     text-decoration: none;
     white-space: nowrap;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    transition: filter 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.btn-cta:active { transform: scale(0.97); }
+.btn-cta:active { transform: scale(0.98); }
 
 .btn-primary-action {
-    background: var(--text-primary);
+    background: var(--grad-primary);
     color: var(--white);
+    box-shadow: var(--shadow-btn);
 }
 
 .btn-primary-action:hover {
-    background: #333333;
+    filter: brightness(1.12);
     color: var(--white);
 }
 
 .btn-secondary-action {
     background: var(--white);
-    color: var(--text-primary);
+    color: var(--safepay-blue-600);
+    border: 1px solid var(--border-color);
 }
 
 .btn-secondary-action:hover {
-    background: var(--lime-soft);
-    color: var(--text-primary);
+    background: var(--safepay-blue-50);
+    border-color: var(--safepay-blue-400);
+    color: var(--safepay-blue-600);
 }
 
 .btn-admin-action {
-    background: var(--lime);
-    color: var(--text-primary);
+    background: var(--safepay-blue-500);
+    color: var(--white);
 }
 
 .btn-admin-action:hover {
-    background: #cbe84a;
-    color: var(--text-primary);
+    background: var(--safepay-blue-600);
+    color: var(--white);
 }
 
 /* Alert banners */
 .alert {
     padding: 14px 18px;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     font-size: 0.875rem;
     line-height: 1.5;
     display: flex;
@@ -647,11 +679,11 @@ ul { list-style: none; }
 
 .alert-info {
     background-color: var(--safepay-blue-50);
-    color: var(--safepay-blue-700);
+    color: var(--safepay-blue-600);
     border: 1px solid var(--safepay-blue-100);
 }
 
-/* Status badges: lime / lavender / coral */
+/* Status badges: green / blue / red */
 .status-pill {
     display: inline-flex;
     align-items: center;
@@ -691,18 +723,18 @@ ul { list-style: none; }
 }
 .status-blocked .status-indicator-dot { background-color: var(--status-blocked); }
 
-/* Cards */
+/* Cards: white, softly shadowed, like the sign-in card */
 .safepay-card {
     background-color: var(--bg-card);
     border-radius: var(--radius-xl);
-    box-shadow: none;
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .safepay-card:hover {
     transform: translateY(-4px);
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-lg);
 }
 
 /* ==========================================================================
@@ -737,11 +769,11 @@ ul { list-style: none; }
         grid-column: auto;
         grid-row: auto;
         padding: 24px 16px 16px;
-        border-radius: 28px;
+        border-radius: 24px;
         background: var(--safepay-navy-900);
         transform: translateX(-115%);
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        box-shadow: 0 20px 60px rgba(10, 10, 60, 0.55);
     }
 
     .sidebar-nav.open { transform: translateX(0); }
@@ -751,7 +783,7 @@ ul { list-style: none; }
         position: fixed;
         inset: 0;
         z-index: 50;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(20, 20, 63, 0.6);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.25s ease;

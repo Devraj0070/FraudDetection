@@ -1,34 +1,37 @@
 /* =========================================================
    SAFE PAY — auth.css  (Sign In / Register)
-   Theme: dark navy shell, light-grey panel, lime + lavender accents
-   Font: Inter (already loaded in the HTML)
+   Design: pale-blue page with a big white rounded card. The card's
+   left side holds a centred "SIGN IN" form (underline inputs, navy
+   button); the right side is deep indigo with a curved edge, outline
+   shapes, and a soft shadow cast onto the white. The indigo also
+   spills out of the card above and below it.
+   Pairs with the updated login.html. No images needed.
    ========================================================= */
 
 :root {
-    --sp-ink: #1c1c1c;          /* near-black used for buttons / sidebar */
-    --sp-ink-soft: #2a2a2a;
-    --sp-lime: #dcf254;         /* signature lime */
-    --sp-lime-deep: #c9e03a;
-    --sp-lavender: #b8a9f0;     /* balance-card purple */
-    --sp-violet: #6b4fd8;       /* small accent dots */
-    --sp-panel: #e4e4e4;        /* grey main panel */
-    --sp-white: #ffffff;
-    --sp-muted: #6b6b6b;
-    --sp-border: #e2e2e2;
+    --sp-indigo-900: #1f1f62;
+    --sp-indigo-800: #26267f;
+    --sp-indigo-700: #2d2d96;
+    --sp-navy: #2a2f8f;
+    --sp-title: #2b4c9e;
+    --sp-ink: #25284a;
+    --sp-muted: #5b5f86;
+    --sp-line: #cfd2ec;
+    --sp-placeholder: #b4b6c4;
+    --sp-page: #eef8fd;
 
-    --sp-danger: #d64545;
+    --sp-danger: #c93a3a;
     --sp-danger-bg: #fdeaea;
-    --sp-success-bg: #eef9c8;
-    --sp-success: #3f5a00;
-    --sp-info-bg: #ece8fc;
-    --sp-info: #4a35b0;
+    --sp-success: #1f7a4d;
+    --sp-success-bg: #e6f6ed;
+    --sp-info: #2a2f8f;
+    --sp-info-bg: #e9ebfb;
 
-    --sp-radius-xl: 32px;
-    --sp-radius-lg: 24px;
-    --sp-radius-pill: 999px;
+    --card-w: min(1100px, 92vw);
+    --card-h: min(640px, calc(100vh - 64px));
+    --card-radius: 28px;
 }
 
-/* ---------- Base ---------- */
 *,
 *::before,
 *::after {
@@ -38,137 +41,94 @@
 body.auth-page {
     margin: 0;
     min-height: 100vh;
-    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
-    color: var(--sp-ink);
-    background: var(--sp-ink);
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ---------- Split layout ---------- */
-.auth-split-wrapper {
-    display: grid;
-    grid-template-columns: minmax(380px, 5fr) 7fr;
-    min-height: 100vh;
-    gap: 0;
-}
-
-/* =========================================================
-   LEFT — BRAND PANE
-   ========================================================= */
-.auth-brand-pane {
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: flex-end;
-    padding: 48px;
-    background: var(--sp-ink);
-    color: var(--sp-white);
-}
-
-/* Abstract shapes echoing the dashboard's balance card */
-.brand-hero-visual {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-}
-
-.brand-hero-visual::before,
-.brand-hero-visual::after {
-    content: "";
-    position: absolute;
-    border-radius: 50%;
-}
-
-/* big lavender disc */
-.brand-hero-visual::before {
-    width: 420px;
-    height: 420px;
-    top: 8%;
-    right: -140px;
-    background: var(--sp-lavender);
-}
-
-/* lime disc overlapping it */
-.brand-hero-visual::after {
-    width: 240px;
-    height: 240px;
-    top: 34%;
-    left: -70px;
-    background: var(--sp-lime);
-    box-shadow: 150px 190px 0 -70px var(--sp-violet);
-}
-
-.brand-pane-content {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-}
-
-.brand-logo-link {
-    display: inline-flex;
-    align-items: center;
-    padding: 12px 22px;
-    background: var(--sp-ink);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--sp-radius-pill);
-}
-
-.auth-brand-logo {
-    display: block;
-    height: 38px;
-    width: auto;
-}
-
-.brand-tagline {
-    margin: 0;
-    padding: 6px 14px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--sp-ink);
-    background: var(--sp-lime);
-    border-radius: var(--sp-radius-pill);
-}
-
-/* =========================================================
-   RIGHT — FORM PANE (the grey rounded panel)
-   ========================================================= */
-.auth-form-pane {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 40px 24px;
-    background: var(--sp-panel);
-    border-radius: var(--sp-radius-xl) 0 0 var(--sp-radius-xl);
+    padding: 32px 16px;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--sp-ink);
+    background: var(--sp-page);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* =========================================================
+   THE CARD
+   ========================================================= */
+.auth-split-wrapper {
+    position: relative;          /* no z-index, so the backdrop pieces can sit behind it */
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: var(--card-w);
+    height: var(--card-h);
+    min-height: 520px;
+    background: #fff;
+    border-radius: var(--card-radius);
+    box-shadow:
+        0 36px 60px -24px rgba(26, 26, 100, 0.45),
+        0 8px 26px rgba(26, 26, 100, 0.14);
+}
+
+/* Indigo that spills out of the card above and below it.
+   The edge lines up with where the card's curve starts (top)
+   and ends (bottom). */
+.auth-split-wrapper::before,
+.auth-split-wrapper::after {
+    content: "";
+    position: fixed;
+    right: 0;
+    z-index: -1;
+    height: calc((100vh - var(--card-h)) / 2 + 48px);
+    background: linear-gradient(90deg, #2a2a86 0%, #1f1f62 100%);
+    pointer-events: none;
+}
+
+.auth-split-wrapper::before {
+    top: 0;
+    left: calc(50vw - var(--card-w) / 2 + var(--card-w) * 0.52);
+}
+
+.auth-split-wrapper::after {
+    bottom: 0;
+    left: calc(50vw - var(--card-w) / 2 + var(--card-w) * 0.645);
+}
+
+/* =========================================================
+   FORM PANE (left, white)
+   ========================================================= */
+.auth-form-pane {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px 72px;
+    border-radius: var(--card-radius) 0 0 var(--card-radius);
 }
 
 .form-pane-container {
     width: 100%;
-    max-width: 440px;
-    padding: 40px;
-    background: var(--sp-white);
-    border-radius: var(--sp-radius-lg);
+    max-width: 290px;
 }
 
 /* ---------- Header ---------- */
 .auth-form-header {
-    margin-bottom: 28px;
+    margin-bottom: 34px;
 }
 
 .auth-form-header h1 {
-    margin: 0 0 6px;
+    margin: 0;
     font-size: 2.5rem;
-    font-weight: 500;
-    letter-spacing: -0.03em;
+    font-weight: 800;
+    letter-spacing: 0.01em;
     line-height: 1.1;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--sp-title);
 }
 
+/* the reference has no subtitle */
 .auth-form-header p {
-    margin: 0;
-    font-size: 0.95rem;
-    color: var(--sp-muted);
+    display: none;
 }
 
 /* ---------- Alerts ---------- */
@@ -176,12 +136,12 @@ body.auth-page {
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    margin-bottom: 20px;
-    padding: 12px 16px;
-    font-size: 0.875rem;
+    margin-bottom: 18px;
+    padding: 10px 12px;
+    font-size: 0.78rem;
     font-weight: 500;
     line-height: 1.4;
-    border-radius: 16px;
+    border-radius: 4px;
 }
 
 .alert svg {
@@ -197,18 +157,26 @@ body.auth-page {
 .auth-form {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 }
 
 .form-field {
     display: flex;
     flex-direction: column;
-    gap: 8px;
 }
 
+/* Placeholders carry the meaning (like the reference); labels stay
+   available to screen readers. */
 .form-field label {
-    font-size: 0.875rem;
-    font-weight: 600;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
 .input-with-icon {
@@ -218,150 +186,221 @@ body.auth-page {
 .input-icon-left {
     position: absolute;
     top: 50%;
-    left: 18px;
+    left: 2px;
     transform: translateY(-50%);
-    color: var(--sp-muted);
+    color: var(--sp-navy);
     pointer-events: none;
-    transition: color 0.2s ease;
 }
 
+/* Underline-only inputs */
 .auth-input {
     width: 100%;
-    height: 54px;
-    padding: 0 20px 0 48px;
+    height: 42px;
+    padding: 0 6px 0 34px;
     font: inherit;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     color: var(--sp-ink);
-    background: #f4f4f4;
-    border: 2px solid transparent;
-    border-radius: var(--sp-radius-pill);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--sp-line);
+    border-radius: 0;
     outline: none;
-    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    transition: border-color 0.2s ease;
 }
 
 .auth-input::placeholder {
-    color: #9a9a9a;
+    color: var(--sp-placeholder);
 }
 
 .auth-input:hover {
-    background: #eeeeee;
+    border-bottom-color: #b6bae0;
 }
 
 .auth-input:focus {
-    background: var(--sp-white);
-    border-color: var(--sp-lime-deep);
-    box-shadow: 0 0 0 4px rgba(220, 242, 84, 0.35);
+    border-bottom-color: var(--sp-navy);
 }
 
-.input-with-icon:focus-within .input-icon-left {
-    color: var(--sp-ink);
-}
-
-/* Chrome autofill override so it stays on-theme */
 .auth-input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 100px #f4f4f4 inset;
+    -webkit-box-shadow: 0 0 0 100px #fff inset;
     -webkit-text-fill-color: var(--sp-ink);
 }
 
-/* ---------- Submit button ---------- */
+/* ---------- Login button (navy gradient bar with shadow) ---------- */
 .btn-auth-submit {
     width: 100%;
-    height: 54px;
-    margin-top: 4px;
+    height: 42px;
+    margin-top: 14px;
     font: inherit;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--sp-white);
-    background: var(--sp-ink);
+    font-size: 0.88rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #fff;
+    background: linear-gradient(90deg, #2e3192 0%, #201f63 100%);
     border: 0;
-    border-radius: var(--sp-radius-pill);
+    border-radius: 2px;
     cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 10px 16px -6px rgba(40, 40, 130, 0.5);
+    transition: filter 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
 }
 
 .btn-auth-submit:hover {
-    background: var(--sp-lime);
-    color: var(--sp-ink);
+    filter: brightness(1.12);
+    box-shadow: 0 12px 20px -6px rgba(40, 40, 130, 0.6);
 }
 
 .btn-auth-submit:active {
-    transform: scale(0.98);
+    transform: scale(0.985);
 }
 
 .btn-auth-submit:focus-visible {
-    outline: 3px solid var(--sp-violet);
+    outline: 3px solid rgba(42, 47, 143, 0.3);
     outline-offset: 3px;
 }
 
-/* ---------- Footer switch link ---------- */
+/* ---------- Sign-up link ---------- */
 .auth-switch-footer {
-    margin-top: 28px;
-    padding-top: 22px;
-    font-size: 0.9rem;
+    margin-top: 20px;
+    font-size: 0.78rem;
     text-align: center;
     color: var(--sp-muted);
-    border-top: 1px solid var(--sp-border);
 }
 
 .auth-switch-footer a {
-    margin-left: 4px;
+    margin-left: 2px;
     font-weight: 600;
-    color: var(--sp-ink);
+    color: var(--sp-navy);
     text-decoration: underline;
-    text-decoration-color: var(--sp-lime-deep);
-    text-decoration-thickness: 3px;
-    text-underline-offset: 4px;
-    transition: background 0.2s ease;
+    text-underline-offset: 3px;
 }
 
 .auth-switch-footer a:hover {
-    background: var(--sp-lime);
+    color: var(--sp-indigo-900);
+}
+
+/* ---------- Copyright (bottom-left of the card) ---------- */
+.auth-copyright {
+    position: absolute;
+    left: 52px;
+    bottom: 28px;
+    margin: 0;
+    font-size: 0.64rem;
+    color: var(--sp-navy);
+}
+
+/* =========================================================
+   BRAND PANE (right, indigo with curved left edge)
+   ========================================================= */
+.auth-brand-pane {
+    position: relative;
+    /* clip to the card's rounded right corners, but let the edge shadow
+       spill out to the left onto the white form */
+    clip-path: inset(0 0 0 -70px round 0 var(--card-radius) var(--card-radius) 0);
+}
+
+.auth-curve,
+.auth-shapes {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* soft shadow cast by the curve onto the white */
+.auth-curve {
+    filter: drop-shadow(-18px 6px 22px rgba(10, 10, 60, 0.38));
+}
+
+.brand-pane-content {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 38px 46px;
+    color: #fff;
+}
+
+.brand-logo-link {
+    display: inline-flex;
+    align-items: center;
+}
+
+.auth-brand-logo {
+    display: block;
+    height: 36px;
+    width: auto;
+}
+
+.brand-tagline {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* =========================================================
    RESPONSIVE
    ========================================================= */
-@media (max-width: 900px) {
-    .auth-split-wrapper {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-    }
-
-    .auth-brand-pane {
-        align-items: center;
-        min-height: 180px;
-        padding: 28px 24px;
-    }
-
-    .brand-hero-visual::before {
-        width: 240px;
-        height: 240px;
-        top: -80px;
-        right: -60px;
-    }
-
-    .brand-hero-visual::after {
-        width: 140px;
-        height: 140px;
-        top: auto;
-        bottom: -60px;
-        left: -30px;
-        box-shadow: none;
-    }
-
-    .auth-form-pane {
-        border-radius: var(--sp-radius-xl) var(--sp-radius-xl) 0 0;
-        padding: 32px 16px 48px;
+@media (max-width: 1000px) {
+    .auth-copyright {
+        left: 32px;
     }
 }
 
-@media (max-width: 480px) {
-    .form-pane-container {
-        padding: 28px 22px;
+@media (max-width: 820px) {
+    body.auth-page {
+        display: block;
+        padding: 0;
+        background: #fff;
     }
 
-    .auth-form-header h1 {
-        font-size: 2rem;
+    .auth-split-wrapper {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: auto;
+        min-height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .auth-split-wrapper::before,
+    .auth-split-wrapper::after {
+        display: none;
+    }
+
+    /* indigo header on top */
+    .auth-brand-pane {
+        order: -1;
+        min-height: 150px;
+        clip-path: none;
+        background: linear-gradient(135deg, var(--sp-indigo-700), var(--sp-indigo-900));
+    }
+
+    .auth-curve {
+        display: none;
+    }
+
+    .brand-pane-content {
+        align-items: flex-start;
+        padding: 28px 24px;
+    }
+
+    .auth-form-pane {
+        flex: 1;
+        align-items: flex-start;
+        padding: 40px 24px 80px;
+        border-radius: 0;
+    }
+
+    .auth-copyright {
+        left: 0;
+        right: 0;
+        bottom: 24px;
+        text-align: center;
     }
 }
 
