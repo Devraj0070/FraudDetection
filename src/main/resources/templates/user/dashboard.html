@@ -135,10 +135,6 @@
                         <span class="footer-card-title">SafePay AI Engine</span>
                     </div>
                     <p class="footer-card-text">Every transfer is analyzed in real time for suspicious behavioral patterns.</p>
-                    <div class="footer-status-pill">
-                        <span class="status-green-dot"></span>
-                        <span>Defense Active</span>
-                    </div>
                 </div>
             </div>
         </aside>
@@ -206,8 +202,7 @@
                             </div>
                         </div>
 
-                        <div class="balance-figure-wrap"
-                             th:title="${balance != null ? '₹' + #numbers.formatDecimal(balance, 1, 2) : '₹0.00'}">
+                        <div class="balance-figure-wrap">
                             <span class="currency-symbol">₹</span>
                             <span class="balance-number" th:text="${balance != null ? #numbers.formatDecimal(balance, 1, 2) : '0.00'}">0.00</span>
                         </div>
