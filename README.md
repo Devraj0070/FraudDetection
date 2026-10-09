@@ -1023,6 +1023,755 @@ These scripts support preparation and splitting of transaction data before model
 
 ---
 
+# 🖥️ 30. Java Swing Monitoring Application
 
+The project also contains a desktop GUI:
 
+```text
+gui/
++-- BaseAppFrame.java
++-- FraudAlertObserver.java
++-- FraudDetectionGuiApp.java
++-- FraudDetectionStrategy.java
++-- FraudMonitorFrame.java
++-- GenericTableModel.java
++-- GuiException.java
++-- HybridStrategy.java
++-- MachineLearningStrategy.java
++-- RuleBasedStrategy.java
++-- TransactionProcessListener.java
++-- TransactionSimulationDialog.java
++-- TransactionSimulationWorker.java
++-- ValidationException.java
+```
 
+The GUI provides an additional environment for:
+
+- Fraud monitoring
+- Transaction simulation
+- Fraud strategy demonstration
+- Fraud alerts
+- Transaction processing
+- Data-table presentation
+
+---
+
+# 🧠 31. Strategy Pattern
+
+The GUI contains multiple fraud-detection strategies:
+
+```text
+FraudDetectionStrategy
+        |
+        +-- RuleBasedStrategy
+        |
+        +-- MachineLearningStrategy
+        |
+        +-- HybridStrategy
+```
+
+The Strategy pattern allows different fraud-detection approaches to be represented independently.
+
+This avoids putting every detection approach into one large class.
+
+---
+
+# 👀 32. Observer Pattern
+
+The project also contains:
+
+```text
+FraudAlertObserver
+```
+
+The observer approach allows monitoring components to react to fraud-related events without tightly coupling every part of the application together.
+
+---
+
+# 🔌 33. JDBC Architecture
+
+The JDBC package contains:
+
+```text
+jdbc/
++-- DatabaseConnection.java
++-- DatabaseOperationException.java
++-- DatabaseOperations.java
++-- FraudAnalyticsSummary.java
++-- FraudJdbcService.java
++-- TransactionJdbcDao.java
++-- TransactionRecord.java
++-- UserJdbcDao.java
++-- UserRecord.java
+```
+
+The JDBC layer provides direct database access and DAO-style operations.
+
+It complements the JPA repository layer and demonstrates direct SQL-based persistence.
+
+---
+
+# 🌐 34. Web / Servlet Layer
+
+The project contains:
+
+```text
+web/
++-- FraudMetricsServlet.java
++-- FraudSecurityAuditFilter.java
++-- ServletConfig.java
+```
+
+These components provide servlet-level functionality for metrics, filtering, configuration, and security-related processing.
+
+---
+
+# 🧯 35. Exception Handling
+
+The exception package contains:
+
+```text
+exception/
++-- ApplicationException.java
++-- GlobalExceptionHandler.java
++-- TransactionException.java
+```
+
+The purpose is to handle errors in a controlled manner and provide appropriate application responses instead of exposing raw internal errors.
+
+---
+
+# 🎨 36. Frontend Structure
+
+The frontend is stored under:
+
+```text
+src/main/resources/
+|
++-- static/
+|   +-- css/
+|   +-- images/
+|
++-- templates/
+    +-- admin/
+    +-- auth/
+    +-- error/
+    +-- user/
+```
+
+### CSS
+
+The project separates styling by feature:
+
+```text
+static/css/
++-- admin.css
++-- auth.css
++-- dashboard.css
++-- error.css
++-- global.css
++-- history.css
++-- result.css
++-- transaction.css
+```
+
+### Images
+
+```text
+static/images/
++-- safepay-flow.svg
++-- safepay-logo.png
+```
+
+### Thymeleaf templates
+
+```text
+templates/
++-- admin/
+|   +-- alerts.html
+|
++-- auth/
+|   +-- login.html
+|   +-- register.html
+|
++-- error/
+|   +-- 403.html
+|
++-- user/
+    +-- dashboard.html
+    +-- history.html
+    +-- result.html
+    +-- transaction.html
+```
+
+---
+
+# 🧭 37. User Interface Flow
+
+The main user journey is:
+
+```text
+Register / Login
+       |
+       v
+Dashboard
+       |
+       v
+Transaction Page
+       |
+       v
+Submit Transaction
+       |
+       v
+Fraud Analysis
+       |
+       v
+Result Page
+       |
+       v
+Transaction History
+```
+
+The result page displays the important detection information separately:
+
+- ML prediction
+- ML fraud probability
+- Final security decision
+- Detection reason
+- Risk assessment
+- Transaction status
+
+---
+
+# 🔁 38. Database and Application Interaction
+
+The complete backend flow is:
+
+```text
+Browser
+   |
+   v
+Controller
+   |
+   v
+Service
+   |
+   +------> Fraud / ML Analysis
+   |
+   +------> Repository / JDBC
+               |
+               v
+             MySQL
+```
+
+The service layer coordinates the transaction while repositories/JDBC components handle persistence.
+
+---
+
+# 🧪 39. Testing Architecture
+
+The project contains automated tests under:
+
+```text
+src/test/java/com/frauddetection/frauddetection/
+```
+
+The test categories include:
+
+```text
+controller/
+fraud/
+gui/
+jdbc/
+ml/
+security/
+service/
+web/
+```
+
+Examples from the project include tests for:
+
+- Admin controller
+- Dashboard controller
+- Transaction controller
+- Random Forest predictor
+- Fraud detection strategies
+- GUI table models
+- Transaction simulation
+- JDBC database connection
+- Transaction records
+- Dataset analysis
+- Dataset loading
+- Model evaluation
+- Model saving
+- Model training
+- Admin authorization
+- User details service
+- Transaction service
+- Metrics servlet
+- Security audit filter
+
+This gives the project automated coverage across several architectural layers.
+
+---
+
+# 🗂️ 40. Project Structure
+
+```text
+fraud-detection-system/
+|
++-- .mvn/
+|   +-- wrapper/
+|       +-- maven-wrapper.properties
+|
++-- ml/
+|   +-- dataset/
+|   |   +-- fraud_test.csv
+|   |   +-- fraud_train.csv
+|   |   +-- fraud_transactions.csv
+|   |   +-- fraud_transactions_generated.csv
+|   |   +-- fraud_validation.csv
+|   |   +-- generate_dataset.py
+|   |
+|   +-- models/
+|   |   +-- fraud_random_forest.model
+|   |   +-- fraud_random_forest_final.model
+|   |
+|   +-- preprocessing/
+|       +-- create_fraud_dataset_splits.py
+|       +-- create_realistic_test.py
+|       +-- prepare_paysim.py
+|       +-- split_paysim.py
+|
++-- src/
+|   +-- main/
+|   |   +-- java/
+|   |   |   +-- com/frauddetection/frauddetection/
+|   |   |       +-- config/
+|   |   |       +-- controller/
+|   |   |       +-- entity/
+|   |   |       +-- exception/
+|   |   |       +-- fraud/
+|   |   |       |   +-- feature/
+|   |   |       |   +-- prediction/
+|   |   |       +-- gui/
+|   |   |       +-- jdbc/
+|   |   |       +-- ml/
+|   |   |       |   +-- evaluation/
+|   |   |       |   +-- model/
+|   |   |       |   +-- training/
+|   |   |       +-- repository/
+|   |   |       +-- security/
+|   |   |       +-- service/
+|   |   |       +-- web/
+|   |   |
+|   |   +-- resources/
+|   |       +-- application.properties
+|   |       +-- static/
+|   |       |   +-- css/
+|   |       |   +-- images/
+|   |       +-- templates/
+|   |           +-- admin/
+|   |           +-- auth/
+|   |           +-- error/
+|   |           +-- user/
+|   |
+|   +-- test/
+|       +-- java/
+|           +-- com/frauddetection/frauddetection/
+|               +-- controller/
+|               +-- fraud/
+|               +-- gui/
+|               +-- jdbc/
+|               +-- ml/
+|               +-- security/
+|               +-- service/
+|               +-- web/
+|
++-- IMP.sql
++-- pom.xml
++-- mvnw
++-- mvnw.cmd
++-- .gitignore
++-- .gitattributes
++-- README.md
+```
+
+> The `target/` directory shown by a local Windows folder listing is a Maven build-output directory containing compiled classes and test reports. It is generated by Maven and is not part of the logical source structure.
+
+---
+
+# 📋 41. Requirements
+
+Install the following:
+
+- **JDK 25**
+- **MySQL 8.x**
+- **Git**
+
+Maven does not need to be installed separately because the project contains the Maven Wrapper:
+
+```text
+mvnw
+mvnw.cmd
+```
+
+---
+
+# 🗄️ 42. Database Setup
+
+Create the database:
+
+```sql
+CREATE DATABASE fraud_detection;
+```
+
+Then configure:
+
+```text
+src/main/resources/application.properties
+```
+
+Example:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/fraud_detection
+spring.datasource.username=root
+spring.datasource.password=${DB_PASSWORD}
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+```
+
+Set the environment variable:
+
+```text
+DB_PASSWORD
+```
+
+to the local MySQL password.
+
+**Do not commit real database passwords to GitHub.**
+
+---
+
+# ▶️ 43. Running the Project
+
+Clone the repository:
+
+```powershell
+git clone https://github.com/Devraj0070/FraudDetection.git
+```
+
+Enter the project:
+
+```powershell
+cd FraudDetection
+```
+
+Start the application on Windows:
+
+```powershell
+.\mvnw.cmd spring-boot:run
+```
+
+After the application starts, open:
+
+```text
+http://localhost:8080
+```
+
+---
+
+# 🏗️ 44. Building the Project
+
+Run:
+
+```powershell
+.\mvnw.cmd clean package
+```
+
+---
+
+# ✅ 45. Running Tests
+
+Run the complete test suite:
+
+```powershell
+.\mvnw.cmd clean test
+```
+
+A successful build ends with:
+
+```text
+BUILD SUCCESS
+```
+
+---
+
+# 🧾 46. Example End-to-End Scenarios
+
+## Scenario A — Normal Payment
+
+```text
+User submits:
+₹500 PAYMENT
+
+        |
+        v
+Validation
+        |
+        v
+ML Prediction
+LEGITIMATE
+        |
+        v
+Behavioral Analysis
+NORMAL
+        |
+        v
+Limit Check
+PASS
+        |
+        v
+Balance Check
+PASS
+        |
+        v
+APPROVED
+        |
+        v
+Account balance updated
+```
+
+---
+
+## Scenario B — Limit Exceeded
+
+```text
+User submits:
+₹150,000 PAYMENT
+
+        |
+        v
+Fraud analysis
+LEGITIMATE
+        |
+        v
+Transaction limit
+EXCEEDED
+        |
+        v
+DECLINED
+        |
+        v
+Account balance unchanged
+```
+
+The transaction is declined because of the application-defined transaction limit, not because it was automatically classified as fraud.
+
+---
+
+## Scenario C — Behavioral Fraud Detection
+
+```text
+Previous transaction activity
+          +
+Very large current transaction
+          |
+          v
+Machine Learning
+LEGITIMATE
+          |
+          v
+Behavioral Rule Engine
+SUSPICIOUS
+          |
+          v
+BLOCKED
+          |
+          v
+Balance unchanged
+          |
+          v
+Fraud/security information recorded
+```
+
+This demonstrates the purpose of combining ML and deterministic rules.
+
+---
+
+# 🧭 47. Design Principles
+
+## Separation of Concerns
+
+Each major part of the application has a focused responsibility.
+
+```text
+Controller  -> HTTP/Web interaction
+Service     -> Business logic
+Repository  -> Persistence
+Fraud       -> Fraud analysis
+ML          -> Machine Learning
+Security    -> Authentication/authorization
+JDBC        -> Direct database access
+GUI         -> Desktop monitoring
+Web         -> Servlet/filter functionality
+```
+
+## Modularity
+
+The fraud system is split into multiple components instead of one large class.
+
+## Explainability
+
+The system can distinguish between:
+
+- ML prediction
+- Behavioral anomaly
+- Limit exceeded
+- Insufficient balance
+- Final security decision
+
+## Security
+
+Authentication, password hashing, authorization, CSRF protection, security headers, and safe database operations are included.
+
+## Testability
+
+Important layers have automated tests.
+
+---
+
+# ✅ 48. What Has Been Implemented
+
+The current project contains:
+
+- User registration and login.
+- BCrypt password protection.
+- Role-based authorization.
+- User dashboard.
+- Transaction submission.
+- Transaction history.
+- Five transaction types.
+- Transaction validation.
+- Transaction limits.
+- Account balance validation.
+- APPROVED / DECLINED / BLOCKED decisions.
+- Random Forest fraud prediction.
+- Fraud probability.
+- Rule-based fraud detection.
+- Behavioral anomaly detection.
+- Risk assessment.
+- Fraud alerts.
+- Admin fraud-alert page.
+- MySQL persistence.
+- Spring Data JPA repositories.
+- Direct JDBC components.
+- Java Servlet metrics/filtering.
+- Java Swing monitoring GUI.
+- Rule-based, ML, and hybrid strategies.
+- Feature extraction.
+- ML dataset preparation.
+- ML model training/evaluation components.
+- Trained Random Forest models.
+- Automated tests across controllers, services, fraud detection, ML, GUI, JDBC, security, and web components.
+- SafePay web branding and frontend resources.
+
+---
+
+# 🚀 49. Future Improvements
+
+Possible future improvements include:
+
+- More advanced behavioral profiling.
+- Additional Machine Learning algorithms.
+- Automated model retraining.
+- More transaction features.
+- Real-time fraud monitoring.
+- Email/SMS fraud alerts.
+- Advanced analytics dashboards.
+- Docker deployment.
+- Cloud deployment.
+- Production-grade secrets management.
+- Real-time notifications.
+- Larger and continuously updated transaction datasets.
+
+---
+
+# 🎓 50. Academic Purpose
+
+SafePay demonstrates the practical use of:
+
+- Object-Oriented Programming
+- Java
+- Spring Boot
+- Spring Security
+- Database Management
+- JPA
+- JDBC
+- Machine Learning
+- Random Forest
+- Fraud Detection
+- Software Architecture
+- Automated Testing
+- Web Development
+- Java Swing
+- Servlets
+- Cybersecurity
+
+The project combines these technologies into an end-to-end transaction security application.
+
+---
+
+# 🏁 51. Final System Summary
+
+SafePay uses multiple layers to make a transaction decision:
+
+```text
+                 USER
+                   |
+                   v
+            AUTHENTICATION
+                   |
+                   v
+          TRANSACTION INPUT
+                   |
+                   v
+             VALIDATION
+                   |
+                   v
+          +--------+--------+
+          |                 |
+          v                 v
+     ML PREDICTION    RULE/BEHAVIOR
+          |                 |
+          +--------+--------+
+                   |
+                   v
+          SECURITY ANALYSIS
+                   |
+          +--------+--------+
+          |        |        |
+          v        v        v
+       APPROVED DECLINED BLOCKED
+          |        |        |
+          +--------+--------+
+                   |
+                   v
+               DATABASE
+                   |
+                   v
+             RESULT / ALERT
+```
+
+The key principle is:
+
+> **SafePay does not rely on Machine Learning alone. It combines learned predictions with deterministic security rules, transaction limits, account validation, and application security to produce an explainable final transaction decision.**
+
+---
+
+## 📄 License
+
+This project is intended primarily for academic and educational purposes.
