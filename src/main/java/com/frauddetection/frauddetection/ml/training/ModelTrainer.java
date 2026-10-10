@@ -2,13 +2,10 @@ package com.frauddetection.frauddetection.ml.training;
 
 import java.io.File;
 
-import org.springframework.stereotype.Component;
-
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instances;
 import weka.core.SerializationHelper;
 
-@Component
 public class ModelTrainer {
 
     private final DatasetLoader datasetLoader;

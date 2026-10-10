@@ -130,6 +130,9 @@ public class TransactionService {
         if (amount == null || amount.signum() <= 0) {
             throw new TransactionException("Amount must be greater than zero.");
         }
+        if (amount.scale() > 2) {
+            throw new TransactionException("Amount cannot have more than 2 decimal places.");
+        }
     }
 
     private FraudPredictionResult predict(Transaction transaction) {
