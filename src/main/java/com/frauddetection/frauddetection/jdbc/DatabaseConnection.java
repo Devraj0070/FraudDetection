@@ -25,7 +25,6 @@ public final class DatabaseConnection {
 
     private static final String DEFAULT_URL = "jdbc:mysql://localhost:3306/fraud_detection?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
     private static final String DEFAULT_USER = "root";
-    private static final String DEFAULT_PASSWORD = "";
 
     private static String jdbcUrl;
     private static String jdbcUser;
@@ -60,10 +59,10 @@ public final class DatabaseConnection {
             jdbcUser = DEFAULT_USER;
         }
 
-        if (envPassword != null) {
+        if (envPassword != null && !envPassword.trim().isEmpty()) {
             jdbcPassword = envPassword;
         } else {
-            jdbcPassword = DEFAULT_PASSWORD;
+            jdbcPassword = null;
         }
 
         // Try reading application.properties if available
@@ -74,17 +73,52 @@ public final class DatabaseConnection {
 
                 String propUrl = props.getProperty("spring.datasource.url");
                 if (propUrl != null && !propUrl.trim().isEmpty() && (envUrl == null || envUrl.isEmpty())) {
-                    jdbcUrl = propUrl.trim();
+                    String resolvedUrl = resolvePropertyPlaceholder(propUrl);
+                    if (resolvedUrl != null) {
+                        jdbcUrl = resolvedUrl;
+                    }
                 }
 
                 String propUser = props.getProperty("spring.datasource.username");
                 if (propUser != null && !propUser.trim().isEmpty() && (envUser == null || envUser.isEmpty())) {
-                    jdbcUser = propUser.trim();
+                    String resolvedUser = resolvePropertyPlaceholder(propUser);
+                    if (resolvedUser != null) {
+                        jdbcUser = resolvedUser;
+                    }
+                }
+
+                String propPassword = props.getProperty("spring.datasource.password");
+                if (propPassword != null && !propPassword.trim().isEmpty() && (envPassword == null || envPassword.isEmpty())) {
+                    String resolvedPassword = resolvePropertyPlaceholder(propPassword);
+                    if (resolvedPassword != null) {
+                        jdbcPassword = resolvedPassword;
+                    }
                 }
             }
         } catch (Exception e) {
             log.debug("Using fallback JDBC configuration: {}", e.getMessage());
         }
+    }
+
+    private static String resolvePropertyPlaceholder(String val) {
+        if (val == null) {
+            return null;
+        }
+        val = val.trim();
+        if (val.startsWith("${") && val.endsWith("}")) {
+            String inner = val.substring(2, val.length() - 1);
+            int colonIndex = inner.indexOf(':');
+            if (colonIndex >= 0) {
+                String envKey = inner.substring(0, colonIndex);
+                String defaultValue = inner.substring(colonIndex + 1);
+                String envVal = System.getenv(envKey);
+                return (envVal != null && !envVal.trim().isEmpty()) ? envVal.trim() : defaultValue.trim();
+            } else {
+                String envVal = System.getenv(inner);
+                return (envVal != null && !envVal.trim().isEmpty()) ? envVal.trim() : null;
+            }
+        }
+        return val;
     }
 
     /**
@@ -111,6 +145,12 @@ public final class DatabaseConnection {
                 }
             }
 
+            if (jdbcPassword == null || jdbcPassword.trim().isEmpty()) {
+                String msg = "Database connection password is not configured. Please set the DB_PASSWORD environment variable.";
+                log.warn(msg);
+                throw new DatabaseOperationException(msg);
+            }
+
             // Ensure MySQL Driver is loaded
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
@@ -132,6 +172,10 @@ public final class DatabaseConnection {
      */
     public static Connection getConnection(String url, String username, String password)
             throws DatabaseOperationException {
+        if (password == null || password.trim().isEmpty()) {
+            throw new DatabaseOperationException(
+                    "Direct JDBC connection failed: Database password is not configured. Please set the DB_PASSWORD environment variable.");
+        }
         try {
             return DriverManager.getConnection(url, username, password);
         } catch (SQLException ex) {

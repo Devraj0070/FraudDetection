@@ -2,14 +2,11 @@ package com.frauddetection.frauddetection.ml.training;
 
 import java.io.File;
 
-import org.springframework.stereotype.Component;
-
 import weka.core.Instances;
 import weka.core.converters.CSVLoader;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NumericToNominal;
 
-@Component
 public class DatasetLoader {
 
     public Instances loadDataset(String filePath) throws Exception {

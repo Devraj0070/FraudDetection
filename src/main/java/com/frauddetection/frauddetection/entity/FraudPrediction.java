@@ -2,6 +2,7 @@ package com.frauddetection.frauddetection.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,10 +29,10 @@ public class FraudPrediction {
     @OneToOne
     private Transaction transaction;
 
-    @jakarta.persistence.Transient
+    @Column(name = "rule_anomaly")
     private boolean ruleAnomaly;
 
-    @jakarta.persistence.Transient
+    @Column(name = "detection_reason")
     private String detectionReason;
 
     public FraudPrediction() {

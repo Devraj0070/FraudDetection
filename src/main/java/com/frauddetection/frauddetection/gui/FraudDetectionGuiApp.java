@@ -7,6 +7,8 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.frauddetection.frauddetection.client.SafePayApiClient;
+
 /**
  * Main launcher entry point for the Java GUI Desktop Application.
  *
@@ -40,11 +42,15 @@ public class FraudDetectionGuiApp {
 
         SwingUtilities.invokeLater(() -> {
             try {
-                FraudMonitorFrame frame = new FraudMonitorFrame();
-                frame.setVisible(true);
-                log.info("FraudGuard Enterprise Desktop GUI initialized successfully.");
+                SafePayApiClient apiClient = new SafePayApiClient("http://127.0.0.1:8080");
+                AuthFrame authFrame = new AuthFrame(apiClient, authResp -> {
+                    DashboardFrame dashboard = new DashboardFrame(apiClient, authResp);
+                    dashboard.setVisible(true);
+                });
+                authFrame.setVisible(true);
+                log.info("SafePay Desktop GUI initialized successfully.");
             } catch (Exception e) {
-                log.error("Failed to display FraudGuard Desktop GUI: {}", e.getMessage(), e);
+                log.error("Failed to display SafePay Desktop GUI: {}", e.getMessage(), e);
             }
         });
     }
