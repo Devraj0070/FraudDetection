@@ -96,7 +96,7 @@ public class SafePayApiClient {
                 if (csrfResponse.headerName() != null && !csrfResponse.headerName().isBlank()) {
                     this.csrfHeaderName = csrfResponse.headerName();
                 }
-                log.debug("Acquired CSRF token via {}: {}", csrfHeaderName, csrfToken);
+                log.debug("Acquired CSRF token via header {}", csrfHeaderName);
                 return csrfResponse;
             } else {
                 throw new ApiClientException(response.statusCode(),
@@ -583,11 +583,20 @@ public class SafePayApiClient {
                 if (root.isArray()) {
                     for (JsonNode node : root) {
                         Long id = node.has("id") && !node.get("id").isNull() ? node.get("id").asLong() : null;
-                        BigDecimal amt = node.has("amount") && !node.get("amount").isNull()
-                                ? new BigDecimal(node.get("amount").asText()) : BigDecimal.ZERO;
-                        String tType = node.has("transactionType") ? node.get("transactionType").asText() : "PAYMENT";
-                        String tStatus = node.has("status") ? node.get("status").asText() : "UNKNOWN";
-                        String time = node.has("transactionTime") ? node.get("transactionTime").asText() : "";
+                        JsonNode amountNode = node.get("amount");
+                        BigDecimal amt = amountNode != null && !amountNode.isNull() ? amountNode.decimalValue() : BigDecimal.ZERO;
+                        JsonNode transactionTypeNode = node.get("transactionType");
+                        String tType = transactionTypeNode != null && !transactionTypeNode.isNull()
+                                ? transactionTypeNode.asString()
+                                : "PAYMENT";
+                        JsonNode statusNode = node.get("status");
+                        String tStatus = statusNode != null && !statusNode.isNull()
+                                ? statusNode.stringValue()
+                                : "UNKNOWN";
+                        JsonNode transactionTimeNode = node.get("transactionTime");
+                        String time = transactionTimeNode != null && !transactionTimeNode.isNull()
+                                ? transactionTimeNode.stringValue()
+                                : "";
                         list.add(new TransactionSummaryDto(id, amt, tType, tStatus, time));
                     }
                 }
@@ -661,10 +670,10 @@ public class SafePayApiClient {
             try {
                 JsonNode node = objectMapper.readTree(responseBody);
                 if (node.has("error")) {
-                    return node.get("error").asText();
+                    return node.get("error").asString();
                 }
                 if (node.has("message")) {
-                    return node.get("message").asText();
+                    return node.get("message").asString();
                 }
             } catch (Exception ignored) {
             }

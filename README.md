@@ -1,66 +1,64 @@
-# 🛡️ SafePay — AI-Powered Fraud Detection System
+# 💳 SafePay — AI-Powered Fraud Detection System
 
 <p align="center">
-  <strong>💳 Secure Transactions · 🤖 Machine Learning · 🚨 Fraud Monitoring · 🔐 Web Security</strong>
+  <img src="https://img.shields.io/badge/Java-25-orange?style=for-the-badge&logo=openjdk&logoColor=white" alt="Java 25" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-Backend-6DB33F?style=for-the-badge&logo=springboot&logoColor=white" alt="Spring Boot" />
+  <img src="https://img.shields.io/badge/Java%20Swing-Desktop%20UI-4479A1?style=for-the-badge&logo=java&logoColor=white" alt="Java Swing" />
+  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
+  <img src="https://img.shields.io/badge/Weka-Machine%20Learning-8A2BE2?style=for-the-badge" alt="Weka" />
 </p>
 
 <p align="center">
-  <img alt="Java" src="https://img.shields.io/badge/Java-25-orange?logo=openjdk&logoColor=white">
-  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-4.1.1-6DB33F?logo=springboot&logoColor=white">
-  <img alt="Maven" src="https://img.shields.io/badge/Maven-Build%20Tool-C71A36?logo=apachemaven&logoColor=white">
-  <img alt="MySQL" src="https://img.shields.io/badge/MySQL-Database-4479A1?logo=mysql&logoColor=white">
-  <img alt="Weka" src="https://img.shields.io/badge/ML-Weka%203.8.6-6C5CE7">
-  <img alt="License" src="https://img.shields.io/badge/Project-Academic%20Demo-blue">
+  <b>🛡️ Smarter Transactions. Safer Payments. Intelligent Fraud Detection.</b>
 </p>
 
+<<<<<<< HEAD
 > An end-to-end academic fraud detection platform that combines Machine Learning, rule-based detection, behavioral analysis, transaction validation, secure authentication, database persistence, a complete standalone Java Swing desktop application.
+=======
+SafePay is an **AI-powered fraud detection system** built with Java. It combines transaction analysis, fraud-risk assessment, machine-learning components, and a desktop interface to help identify potentially suspicious financial activity.
+
+The project uses a **Java Swing and Java2D desktop application** connected to a **Spring Boot REST API**, with MySQL for data storage and Weka for machine-learning functionality.
+>>>>>>> origin/main
 
 ---
 
-## 📌 1. Project Overview
+## ✨ Key Features
 
-**SafePay** is an AI-powered financial transaction fraud detection system built to identify suspicious transactions before they can affect a user's account.
+### 🖥️ Modern Desktop Application
+- 🔐 Login and registration interface.
+- 📊 Dashboard for transaction and account summaries.
+- 💸 Transaction submission interface.
+- 📜 Transaction history view.
+- 📈 Java2D transaction-amount chart.
+- 🛡️ Admin monitoring interface for fraud alerts.
 
-The project uses a **multi-layer detection approach** instead of depending on only one method:
+### 🔌 Backend and REST API
+- ⚙️ Spring Boot REST API.
+- 🔑 Spring Security authentication and authorization.
+- 🛡️ CSRF protection for API requests.
+- 👤 Transaction ownership checks.
+- 📡 API endpoints for authentication, dashboard data, transactions, and administrative operations.
+- ⚠️ Centralized exception handling.
 
-1. Transaction validation
-2. Machine Learning prediction
-3. Rule-based fraud detection
-4. Behavioral anomaly detection
-5. Transaction-limit validation
-6. Account-balance validation
-7. Security and authorization
-8. Database persistence
+### 🤖 Fraud Detection and Machine Learning
+- 🔎 Rule-based fraud checks.
+- 📉 Transaction feature extraction.
+- 🧠 Weka-based machine-learning components.
+- 🧪 Dataset loading and preprocessing utilities.
+- 📊 Model-training and evaluation utilities where available.
 
-The system produces three main transaction outcomes:
-
-- **APPROVED** — the transaction is valid and safe to process.
-- **DECLINED** — the transaction is valid but cannot be processed because of a business rule such as a transaction limit or insufficient balance.
-- **BLOCKED** — the transaction is considered suspicious and is stopped for fraud/security reasons.
-
-A major design goal is to keep the **Machine Learning prediction** separate from the **final security decision**.
-
-For example, the ML model may predict:
-
-```text
-ML Prediction: LEGITIMATE
-Fraud Probability: 0.00%
-```
-
-while the behavioral engine identifies suspicious activity:
-
-```text
-Behavioral Analysis: SUSPICIOUS
-Final Decision: BLOCKED
-Detection Reason: Behavioral Anomaly
-```
-
-This allows the system to explain *which detection layer* caused the final decision.
+### 🧪 Testing and Reliability
+- ✅ Automated tests for backend services and REST controllers.
+- 🔐 Authentication and authorization tests.
+- 💳 Transaction-processing tests.
+- 🧠 Fraud-rule and feature-extraction tests.
+- 🖥️ Desktop UI tests.
 
 ---
 
-# 🎯 2. Project Objectives
+## 🛠️ Technology Stack
 
+<<<<<<< HEAD
 The project was developed to demonstrate a complete fraud-detection workflow using Java and related technologies.
 
 ### Main objectives
@@ -172,38 +170,54 @@ BCrypt is used for password hashing.
 The application does not need to store the original user password.
 
 The basic process is:
+=======
+| Technology | Purpose |
+|---|---|
+| ☕ **Java 25** | Core programming language |
+| 🍃 **Spring Boot** | Backend application and REST API |
+| 🖥️ **Java Swing** | Native desktop interface |
+| 🎨 **Java2D** | Custom charts and desktop graphics |
+| 🔐 **Spring Security** | Authentication and authorization |
+| 🧠 **Weka** | Machine-learning functionality |
+| 🗄️ **MySQL 8** | Relational database |
+| 📦 **Maven Wrapper** | Build and dependency management |
+| 🧪 **JUnit / Maven Surefire** | Automated testing, where configured |
+| 🌿 **Git and GitHub** | Version control and collaboration |
+
+> Check `pom.xml` for the exact dependency versions and test libraries configured in the current source code.
+
+---
+
+## 🏗️ System Architecture
+>>>>>>> origin/main
 
 ```text
-User Password
-      |
-      v
-   BCrypt
-      |
-      v
-Password Hash
-      |
-      v
-   Database
+       👤 User / Administrator
+                  |
+                  v
+      🖥️ Java Swing Desktop App
+              + Java2D
+                  |
+                  v
+          🔌 REST API Client
+                  |
+                  v
+       🍃 Spring Boot REST API
+                  |
+          +-------+-------+
+          |       |       |
+          v       v       v
+       🔐 Auth  💳 Fraud  📊 Dashboard
+          |       |
+          v       v
+       🗄️ MySQL  🧠 Weka / Risk Rules
 ```
 
----
-
-## 🐬 4.5 MySQL
-
-MySQL is used as the persistent database.
-
-It stores information related to:
-
-- Users
-- Accounts
-- Transactions
-- Fraud predictions
-- Fraud alerts
-
-The database allows information to remain available after the application is restarted.
+The desktop client communicates with the backend through HTTP API requests. The backend handles application logic, security checks, and data access.
 
 ---
 
+<<<<<<< HEAD
 ## 🗃️ 4.6 Spring Data JPA
 
 Spring Data JPA is used to map Java objects to database records.
@@ -1312,462 +1326,152 @@ This gives the project automated coverage across several architectural layers.
 ---
 
 # 🗂️ 40. Project Structure
+=======
+## 📂 Project Structure
+>>>>>>> origin/main
 
 ```text
 fraud-detection-system/
-|
-+-- .mvn/
-|   +-- wrapper/
-|       +-- maven-wrapper.properties
-|
-+-- ml/
-|   +-- dataset/
-|   |   +-- fraud_test.csv
-|   |   +-- fraud_train.csv
-|   |   +-- fraud_transactions.csv
-|   |   +-- fraud_transactions_generated.csv
-|   |   +-- fraud_validation.csv
-|   |   +-- generate_dataset.py
-|   |
-|   +-- models/
-|   |   +-- fraud_random_forest.model
-|   |   +-- fraud_random_forest_final.model
-|   |
-|   +-- preprocessing/
-|       +-- create_fraud_dataset_splits.py
-|       +-- create_realistic_test.py
-|       +-- prepare_paysim.py
-|       +-- split_paysim.py
-|
-+-- src/
-|   +-- main/
-|   |   +-- java/
-|   |   |   +-- com/frauddetection/frauddetection/
-|   |   |       +-- config/
-|   |   |       +-- controller/
-|   |   |       +-- entity/
-|   |   |       +-- exception/
-|   |   |       +-- fraud/
-|   |   |       |   +-- feature/
-|   |   |       |   +-- prediction/
-|   |   |       +-- gui/
-|   |   |       +-- jdbc/
-|   |   |       +-- ml/
-|   |   |       |   +-- evaluation/
-|   |   |       |   +-- model/
-|   |   |       |   +-- training/
-|   |   |       +-- repository/
-|   |   |       +-- security/
-|   |   |       +-- service/
-|   |   |       +-- web/
-|   |   |
-|   |   +-- resources/
-|   |       +-- application.properties
-|   |       +-- static/
-|   |       |   +-- css/
-|   |       |   +-- images/
-|   |       +-- templates/
-|   |           +-- admin/
-|   |           +-- auth/
-|   |           +-- error/
-|   |           +-- user/
-|   |
-|   +-- test/
-|       +-- java/
-|           +-- com/frauddetection/frauddetection/
-|               +-- controller/
-|               +-- fraud/
-|               +-- gui/
-|               +-- jdbc/
-|               +-- ml/
-|               +-- security/
-|               +-- service/
-|               +-- web/
-|
-+-- IMP.sql
-+-- pom.xml
-+-- mvnw
-+-- mvnw.cmd
-+-- .gitignore
-+-- .gitattributes
-+-- README.md
+├── ml/
+│   ├── models/                  # Model artifacts, if present
+│   └── preprocessing/           # Dataset preparation scripts
+├── src/
+│   ├── main/
+│   │   ├── java/com/frauddetection/frauddetection/
+│   │   │   ├── client/          # REST API client
+│   │   │   ├── config/          # Application and security config
+│   │   │   ├── controller/      # REST API controllers
+│   │   │   ├── dto/             # API data transfer objects
+│   │   │   ├── entity/          # Database entities
+│   │   │   ├── exception/       # Exception handling
+│   │   │   ├── fraud/           # Fraud rules and feature extraction
+│   │   │   ├── gui/             # Swing screens and Java2D charts
+│   │   │   ├── jdbc/            # Database utilities
+│   │   │   ├── ml/              # Machine-learning utilities
+│   │   │   └── service/         # Business logic
+│   │   └── resources/
+│   │       ├── static/          # Static resources
+│   │       └── templates/       # Existing web resources
+│   └── test/
+│       └── java/                # Automated tests
+├── design-references/            # UI reference images
+├── launch-safepay.bat            # Windows launcher, if present
+├── mvnw
+├── mvnw.cmd
+└── pom.xml
 ```
-
-> The `target/` directory shown by a local Windows folder listing is a Maven build-output directory containing compiled classes and test reports. It is generated by Maven and is not part of the logical source structure.
 
 ---
 
-# 📋 41. Requirements
+## 🚀 Getting Started
+
+### 📋 Prerequisites
 
 Install the following:
 
-- **JDK 25**
-- **MySQL 8.x**
-- **Git**
+- ☕ JDK version required by `pom.xml` (Java 25 is the project's configured target).
+- 🗄️ MySQL 8.
+- 🪟 Windows PowerShell or Command Prompt.
+- 🌿 Git, if cloning the repository.
 
-Maven does not need to be installed separately because the project contains the Maven Wrapper:
+### 1️⃣ Clone the Repository
 
-```text
-mvnw
-mvnw.cmd
+```bash
+git clone https://github.com/Devraj0070/FraudDetection.git
+cd FraudDetection
 ```
 
----
+### 2️⃣ Configure MySQL
 
-# 🗄️ 42. Database Setup
-
-Create the database:
-
-```sql
-CREATE DATABASE fraud_detection;
-```
-
-Then configure:
+Open:
 
 ```text
 src/main/resources/application.properties
 ```
 
-Example:
+Configure the database URL, username, and password for your local environment. Create the required database and schema according to the project's setup.
 
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/fraud_detection
-spring.datasource.username=root
-spring.datasource.password=${DB_PASSWORD}
+🔒 **Never commit real database credentials, API keys, or private tokens.**
 
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-spring.jpa.properties.hibernate.format_sql=true
-```
+### 3️⃣ Build the Application
 
-Set the environment variable:
-
-```text
-DB_PASSWORD
-```
-
-to the local MySQL password.
-
-**Do not commit real database passwords to GitHub.**
-
----
-
-# ▶️ 43. Running the Project
-
-Clone the repository:
-
-```powershell
-git clone https://github.com/Devraj0070/FraudDetection.git
-```
-
-Enter the project:
-
-```powershell
-cd FraudDetection
-```
-
-Start the application on Windows:
-
-```powershell
-.\mvnw.cmd spring-boot:run
-```
-
-After the application starts, open:
-
-```text
-http://localhost:8080
-```
-
----
-
-# 🏗️ 44. Building the Project
-
-Run:
+On Windows:
 
 ```powershell
 .\mvnw.cmd clean package
 ```
 
----
-
-# ✅ 45. Running Tests
-
-Run the complete test suite:
+### 4️⃣ Run Automated Tests
 
 ```powershell
-.\mvnw.cmd clean test
+.\mvnw.cmd test
 ```
 
-A successful build ends with:
+📄 Test reports are generated under:
 
 ```text
-BUILD SUCCESS
+target/surefire-reports/
 ```
 
----
+Review any test failures before treating the build as verified.
 
-# 🧾 46. Example End-to-End Scenarios
+### 5️⃣ Launch SafePay
 
-## Scenario A — Normal Payment
+If the Windows launcher is available, run:
 
-```text
-User submits:
-₹500 PAYMENT
-
-        |
-        v
-Validation
-        |
-        v
-ML Prediction
-LEGITIMATE
-        |
-        v
-Behavioral Analysis
-NORMAL
-        |
-        v
-Limit Check
-PASS
-        |
-        v
-Balance Check
-PASS
-        |
-        v
-APPROVED
-        |
-        v
-Account balance updated
+```powershell
+.\launch-safepay.bat
 ```
 
----
-
-## Scenario B — Limit Exceeded
-
-```text
-User submits:
-₹150,000 PAYMENT
-
-        |
-        v
-Fraud analysis
-LEGITIMATE
-        |
-        v
-Transaction limit
-EXCEEDED
-        |
-        v
-DECLINED
-        |
-        v
-Account balance unchanged
-```
-
-The transaction is declined because of the application-defined transaction limit, not because it was automatically classified as fraud.
+Follow the launcher's prompts to start the required application components.
 
 ---
 
-## Scenario C — Behavioral Fraud Detection
+## 🔐 Security Principles
 
-```text
-Previous transaction activity
-          +
-Very large current transaction
-          |
-          v
-Machine Learning
-LEGITIMATE
-          |
-          v
-Behavioral Rule Engine
-SUSPICIOUS
-          |
-          v
-BLOCKED
-          |
-          v
-Balance unchanged
-          |
-          v
-Fraud/security information recorded
-```
+- 🔑 Keep authentication and authorization enabled.
+- 👤 Restrict transaction access to the authorized owner.
+- 🛡️ Validate transaction inputs and access permissions.
+- 🔒 Keep passwords and secrets out of source control.
+- 🧪 Test fraud rules and security controls before deployment.
 
-This demonstrates the purpose of combining ML and deterministic rules.
+> ⚠️ **Disclaimer:** SafePay is a development project. It is not a certified payment-processing platform. Production use requires additional security testing, reliability validation, privacy controls, and regulatory review.
 
 ---
 
-# 🧭 47. Design Principles
+## 🗺️ Future Improvements
 
-## Separation of Concerns
+Potential areas for future development include:
 
-Each major part of the application has a focused responsibility.
+- ✨ Further polish and animation for the desktop interface.
+- 📦 Windows installer packaging.
+- 📊 More detailed fraud analytics.
+- 🧪 Improved automated UI testing.
+- 🔔 Real-time fraud-alert updates.
+- 📈 Expanded model evaluation and monitoring.
 
-```text
-Controller  -> HTTP/Web interaction
-Service     -> Business logic
-Repository  -> Persistence
-Fraud       -> Fraud analysis
-ML          -> Machine Learning
-Security    -> Authentication/authorization
-JDBC        -> Direct database access
-GUI         -> Desktop monitoring
-Web         -> Servlet/filter functionality
-```
-
-## Modularity
-
-The fraud system is split into multiple components instead of one large class.
-
-## Explainability
-
-The system can distinguish between:
-
-- ML prediction
-- Behavioral anomaly
-- Limit exceeded
-- Insufficient balance
-- Final security decision
-
-## Security
-
-Authentication, password hashing, authorization, CSRF protection, security headers, and safe database operations are included.
-
-## Testability
-
-Important layers have automated tests.
+These are potential improvements, not claims that the features are already implemented.
 
 ---
 
-# ✅ 48. What Has Been Implemented
+## 🤝 Contributing
 
-The current project contains:
+Contributions and suggestions are welcome.
 
-- User registration and login.
-- BCrypt password protection.
-- Role-based authorization.
-- User dashboard.
-- Transaction submission.
-- Transaction history.
-- Five transaction types.
-- Transaction validation.
-- Transaction limits.
-- Account balance validation.
-- APPROVED / DECLINED / BLOCKED decisions.
-- Random Forest fraud prediction.
-- Fraud probability.
-- Rule-based fraud detection.
-- Behavioral anomaly detection.
-- Risk assessment.
-- Fraud alerts.
-- Admin fraud-alert page.
-- MySQL persistence.
-- Spring Data JPA repositories.
-- Direct JDBC components.
-- Java Servlet metrics/filtering.
-- Java Swing monitoring GUI.
-- Rule-based, ML, and hybrid strategies.
-- Feature extraction.
-- ML dataset preparation.
-- ML model training/evaluation components.
-- Trained Random Forest models.
-- Automated tests across controllers, services, fraud detection, ML, GUI, JDBC, security, and web components.
-- SafePay web branding and frontend resources.
+1. Create a branch for your changes.
+2. Make a focused improvement.
+3. Add or update relevant tests.
+4. Run the test suite.
+5. Open a pull request for review.
 
 ---
 
-# 🚀 49. Future Improvements
+## 📜 License
 
-Possible future improvements include:
-
-- More advanced behavioral profiling.
-- Additional Machine Learning algorithms.
-- Automated model retraining.
-- More transaction features.
-- Real-time fraud monitoring.
-- Email/SMS fraud alerts.
-- Advanced analytics dashboards.
-- Docker deployment.
-- Cloud deployment.
-- Production-grade secrets management.
-- Real-time notifications.
-- Larger and continuously updated transaction datasets.
+A license has not yet been specified here. Add the project's chosen license before allowing reuse under particular terms.
 
 ---
 
-# 🎓 50. Academic Purpose
-
-SafePay demonstrates the practical use of:
-
-- Object-Oriented Programming
-- Java
-- Spring Boot
-- Spring Security
-- Database Management
-- JPA
-- JDBC
-- Machine Learning
-- Random Forest
-- Fraud Detection
-- Software Architecture
-- Automated Testing
-- Web Development
-- Java Swing
-- Servlets
-- Cybersecurity
-
-The project combines these technologies into an end-to-end transaction security application.
-
----
-
-# 🏁 51. Final System Summary
-
-SafePay uses multiple layers to make a transaction decision:
-
-```text
-                 USER
-                   |
-                   v
-            AUTHENTICATION
-                   |
-                   v
-          TRANSACTION INPUT
-                   |
-                   v
-             VALIDATION
-                   |
-                   v
-          +--------+--------+
-          |                 |
-          v                 v
-     ML PREDICTION    RULE/BEHAVIOR
-          |                 |
-          +--------+--------+
-                   |
-                   v
-          SECURITY ANALYSIS
-                   |
-          +--------+--------+
-          |        |        |
-          v        v        v
-       APPROVED DECLINED BLOCKED
-          |        |        |
-          +--------+--------+
-                   |
-                   v
-               DATABASE
-                   |
-                   v
-             RESULT / ALERT
-```
-
-The key principle is:
-
-> **SafePay does not rely on Machine Learning alone. It combines learned predictions with deterministic security rules, transaction limits, account validation, and application security to produce an explainable final transaction decision.**
-
----
-
-## 📄 License
-
-This project is intended primarily for academic and educational purposes.
+<p align="center">
+  <b>💳 SafePay — Making Every Transaction Smarter and Safer. 🛡️</b>
+</p>
