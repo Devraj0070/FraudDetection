@@ -275,6 +275,11 @@ class DashboardFrameTest {
     @Test
     @DisplayName("DashboardFrame initializes and navigates to TransactionHistoryPanel and AdminMonitoringPanel")
     void dashboardFrame_navigatesToHistoryAndAlerts() throws Exception {
+        org.junit.jupiter.api.Assumptions.assumeFalse(
+                java.awt.GraphicsEnvironment.isHeadless(),
+                "Skipping GUI test in headless environment"
+        );
+
         final DashboardFrame[] frameHolder = new DashboardFrame[1];
 
         SwingUtilities.invokeAndWait(() -> {

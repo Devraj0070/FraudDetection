@@ -43,21 +43,21 @@
 
 		<!-- Spring Data JPA -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-jpa</artifactId>
-		</dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-aspects</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
 
 		<!-- Spring Security -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-security</artifactId>
-		</dependency>
-
-		<!-- Thymeleaf -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf</artifactId>
-		</dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
 
 		<!-- Spring Web -->
 		<dependency>
@@ -65,17 +65,65 @@
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
 
-		<!-- Thymeleaf Spring Security -->
-		<dependency>
-			<groupId>org.thymeleaf.extras</groupId>
-			<artifactId>thymeleaf-extras-springsecurity6</artifactId>
-		</dependency>
-
 		<!-- Machine Learning -->
 		<dependency>
 			<groupId>nz.ac.waikato.cms.weka</groupId>
 			<artifactId>weka-stable</artifactId>
 			<version>3.8.6</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_ref-osx-x86_64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_ref-linux-x86_64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_ref-linux-i686</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_ref-win-x86_64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_ref-win-i686</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_ref-linux-armhf</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_system-osx-x86_64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_system-linux-x86_64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_system-linux-i686</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_system-win-x86_64</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_system-win-i686</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.github.fommil.netlib</groupId>
+					<artifactId>netlib-native_system-linux-armhf</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<!-- MySQL -->
@@ -86,6 +134,11 @@
 		</dependency>
 
 		<!-- Test -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
@@ -100,16 +153,9 @@
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-thymeleaf-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 	</dependencies>
 
 	<build>

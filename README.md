@@ -13,7 +13,7 @@
   <img alt="License" src="https://img.shields.io/badge/Project-Academic%20Demo-blue">
 </p>
 
-> An end-to-end academic fraud detection platform that combines Machine Learning, rule-based detection, behavioral analysis, transaction validation, secure authentication, database persistence, a web interface, and a Java Swing monitoring application.
+> An end-to-end academic fraud detection platform that combines Machine Learning, rule-based detection, behavioral analysis, transaction validation, secure authentication, database persistence, a complete standalone Java Swing desktop application.
 
 ---
 
@@ -74,7 +74,7 @@ The project was developed to demonstrate a complete fraud-detection workflow usi
 - Distinguish fraud from normal business-rule failures.
 - Implement secure authentication and role-based authorization.
 - Store application data in MySQL.
-- Provide transaction results and history through a web interface.
+- Provide transaction results and history through a Swing desktop interface.
 - Provide administrative fraud alerts.
 - Include a desktop monitoring/simulation application.
 - Include automated tests for major components.
@@ -92,9 +92,6 @@ The project was developed to demonstrate a complete fraud-detection workflow usi
 | **Spring Data JPA** | Entity mapping and database persistence |
 | **MySQL** | Persistent relational database |
 | **Maven** | Build system and dependency management |
-| **Thymeleaf** | Server-side HTML rendering |
-| **HTML** | Web interface structure |
-| **CSS** | Web interface styling |
 | **Weka 3.8.6** | Machine Learning functionality |
 | **Random Forest** | Fraud classification model |
 | **JDBC** | Direct SQL/database access |
@@ -113,7 +110,6 @@ The project was developed to demonstrate a complete fraud-detection workflow usi
 | 🐬 **MySQL** | Data storage | Keeps users, accounts, transactions, predictions, and alerts. |
 | 🗃️ **Spring Data JPA** | Object/database mapping | Maps Java entities to database records and provides repository operations. |
 | 🔌 **JDBC** | Direct SQL access | Supports explicit SQL operations through the project's DAO/service classes. |
-| 🧩 **Thymeleaf + HTML + CSS** | Web pages | Renders dynamic server data into pages and styles the user interface. |
 | 🔐 **Spring Security + BCrypt** | Web security | Protects routes and verifies securely hashed passwords. |
 | 🤖 **Weka + Random Forest** | ML fraud prediction | Loads the trained model and estimates whether a transaction looks fraudulent. |
 | 🖥️ **Java Swing** | Desktop tool | Provides the separate monitoring and transaction-simulation GUI. |
@@ -153,7 +149,7 @@ It also gives the project a standard layered backend architecture.
 
 ## 🔐 4.3 Spring Security
 
-Spring Security is used to protect the web application.
+Spring Security is used to protect the API endpoints.
 
 It handles:
 
@@ -236,7 +232,7 @@ This is useful both technically and academically because the project demonstrate
 
 ## 🧩 4.8 Thymeleaf
 
-Thymeleaf is used to connect Spring Boot backend data with HTML pages.
+The Java GUI communicates with real Spring Boot components replacing previous HTML.
 
 It allows dynamic information such as:
 
@@ -728,7 +724,7 @@ Protected administrative endpoints cannot be accessed by normal users.
 
 Spring Security provides CSRF protection for the web application.
 
-Security headers are also configured to add another layer of protection to the web interface.
+
 
 The project therefore does not treat fraud detection as only a Machine Learning problem; application security is also part of the system.
 

@@ -71,12 +71,6 @@ class AdminAuthorizationTest {
     }
 
     @Test
-    void unauthenticatedUserCannotAccessAdminAlerts() throws Exception {
-        mockMvc.perform(get("/admin/alerts"))
-                .andExpect(status().is3xxRedirection());
-    }
-
-    @Test
     void unauthenticatedUserCannotAccessApiAdminAlerts() throws Exception {
         mockMvc.perform(get("/api/admin/alerts"))
                 .andExpect(status().isUnauthorized());
@@ -84,24 +78,9 @@ class AdminAuthorizationTest {
 
     @Test
     @WithMockUser(username = "alice", roles = "USER")
-    void userCannotAccessAdminAlerts() throws Exception {
-        mockMvc.perform(get("/admin/alerts"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username = "alice", roles = "USER")
     void userCannotAccessApiAdminAlerts() throws Exception {
         mockMvc.perform(get("/api/admin/alerts"))
                 .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
-    void adminCanAccessAdminAlerts() throws Exception {
-        mockMvc.perform(get("/admin/alerts"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("admin/alerts"));
     }
 
     @Test
@@ -259,56 +238,9 @@ class AdminAuthorizationTest {
     }
 
     @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
-    void adminAlertsPageRendersExistingAlerts() throws Exception {
-        Transaction transaction = new Transaction();
-        transaction.setAmount(new BigDecimal("250.00"));
-        transaction.setTransactionTime(LocalDateTime.of(2026, 10, 6, 12, 0));
-
-        FraudAlert alert = new FraudAlert();
-        alert.setAlertType("VELOCITY");
-        alert.setSeverity("HIGH");
-        alert.setStatus("OPEN");
-        alert.setCreatedAt(LocalDateTime.of(2026, 10, 6, 12, 5));
-        alert.setTransaction(transaction);
-
-        Mockito.when(fraudAlertRepository.findAllByOrderByCreatedAtDesc())
-                .thenReturn(List.of(alert));
-
-        mockMvc.perform(get("/admin/alerts"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("admin/alerts"))
-                .andExpect(model().attribute("alerts", List.of(alert)));
-    }
-
-    @Test
-    @WithMockUser(username = "admin", roles = "ADMIN")
-    void adminAlertsPageRendersWhenNoAlertsExist() throws Exception {
-        Mockito.when(fraudAlertRepository.findAllByOrderByCreatedAtDesc())
-                .thenReturn(List.of());
-
-        mockMvc.perform(get("/admin/alerts"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("admin/alerts"))
-                .andExpect(model().attribute("alerts", List.of()));
-    }
-
-    @Test
-    void loginStaysPublic() throws Exception {
-        mockMvc.perform(get("/login"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    void registerStaysPublic() throws Exception {
-        mockMvc.perform(get("/register"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
     @WithMockUser(username = "alice", roles = "USER")
     void existingAuthenticatedUserAccessStillWorks() throws Exception {
-        mockMvc.perform(get("/dashboard"))
+        mockMvc.perform(get("/api/dashboard"))
                 .andExpect(status().isOk());
     }
 
@@ -318,53 +250,4 @@ class AdminAuthorizationTest {
                 .andExpect(status().isForbidden());
     }
 
-    @Test
-    @WithMockUser(username = "dash_user", roles = "USER")
-    void dashboardRendersSuccessfullyForUserWithAccount() throws Exception {
-        User user = new User();
-        user.setUsername("dash_user");
-        user.setEmail("dash@test.com");
-        user.setPassword("password");
-        user.setRole("USER");
-        user = userRepository.save(user);
-
-        Account account = new Account();
-        account.setAccountNumber("100000000099");
-        account.setAccountType("SAVINGS");
-        account.setBalance(new BigDecimal("5000.00"));
-        account.setStatus("ACTIVE");
-        account.setUser(user);
-        accountRepository.save(account);
-
-        mockMvc.perform(get("/dashboard"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("user/dashboard"))
-                .andExpect(model().attribute("username", "dash_user"))
-                .andExpect(model().attribute("balance", new BigDecimal("5000.00")));
     }
-
-    @Test
-    @WithMockUser(username = "dash_admin", roles = "ADMIN")
-    void dashboardRendersSuccessfullyForAdminWithAccount() throws Exception {
-        User admin = new User();
-        admin.setUsername("dash_admin");
-        admin.setEmail("admin@test.com");
-        admin.setPassword("password");
-        admin.setRole("ADMIN");
-        admin = userRepository.save(admin);
-
-        Account account = new Account();
-        account.setAccountNumber("100000000098");
-        account.setAccountType("SAVINGS");
-        account.setBalance(new BigDecimal("10000.00"));
-        account.setStatus("ACTIVE");
-        account.setUser(admin);
-        accountRepository.save(account);
-
-        mockMvc.perform(get("/dashboard"))
-                .andExpect(status().isOk())
-                .andExpect(view().name("user/dashboard"))
-                .andExpect(model().attribute("username", "dash_admin"))
-                .andExpect(model().attribute("balance", new BigDecimal("10000.00")));
-    }
-}

@@ -56,16 +56,7 @@ public class SecurityConfig {
             .securityContext(sc -> sc
                 .securityContextRepository(securityContextRepository())
             )
-            .exceptionHandling(ex -> ex
-                .defaultAuthenticationEntryPointFor(
-                    new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                    request -> request.getRequestURI() != null && request.getRequestURI().startsWith("/api")
-                )
-                .defaultAuthenticationEntryPointFor(
-                    new LoginUrlAuthenticationEntryPoint("/login"),
-                    request -> true
-                )
-            )
+            .exceptionHandling(ex -> ex.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/admin/**", "/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(
@@ -81,11 +72,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .userDetailsService(userDetailsService)
-            .formLogin(form -> form
-                .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
-                .permitAll()
-            )
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessHandler((request, response, authentication) -> {
