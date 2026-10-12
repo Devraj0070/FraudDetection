@@ -3,9 +3,7 @@ package com.frauddetection.frauddetection.security;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,7 +21,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.frauddetection.frauddetection.entity.Account;
-import com.frauddetection.frauddetection.entity.FraudAlert;
 import com.frauddetection.frauddetection.entity.Transaction;
 import com.frauddetection.frauddetection.entity.TransactionType;
 import com.frauddetection.frauddetection.entity.User;
