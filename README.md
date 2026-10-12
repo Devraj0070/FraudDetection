@@ -12,13 +12,12 @@
   <b>🛡️ Smarter Transactions. Safer Payments. Intelligent Fraud Detection.</b>
 </p>
 
-<<<<<<< HEAD
 > An end-to-end academic fraud detection platform that combines Machine Learning, rule-based detection, behavioral analysis, transaction validation, secure authentication, database persistence, a complete standalone Java Swing desktop application.
 =======
 SafePay is an **AI-powered fraud detection system** built with Java. It combines transaction analysis, fraud-risk assessment, machine-learning components, and a desktop interface to help identify potentially suspicious financial activity.
 
 The project uses a **Java Swing and Java2D desktop application** connected to a **Spring Boot REST API**, with MySQL for data storage and Weka for machine-learning functionality.
->>>>>>> origin/main
+
 
 ---
 
