@@ -87,13 +87,66 @@ public class ApiDashboardController {
             accountNumber = account.getAccountNumber() != null ? account.getAccountNumber() : "";
             accountType = account.getAccountType() != null ? account.getAccountType() : "STANDARD";
             accountStatus = account.getStatus() != null ? account.getStatus() : "ACTIVE";
+        }
 
-            totalCount = transactionRepository.countByAccount(account);
-            approvedCount = transactionRepository.countByAccountAndStatus(account, "APPROVED");
-            declinedCount = transactionRepository.countByAccountAndStatus(account, "DECLINED");
-            blockedCount = transactionRepository.countByAccountAndStatus(account, "BLOCKED");
+        boolean isAdmin = user != null && user.getRole() != null
+                && (user.getRole().contains("ADMIN") || "ROLE_ADMIN".equalsIgnoreCase(user.getRole()));
 
-            List<Transaction> recent = transactionRepository.findTop5ByAccountOrderByTransactionTimeDesc(account);
+        if (isAdmin) {
+            totalCount = transactionRepository.count();
+            approvedCount = transactionRepository.countByStatus("APPROVED");
+            declinedCount = transactionRepository.countByStatus("DECLINED");
+            blockedCount = transactionRepository.countByStatus("BLOCKED")
+                    + transactionRepository.countByStatus("PENDING_REVIEW");
+
+            List<Transaction> recent = transactionRepository.findTop5ByOrderByTransactionTimeDesc();
+            if (recent != null) {
+                for (Transaction t : recent) {
+                    String timeStr = t.getTransactionTime() != null ? t.getTransactionTime().format(TIME_FORMATTER) : "";
+                    String typeStr = t.getTransactionType() != null ? t.getTransactionType().name() : "PAYMENT";
+                    String accNum = t.getAccount() != null ? t.getAccount().getAccountNumber() : "";
+                    String userStr = (t.getAccount() != null && t.getAccount().getUser() != null)
+                            ? t.getAccount().getUser().getUsername()
+                            : "";
+                    recentDtos.add(new TransactionSummaryDto(
+                            t.getId(),
+                            t.getAmount(),
+                            typeStr,
+                            t.getStatus(),
+                            timeStr,
+                            accNum,
+                            userStr
+                    ));
+                }
+            }
+        } else if (account != null) {
+            totalCount = transactionRepository.countByAccountOrReceiverAccount(account);
+            if (totalCount == 0) {
+                long fb = transactionRepository.countByAccount(account);
+                if (fb > 0) totalCount = fb;
+            }
+            approvedCount = transactionRepository.countByAccountOrReceiverAccountAndStatus(account, "APPROVED");
+            if (approvedCount == 0) {
+                long fb = transactionRepository.countByAccountAndStatus(account, "APPROVED");
+                if (fb > 0) approvedCount = fb;
+            }
+            declinedCount = transactionRepository.countByAccountOrReceiverAccountAndStatus(account, "DECLINED");
+            if (declinedCount == 0) {
+                long fb = transactionRepository.countByAccountAndStatus(account, "DECLINED");
+                if (fb > 0) declinedCount = fb;
+            }
+            blockedCount = transactionRepository.countByAccountOrReceiverAccountAndStatus(account, "BLOCKED")
+                    + transactionRepository.countByAccountOrReceiverAccountAndStatus(account, "PENDING_REVIEW");
+            if (blockedCount == 0) {
+                long fb = transactionRepository.countByAccountAndStatus(account, "BLOCKED");
+                if (fb > 0) blockedCount = fb;
+            }
+
+            List<Transaction> allForAccount = transactionRepository.findAllByAccountOrReceiverAccountOrderByTransactionTimeDesc(account);
+            if (allForAccount == null || allForAccount.isEmpty()) {
+                allForAccount = transactionRepository.findTop5ByAccountOrderByTransactionTimeDesc(account);
+            }
+            List<Transaction> recent = allForAccount != null ? allForAccount.stream().limit(5).toList() : Collections.emptyList();
             if (recent != null) {
                 for (Transaction t : recent) {
                     String timeStr = t.getTransactionTime() != null ? t.getTransactionTime().format(TIME_FORMATTER) : "";

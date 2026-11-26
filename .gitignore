@@ -31,6 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
 # PaySim datasets
 ml/dataset/paysim.csv
 ml/dataset/paysim_prepared.csv
@@ -44,3 +45,23 @@ ml/dataset/fraud_test.csv
 
 # Trained ML models
 ml/models/*.model
+
+# Frontend build & dependencies
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+*.tsbuildinfo
+frontend/*.tsbuildinfo
+
+# Temporary artifacts & tool state
+.claude/
+test-results.txt
+*.log
+# Chromium / Crashpad crash dumps
+Crashpad/
+
+# OS-generated files
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store

@@ -37,6 +37,7 @@
 
 	<properties>
 		<java.version>25</java.version>
+		<exec.mainClass>com.frauddetection.frauddetection.gui.FraudDetectionGuiApp</exec.mainClass>
 	</properties>
 
 	<dependencies>
@@ -137,7 +138,7 @@
 		<dependency>
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
-			<scope>test</scope>
+			<scope>runtime</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -159,7 +160,35 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>ml/models</directory>
+				<targetPath>models</targetPath>
+				<includes>
+					<include>fraud_random_forest_final.model</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-clean-plugin</artifactId>
+				<configuration>
+					<excludeDefaultDirectories>true</excludeDefaultDirectories>
+					<filesets>
+						<fileset>
+							<directory>target</directory>
+							<includes>
+								<include>**/*</include>
+							</includes>
+						</fileset>
+					</filesets>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -77,9 +78,17 @@ public class ApiTransactionController {
         this(transactionService, userRepository, accountRepository, null, null);
     }
 
+    public ResponseEntity<TransactionResponse> createTransaction(
+            TransactionRequest request,
+            Authentication authentication,
+            HttpServletRequest httpRequest) {
+        return createTransaction(request, null, authentication, httpRequest);
+    }
+
     @PostMapping
     public ResponseEntity<TransactionResponse> createTransaction(
             @RequestBody TransactionRequest request,
+            @org.springframework.web.bind.annotation.RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKeyHeader,
             Authentication authentication,
             HttpServletRequest httpRequest) {
 
@@ -155,16 +164,54 @@ public class ApiTransactionController {
 
         String remoteIp = httpRequest != null ? httpRequest.getRemoteAddr() : "127.0.0.1";
         String userAgent = httpRequest != null ? httpRequest.getHeader("User-Agent") : "SafePay-Desktop";
+        String idempotencyKey = (request.idempotencyKey() != null && !request.idempotencyKey().isBlank())
+                ? request.idempotencyKey().trim()
+                : (idempotencyKeyHeader != null && !idempotencyKeyHeader.isBlank() ? idempotencyKeyHeader.trim() : null);
 
         FraudPrediction fraudPrediction;
         try {
-            fraudPrediction = transactionService.processPayment(
-                    user,
-                    request.amount(),
-                    type,
-                    remoteIp,
-                    userAgent
-            );
+            if (idempotencyKey != null && !idempotencyKey.isBlank()) {
+                if (request.receiverAccountNumber() != null && !request.receiverAccountNumber().trim().isEmpty()) {
+                    fraudPrediction = transactionService.processPayment(
+                            user,
+                            request.amount(),
+                            type,
+                            request.receiverAccountNumber(),
+                            remoteIp,
+                            userAgent,
+                            idempotencyKey
+                    );
+                } else {
+                    fraudPrediction = transactionService.processPayment(
+                            user,
+                            request.amount(),
+                            type,
+                            null,
+                            remoteIp,
+                            userAgent,
+                            idempotencyKey
+                    );
+                }
+            } else {
+                if (request.receiverAccountNumber() != null && !request.receiverAccountNumber().trim().isEmpty()) {
+                    fraudPrediction = transactionService.processPayment(
+                            user,
+                            request.amount(),
+                            type,
+                            request.receiverAccountNumber(),
+                            remoteIp,
+                            userAgent
+                    );
+                } else {
+                    fraudPrediction = transactionService.processPayment(
+                            user,
+                            request.amount(),
+                            type,
+                            remoteIp,
+                            userAgent
+                    );
+                }
+            }
         } catch (TransactionException ex) {
             log.warn("Transaction validation notice for user {}: {}", username, ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TransactionResponse(
@@ -180,6 +227,46 @@ public class ApiTransactionController {
                     ex.getMessage(),
                     null, request.amount(), type.name(), null, null,
                     ex.getMessage(), null, null, null
+            ));
+        } catch (DataIntegrityViolationException ex) {
+            log.warn("Database constraint / duplicate idempotency key detected for user {}: {}", username, ex.getMessage());
+            if (idempotencyKey != null && !idempotencyKey.isBlank() && transactionRepository != null) {
+                Optional<Transaction> existingOpt = transactionRepository.findByIdempotencyKey(idempotencyKey.trim());
+                if (existingOpt.isPresent()) {
+                    Transaction existingTx = existingOpt.get();
+                    String status = existingTx.getStatus() != null ? existingTx.getStatus() : "APPROVED";
+                    boolean isApproved = "APPROVED".equalsIgnoreCase(status);
+                    boolean isPendingReview = "PENDING_REVIEW".equalsIgnoreCase(status);
+                    String timeStr = existingTx.getTransactionTime() != null
+                            ? existingTx.getTransactionTime().format(TIME_FORMATTER)
+                            : "";
+                    String msg = isPendingReview
+                            ? "Your transaction is pending review by SafePay Fraud Protection."
+                            : (isApproved ? "Your transaction was approved and processed successfully." : "Your transaction was declined.");
+                    BigDecimal newBal = null;
+                    if (existingTx.getAccount() != null) {
+                        newBal = existingTx.getAccount().getBalance();
+                    }
+                    return ResponseEntity.ok(new TransactionResponse(
+                            isApproved || isPendingReview,
+                            msg,
+                            existingTx.getId(),
+                            existingTx.getAmount(),
+                            existingTx.getTransactionType() != null ? existingTx.getTransactionType().name() : type.name(),
+                            status,
+                            timeStr,
+                            "Normal / Idempotent",
+                            "LOW",
+                            0.0,
+                            newBal
+                    ));
+                }
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new TransactionResponse(
+                    false,
+                    "Duplicate transaction submission detected. A transaction with this idempotency key already exists.",
+                    null, request.amount(), type.name(), "DECLINED", null,
+                    "Duplicate request", "HIGH", null, null
             ));
         } catch (Exception ex) {
             log.error("Unexpected error executing transaction for user {}: {}", username, ex.getMessage(), ex);
@@ -201,10 +288,11 @@ public class ApiTransactionController {
         boolean isBlocked = "BLOCKED".equalsIgnoreCase(status);
         boolean isDeclined = "DECLINED".equalsIgnoreCase(status);
         boolean isApproved = "APPROVED".equalsIgnoreCase(status);
+        boolean isPendingReview = "PENDING_REVIEW".equalsIgnoreCase(status);
 
         double probability = fraudPrediction != null ? fraudPrediction.getProbability() : 0.0;
         String riskAssessment;
-        if (isBlocked) {
+        if (isBlocked || isPendingReview) {
             riskAssessment = "HIGH";
         } else if (probability < 0.30) {
             riskAssessment = "LOW";
@@ -216,7 +304,7 @@ public class ApiTransactionController {
 
         String detectionReason = fraudPrediction != null ? fraudPrediction.getDetectionReason() : null;
         if (detectionReason == null || detectionReason.isBlank()) {
-            if (isBlocked) {
+            if (isBlocked || isPendingReview) {
                 boolean isMlFraud = fraudPrediction != null && "FRAUD".equalsIgnoreCase(fraudPrediction.getPrediction());
                 boolean isRuleAnomaly = fraudPrediction != null && fraudPrediction.isRuleAnomaly();
                 if (isMlFraud && isRuleAnomaly) {
@@ -247,6 +335,8 @@ public class ApiTransactionController {
         String message;
         if (isApproved) {
             message = "Your transaction was approved and processed successfully.";
+        } else if (isPendingReview) {
+            message = "Your transaction is pending review by SafePay Fraud Protection.";
         } else if (isBlocked) {
             message = "Your transaction was blocked by SafePay AI Fraud Protection: " + detectionReason;
         } else {
@@ -271,7 +361,7 @@ public class ApiTransactionController {
     /**
      * Retrieves the authenticated user's transaction history with optional type, status, and search filters.
      */
-    @GetMapping
+    @GetMapping({"", "/history"})
     public ResponseEntity<?> getTransactions(
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String status,
@@ -305,21 +395,38 @@ public class ApiTransactionController {
         String filterStatus = null;
         if (status != null && !status.isBlank()) {
             String upperStatus = status.trim().toUpperCase();
-            if (!"APPROVED".equals(upperStatus) && !"DECLINED".equals(upperStatus) && !"BLOCKED".equals(upperStatus)) {
+            if (!"APPROVED".equals(upperStatus) && !"DECLINED".equals(upperStatus) && !"BLOCKED".equals(upperStatus) && !"PENDING_REVIEW".equals(upperStatus)) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
-                        "error", "Invalid transaction status filter: " + status + ". Valid statuses: APPROVED, DECLINED, BLOCKED."
+                        "error", "Invalid transaction status filter: " + status + ". Valid statuses: APPROVED, DECLINED, BLOCKED, PENDING_REVIEW."
                 ));
             }
             filterStatus = upperStatus;
         }
 
-        List<Account> accounts = accountRepository.findByUser(user);
+        boolean isAdmin = user.getRole() != null
+                && (user.getRole().contains("ADMIN") || "ROLE_ADMIN".equalsIgnoreCase(user.getRole()));
+
         List<Transaction> allTransactions = new ArrayList<>();
-        if (accounts != null && transactionRepository != null) {
-            for (Account account : accounts) {
-                List<Transaction> txList = transactionRepository.findByAccountOrderByTransactionTimeDesc(account);
-                if (txList != null) {
-                    allTransactions.addAll(txList);
+        if (isAdmin) {
+            allTransactions.addAll(transactionRepository.findAll());
+        } else {
+            List<Account> accounts = accountRepository.findByUser(user);
+            if (accounts != null && transactionRepository != null) {
+                for (Account account : accounts) {
+                    List<Transaction> txList = transactionRepository.findAllByAccountOrReceiverAccountOrderByTransactionTimeDesc(account);
+                    if (txList == null || txList.isEmpty()) {
+                        List<Transaction> fallback = transactionRepository.findByAccountOrderByTransactionTimeDesc(account);
+                        if (fallback != null && !fallback.isEmpty()) {
+                            txList = fallback;
+                        }
+                    }
+                    if (txList != null) {
+                        for (Transaction tx : txList) {
+                            if (!allTransactions.contains(tx)) {
+                                allTransactions.add(tx);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -355,12 +462,18 @@ public class ApiTransactionController {
 
             String timeStr = t.getTransactionTime() != null ? t.getTransactionTime().format(TIME_FORMATTER) : "";
             String typeStr = t.getTransactionType() != null ? t.getTransactionType().name() : "PAYMENT";
+            String accNum = t.getAccount() != null ? t.getAccount().getAccountNumber() : null;
+            String userStr = (t.getAccount() != null && t.getAccount().getUser() != null)
+                    ? t.getAccount().getUser().getUsername()
+                    : null;
             resultDtos.add(new TransactionSummaryDto(
                     t.getId(),
                     t.getAmount(),
                     typeStr,
                     t.getStatus(),
-                    timeStr
+                    timeStr,
+                    accNum,
+                    userStr
             ));
         }
 
@@ -421,14 +534,17 @@ public class ApiTransactionController {
 
         Transaction transaction = txOpt.get();
 
-        // Enforce ownership: transaction must belong to authenticated user (or user must be ADMIN)
+        // Enforce ownership: transaction must belong to authenticated user (as sender or receiver, or user must be ADMIN)
         Account account = transaction.getAccount();
-        boolean isOwner = account != null && account.getUser() != null && user.getId() != null
+        Account receiverAccount = transaction.getReceiverAccount();
+        boolean isSender = account != null && account.getUser() != null && user.getId() != null
                 && user.getId().equals(account.getUser().getId());
+        boolean isReceiver = receiverAccount != null && receiverAccount.getUser() != null && user.getId() != null
+                && user.getId().equals(receiverAccount.getUser().getId());
         boolean isAdmin = user.getRole() != null
                 && ("ADMIN".equalsIgnoreCase(user.getRole()) || "ROLE_ADMIN".equalsIgnoreCase(user.getRole()));
 
-        if (!isOwner && !isAdmin) {
+        if (!isSender && !isReceiver && !isAdmin) {
             log.warn("Cross-user transaction access denied: User {} attempted to access transaction #{} owned by {}",
                     username, id, (account != null && account.getUser() != null ? account.getUser().getUsername() : "unknown"));
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new TransactionResponse(
@@ -447,10 +563,11 @@ public class ApiTransactionController {
         boolean isBlocked = "BLOCKED".equalsIgnoreCase(status);
         boolean isDeclined = "DECLINED".equalsIgnoreCase(status);
         boolean isApproved = "APPROVED".equalsIgnoreCase(status);
+        boolean isPendingReview = "PENDING_REVIEW".equalsIgnoreCase(status);
 
         double probability = fraudPrediction != null ? fraudPrediction.getProbability() : 0.0;
         String riskAssessment;
-        if (isBlocked) {
+        if (isBlocked || isPendingReview) {
             riskAssessment = "HIGH";
         } else if (probability < 0.30) {
             riskAssessment = "LOW";
@@ -462,7 +579,7 @@ public class ApiTransactionController {
 
         String detectionReason = fraudPrediction != null ? fraudPrediction.getDetectionReason() : null;
         if (detectionReason == null || detectionReason.isBlank()) {
-            if (isBlocked) {
+            if (isBlocked || isPendingReview) {
                 detectionReason = "Flagged for fraud review";
             } else if (isDeclined) {
                 detectionReason = "Transaction declined";
@@ -481,6 +598,8 @@ public class ApiTransactionController {
         String message;
         if (isApproved) {
             message = "Transaction approved and settled.";
+        } else if (isPendingReview) {
+            message = "Transaction is pending fraud review.";
         } else if (isBlocked) {
             message = "Transaction blocked by SafePay AI Fraud Protection: " + detectionReason;
         } else {

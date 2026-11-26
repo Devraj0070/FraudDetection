@@ -52,20 +52,21 @@ public class TransactionPanel extends JPanel {
     public static final String VIEW_RESULT = "VIEW_RESULT";
 
     // Design Tokens matching DashboardFrame
-    public static final Color COLOR_PURPLE_PRIMARY = new Color(124, 58, 237); // #7C3AED
-    public static final Color COLOR_PURPLE_LIGHT = new Color(196, 181, 253);   // #C4B5FD
-    public static final Color COLOR_PURPLE_PILL = new Color(243, 232, 255);    // #F3E8FF
-    public static final Color COLOR_HERO_BG = new Color(248, 247, 252);       // #F8F7FC
-    public static final Color COLOR_CARD_WHITE = Color.WHITE;
-    public static final Color COLOR_CARD_OUTLINE = new Color(241, 245, 249);  // #F1F5F9
-    public static final Color COLOR_BORDER_SUBTLE = new Color(226, 232, 240); // #E2E8F0
-    public static final Color COLOR_TEXT_MAIN = new Color(15, 23, 42);        // #0F172A
-    public static final Color COLOR_TEXT_SUBTLE = new Color(100, 116, 139);   // #64748B
-    public static final Color COLOR_INPUT_BG = new Color(248, 250, 252);      // #F8FAFC
+    public static final Color COLOR_PURPLE_PRIMARY = new Color(216, 255, 0); // #D8FF00 Electric Lime
+    public static final Color COLOR_PURPLE_LIGHT = new Color(216, 255, 0, 100);
+    public static final Color COLOR_PURPLE_PILL = new Color(216, 255, 0, 35);
+    public static final Color COLOR_HERO_BG = new Color(22, 22, 22);
+    public static final Color COLOR_CARD_WHITE = new Color(22, 22, 22);
+    public static final Color COLOR_CARD_OUTLINE = new Color(36, 36, 36);
+    public static final Color COLOR_BORDER_SUBTLE = new Color(36, 36, 36);
+    public static final Color COLOR_TEXT_MAIN = Color.WHITE;
+    public static final Color COLOR_TEXT_SUBTLE = new Color(156, 163, 175);
+    public static final Color COLOR_INPUT_BG = new Color(17, 17, 17);
 
     public static final Color COLOR_STATUS_APPROVED = new Color(22, 163, 74); // #16A34A
     public static final Color COLOR_STATUS_BLOCKED = new Color(220, 38, 38);  // #DC2626
     public static final Color COLOR_STATUS_DECLINED = new Color(217, 119, 6); // #D97706
+    public static final Color COLOR_STATUS_PENDING = new Color(124, 58, 237);  // #7C3AED (SafePay Purple)
 
     private final SafePayApiClient apiClient;
     private final Runnable onTransactionSuccess;
@@ -76,6 +77,9 @@ public class TransactionPanel extends JPanel {
 
     // Form Controls
     private JComboBox<TransactionTypeItem> cmbType;
+    private JPanel receiverAccountContainer;
+    private JLabel lblReceiverPrompt;
+    private JTextField txtReceiverAccount;
     private JTextField txtAmount;
     private JLabel lblLimitNotice;
     private JLabel lblValidationError;
@@ -98,8 +102,16 @@ public class TransactionPanel extends JPanel {
 
     private boolean isSubmitting = false;
 
+    public TransactionPanel(SafePayApiClient apiClient) {
+        this(apiClient, null, null);
+    }
+
+    public TransactionPanel() {
+        this(new SafePayApiClient(), null, null);
+    }
+
     public TransactionPanel(SafePayApiClient apiClient, Runnable onTransactionSuccess, Runnable onNavigateToDashboard) {
-        this.apiClient = apiClient;
+        this.apiClient = apiClient != null ? apiClient : new SafePayApiClient();
         this.onTransactionSuccess = onTransactionSuccess;
         this.onNavigateToDashboard = onNavigateToDashboard;
 
@@ -201,7 +213,7 @@ public class TransactionPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(243, 232, 255));
+                g2.setColor(new Color(22, 22, 22));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
                 g2.setColor(new Color(196, 181, 253));
                 g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 16, 16);
@@ -253,7 +265,10 @@ public class TransactionPanel extends JPanel {
         cmbType.setPreferredSize(new Dimension(420, 40));
         cmbType.setBackground(COLOR_INPUT_BG);
         cmbType.setRenderer(new TransactionTypeCellRenderer());
-        cmbType.addActionListener(e -> updateLimitNotice());
+        cmbType.addActionListener(e -> {
+            updateLimitNotice();
+            updateReceiverFieldVisibility();
+        });
         card.add(cmbType);
         card.add(Box.createVerticalStrut(6));
 
@@ -263,7 +278,58 @@ public class TransactionPanel extends JPanel {
         lblLimitNotice.setForeground(COLOR_TEXT_SUBTLE);
         updateLimitNotice();
         card.add(lblLimitNotice);
-        card.add(Box.createVerticalStrut(16));
+        card.add(Box.createVerticalStrut(14));
+        // 2. Recipient Account Number Field (for Transfers)
+        receiverAccountContainer = new JPanel();
+        receiverAccountContainer.setLayout(new BoxLayout(receiverAccountContainer, BoxLayout.Y_AXIS));
+        receiverAccountContainer.setOpaque(false);
+
+        lblReceiverPrompt = new JLabel("Recipient Account Number");
+        lblReceiverPrompt.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblReceiverPrompt.setForeground(COLOR_TEXT_MAIN);
+        receiverAccountContainer.add(lblReceiverPrompt);
+        receiverAccountContainer.add(Box.createVerticalStrut(6));
+
+        JPanel receiverInputContainer = new JPanel(new BorderLayout(8, 0)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                g2.setColor(COLOR_INPUT_BG);
+                g2.fillRoundRect(0, 0, getWidth(), getHeight(), 14, 14);
+                g2.setColor(txtReceiverAccount != null && txtReceiverAccount.hasFocus() ? COLOR_PURPLE_PRIMARY : COLOR_BORDER_SUBTLE);
+                g2.setStroke(new BasicStroke(txtReceiverAccount != null && txtReceiverAccount.hasFocus() ? 1.6f : 1.0f));
+                g2.drawRoundRect(0, 0, getWidth() - 1, getHeight() - 1, 14, 14);
+                g2.dispose();
+            }
+        };
+        receiverInputContainer.setOpaque(false);
+        receiverInputContainer.setMaximumSize(new Dimension(Short.MAX_VALUE, 46));
+        receiverInputContainer.setPreferredSize(new Dimension(420, 46));
+        receiverInputContainer.setBorder(BorderFactory.createEmptyBorder(4, 14, 4, 14));
+
+        txtReceiverAccount = new JTextField();
+        txtReceiverAccount.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        txtReceiverAccount.setForeground(COLOR_TEXT_MAIN);
+        txtReceiverAccount.setOpaque(false);
+        txtReceiverAccount.setBorder(null);
+        txtReceiverAccount.addFocusListener(new FocusAdapter() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                receiverInputContainer.repaint();
+            }
+            @Override
+            public void focusLost(FocusEvent e) {
+                receiverInputContainer.repaint();
+            }
+        });
+        receiverInputContainer.add(txtReceiverAccount, BorderLayout.CENTER);
+        receiverAccountContainer.add(receiverInputContainer);
+        receiverAccountContainer.add(Box.createVerticalStrut(14));
+
+        updateReceiverFieldVisibility();
+        card.add(receiverAccountContainer);
 
         // 2. Amount Input Field
         JLabel lblAmountPrompt = new JLabel("Transaction Amount (₹ INR)");
@@ -432,7 +498,7 @@ public class TransactionPanel extends JPanel {
         secCard.add(lblSecTitle);
         secCard.add(Box.createVerticalStrut(8));
 
-        secCard.add(createBulletPoint("Weka Random Forest model risk classification"));
+        secCard.add(createBulletPoint("AI real-time behavioral risk assessment"));
         secCard.add(Box.createVerticalStrut(4));
         secCard.add(createBulletPoint("Behavioral velocity & anomaly rule engine"));
         secCard.add(Box.createVerticalStrut(4));
@@ -494,6 +560,21 @@ public class TransactionPanel extends JPanel {
         }
     }
 
+    private void updateReceiverFieldVisibility() {
+        TransactionTypeItem item = cmbType != null ? (TransactionTypeItem) cmbType.getSelectedItem() : null;
+        boolean isTransfer = item != null && item.type == TransactionType.TRANSFER;
+        if (receiverAccountContainer != null) {
+            receiverAccountContainer.setVisible(isTransfer);
+        }
+        if (txtReceiverAccount != null) {
+            txtReceiverAccount.setEnabled(isTransfer && !isSubmitting);
+        }
+        if (getParent() != null) {
+            revalidate();
+            repaint();
+        }
+    }
+
     // =========================================================================
     // 2. TRANSACTION SUBMISSION & VALIDATION
     // =========================================================================
@@ -539,11 +620,24 @@ public class TransactionPanel extends JPanel {
             return;
         }
 
+        String receiverAccountNumber = null;
+        if (selectedItem.type == TransactionType.TRANSFER) {
+            String rawReceiver = txtReceiverAccount != null ? txtReceiverAccount.getText().trim() : "";
+            if (rawReceiver.isEmpty()) {
+                lblValidationError.setText("Please enter the recipient's account number for transfers.");
+                if (txtReceiverAccount != null) {
+                    txtReceiverAccount.requestFocusInWindow();
+                }
+                return;
+            }
+            receiverAccountNumber = rawReceiver;
+        }
+
         // Set submittal state (prevents duplicate submission)
         setSubmittingState(true);
         lblProcessingNotice.setText("⏳ Evaluating transaction with SafePay AI Fraud Protection...");
 
-        final TransactionRequest req = new TransactionRequest(amount, selectedItem.type.name());
+        final TransactionRequest req = new TransactionRequest(amount, selectedItem.type.name(), receiverAccountNumber);
 
         new SwingWorker<TransactionResponse, Void>() {
             @Override
@@ -580,6 +674,11 @@ public class TransactionPanel extends JPanel {
         btnSubmit.setEnabled(!submitting);
         txtAmount.setEnabled(!submitting);
         cmbType.setEnabled(!submitting);
+        TransactionTypeItem item = cmbType != null ? (TransactionTypeItem) cmbType.getSelectedItem() : null;
+        boolean isTransfer = item != null && item.type == TransactionType.TRANSFER;
+        if (txtReceiverAccount != null) {
+            txtReceiverAccount.setEnabled(!submitting && isTransfer);
+        }
         for (JButton chip : presetChips) {
             chip.setEnabled(!submitting);
         }
@@ -609,7 +708,10 @@ public class TransactionPanel extends JPanel {
                 Color c2 = new Color(21, 128, 61);
 
                 String st = lblReceiptStatus != null ? lblReceiptStatus.getText() : "APPROVED";
-                if ("BLOCKED".equalsIgnoreCase(st)) {
+                if ("PENDING_REVIEW".equalsIgnoreCase(st)) {
+                    c1 = new Color(124, 58, 237); // #7C3AED (SafePay Purple)
+                    c2 = new Color(79, 70, 229);  // #4F46E5 (Indigo)
+                } else if ("BLOCKED".equalsIgnoreCase(st)) {
                     c1 = COLOR_STATUS_BLOCKED;
                     c2 = new Color(185, 28, 28);
                 } else if ("DECLINED".equalsIgnoreCase(st)) {
@@ -778,6 +880,10 @@ public class TransactionPanel extends JPanel {
             lblResultTitle.setText("Transaction Approved & Settled");
             lblResultSubtitle.setText("Your payment was evaluated as legitimate and processed successfully.");
             lblReceiptStatus.setForeground(COLOR_STATUS_APPROVED);
+        } else if ("PENDING_REVIEW".equals(status)) {
+            lblResultTitle.setText("Transaction Submitted for Review");
+            lblResultSubtitle.setText("Flagged for verification by SafePay Fraud Protection. Balances remain unchanged pending administrator review.");
+            lblReceiptStatus.setForeground(COLOR_STATUS_PENDING);
         } else if ("BLOCKED".equals(status)) {
             lblResultTitle.setText("Transaction Blocked by SafePay AI");
             lblResultSubtitle.setText("High-risk or anomalous activity flagged by AI Fraud Protection.");
@@ -794,10 +900,7 @@ public class TransactionPanel extends JPanel {
         lblReceiptStatus.setText(status);
         lblReceiptTime.setText(res.transactionTime() != null ? res.transactionTime() : "Just now");
 
-        String probStr = res.fraudProbability() != null
-                ? String.format(Locale.ENGLISH, " (ML Risk: %.1f%%)", res.fraudProbability() * 100)
-                : "";
-        lblReceiptRisk.setText((res.riskAssessment() != null ? res.riskAssessment() : "LOW") + probStr);
+        lblReceiptRisk.setText(res.riskAssessment() != null ? res.riskAssessment() : "LOW");
         lblReceiptReason.setText(res.detectionReason() != null ? res.detectionReason() : "Normal / Legitimate");
         lblReceiptBalance.setText(res.newBalance() != null ? DashboardFrame.formatCurrency(res.newBalance()) + " INR" : "N/A");
 
@@ -807,6 +910,10 @@ public class TransactionPanel extends JPanel {
 
     public void resetFormAndShow() {
         txtAmount.setText("");
+        if (txtReceiverAccount != null) {
+            txtReceiverAccount.setText("");
+        }
+        updateReceiverFieldVisibility();
         lblValidationError.setText(" ");
         lblProcessingNotice.setText(" ");
         cardLayout.show(containerPanel, VIEW_FORM);
@@ -859,6 +966,18 @@ public class TransactionPanel extends JPanel {
     }
 
     // =========================================================================
+    public JTextField getTxtReceiverAccount() {
+        return txtReceiverAccount;
+    }
+
+    public JPanel getReceiverAccountContainer() {
+        return receiverAccountContainer;
+    }
+
+    public JLabel getLblResultSubtitle() {
+        return lblResultSubtitle;
+    }
+
     // INNER CLASSES: TRANSACTION TYPE ITEM & RENDERER
     // =========================================================================
 

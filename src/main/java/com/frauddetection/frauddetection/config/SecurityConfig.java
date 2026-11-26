@@ -104,10 +104,16 @@ public class SecurityConfig {
             if (headerValue == null) {
                 headerValue = request.getHeader("X-CSRF-TOKEN");
             }
+            if (headerValue == null) {
+                headerValue = request.getHeader("X-XSRF-TOKEN");
+            }
             if (StringUtils.hasText(headerValue)) {
-                String unmasked = this.xor.resolveCsrfTokenValue(request, csrfToken);
-                if (StringUtils.hasText(unmasked)) {
-                    return unmasked;
+                try {
+                    String unmasked = this.xor.resolveCsrfTokenValue(request, csrfToken);
+                    if (StringUtils.hasText(unmasked)) {
+                        return unmasked;
+                    }
+                } catch (Exception ignored) {
                 }
                 return headerValue;
             }

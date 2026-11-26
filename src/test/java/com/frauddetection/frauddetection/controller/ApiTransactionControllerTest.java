@@ -475,6 +475,39 @@ class ApiTransactionControllerTest {
     }
 
     @Test
+    @DisplayName("getTransactions filters by PENDING_REVIEW status")
+    void getTransactions_filtersByPendingReviewStatus() {
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(accountRepository.findByUser(testUser)).thenReturn(List.of(testAccount));
+
+        Transaction t1 = new Transaction();
+        t1.setId(1L);
+        t1.setAmount(new BigDecimal("100.00"));
+        t1.setTransactionType(TransactionType.PAYMENT);
+        t1.setStatus("APPROVED");
+
+        Transaction t2 = new Transaction();
+        t2.setId(2L);
+        t2.setAmount(new BigDecimal("200.00"));
+        t2.setTransactionType(TransactionType.TRANSFER);
+        t2.setStatus("PENDING_REVIEW");
+
+        when(transactionRepository.findByAccountOrderByTransactionTimeDesc(testAccount))
+                .thenReturn(List.of(t1, t2));
+
+        ResponseEntity<?> res = controller.getTransactions(null, "PENDING_REVIEW", null, authentication);
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        @SuppressWarnings("unchecked")
+        List<TransactionSummaryDto> list = (List<TransactionSummaryDto>) res.getBody();
+        assertNotNull(list);
+        assertEquals(1, list.size());
+        assertEquals(2L, list.get(0).id());
+        assertEquals("PENDING_REVIEW", list.get(0).status());
+    }
+
+    @Test
     @DisplayName("getTransactions search filter matches transaction ID or amount")
     void getTransactions_searchFilter_matchesIdOrAmount() {
         when(authentication.isAuthenticated()).thenReturn(true);
@@ -646,5 +679,126 @@ class ApiTransactionControllerTest {
         assertTrue(res.getBody().success());
         assertEquals(800L, res.getBody().transactionId());
         assertEquals("APPROVED", res.getBody().status());
+    }
+
+    @Test
+    @DisplayName("createTransaction returns 200 with PENDING_REVIEW status and pending message when flagged for review")
+    void createTransaction_pendingReview_returns200WithPendingMessage() {
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(accountRepository.findTopByUserOrderByIdAsc(testUser)).thenReturn(Optional.of(testAccount));
+
+        Transaction tx = new Transaction();
+        tx.setId(109L);
+        tx.setAmount(new BigDecimal("5000.00"));
+        tx.setTransactionType(TransactionType.PAYMENT);
+        tx.setStatus("PENDING_REVIEW");
+        tx.setTransactionTime(LocalDateTime.of(2026, 10, 9, 14, 10, 0));
+
+        FraudPrediction prediction = new FraudPrediction();
+        prediction.setTransaction(tx);
+        prediction.setPrediction("FRAUD");
+        prediction.setProbability(0.88);
+        prediction.setRuleAnomaly(false);
+        prediction.setDetectionReason("Machine Learning Fraud Detection");
+
+        when(transactionService.processPayment(
+                eq(testUser),
+                eq(new BigDecimal("5000.00")),
+                eq(TransactionType.PAYMENT),
+                any(),
+                any()
+        )).thenReturn(prediction);
+
+        ResponseEntity<TransactionResponse> res = controller.createTransaction(
+                new TransactionRequest(new BigDecimal("5000.00"), "PAYMENT"),
+                authentication,
+                mockRequest
+        );
+
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertNotNull(res.getBody());
+        assertTrue(res.getBody().success());
+        assertEquals("PENDING_REVIEW", res.getBody().status());
+        assertEquals("HIGH", res.getBody().riskAssessment());
+        assertEquals(0.88, res.getBody().fraudProbability());
+        assertEquals("Your transaction is pending review by SafePay Fraud Protection.", res.getBody().message());
+    }
+
+    @Test
+    @DisplayName("createTransaction supports TRANSFER with receiverAccountNumber")
+    void createTransaction_transferWithReceiver_success() {
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+        when(accountRepository.findTopByUserOrderByIdAsc(testUser)).thenReturn(Optional.of(testAccount));
+
+        Transaction tx = new Transaction();
+        tx.setId(110L);
+        tx.setAmount(new BigDecimal("1000.00"));
+        tx.setTransactionType(TransactionType.TRANSFER);
+        tx.setStatus("APPROVED");
+        tx.setTransactionTime(LocalDateTime.of(2026, 10, 9, 14, 10, 0));
+
+        FraudPrediction prediction = new FraudPrediction();
+        prediction.setTransaction(tx);
+        prediction.setPrediction("LEGITIMATE");
+        prediction.setProbability(0.01);
+        prediction.setRuleAnomaly(false);
+        prediction.setDetectionReason("Normal / Legitimate");
+
+        when(transactionService.processPayment(
+                eq(testUser),
+                eq(new BigDecimal("1000.00")),
+                eq(TransactionType.TRANSFER),
+                eq("ACC-998877"),
+                any(),
+                any()
+        )).thenReturn(prediction);
+
+        ResponseEntity<TransactionResponse> res = controller.createTransaction(
+                new TransactionRequest(new BigDecimal("1000.00"), "TRANSFER", "ACC-998877"),
+                authentication,
+                mockRequest
+        );
+
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertNotNull(res.getBody());
+        assertTrue(res.getBody().success());
+        assertEquals("APPROVED", res.getBody().status());
+        assertEquals("Your transaction was approved and processed successfully.", res.getBody().message());
+    }
+
+    @Test
+    @DisplayName("getTransactionDetails formats PENDING_REVIEW response with appropriate message")
+    void getTransactionDetails_pendingReview_returnsPendingMessage() {
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(testUser));
+
+        Transaction tx = new Transaction();
+        tx.setId(701L);
+        tx.setAccount(testAccount);
+        tx.setAmount(new BigDecimal("25000.00"));
+        tx.setTransactionType(TransactionType.TRANSFER);
+        tx.setStatus("PENDING_REVIEW");
+        tx.setTransactionTime(LocalDateTime.of(2026, 10, 5, 11, 30));
+
+        FraudPrediction pred = new FraudPrediction();
+        pred.setPrediction("FRAUD");
+        pred.setProbability(0.85);
+        pred.setRuleAnomaly(true);
+        pred.setDetectionReason("Machine Learning & Behavioral Anomaly");
+
+        when(transactionRepository.findById(701L)).thenReturn(Optional.of(tx));
+        when(fraudPredictionRepository.findByTransaction(tx)).thenReturn(Optional.of(pred));
+
+        ResponseEntity<TransactionResponse> res = controller.getTransactionDetails(701L, authentication);
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertTrue(res.getBody().success());
+        assertEquals("PENDING_REVIEW", res.getBody().status());
+        assertEquals("HIGH", res.getBody().riskAssessment());
+        assertEquals("Transaction is pending fraud review.", res.getBody().message());
     }
 }

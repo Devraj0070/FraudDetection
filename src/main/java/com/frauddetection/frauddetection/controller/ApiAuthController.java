@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.frauddetection.frauddetection.dto.AuthResponse;
@@ -186,9 +187,9 @@ public class ApiAuthController {
     }
 
     /**
-     * Session logout for desktop and REST clients.
+     * Session logout for desktop and REST clients. Supports POST and GET.
      */
-    @PostMapping("/logout")
+    @RequestMapping(value = "/logout", method = {RequestMethod.POST, RequestMethod.GET})
     public ResponseEntity<AuthResponse> logout(HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null) {

@@ -3,6 +3,8 @@ package com.frauddetection.frauddetection.fraud.prediction;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.frauddetection.frauddetection.fraud.feature.FeatureVector;
@@ -18,6 +20,8 @@ import weka.core.Utils;
 @Component
 public class RandomForestPredictor implements FraudPredictor {
 
+    public static final double DEFAULT_FRAUD_THRESHOLD = 0.25;
+
     private static final List<String> TRANSACTION_TYPE_VALUES = List.of(
             "PAYMENT",
             "TRANSFER",
@@ -29,9 +33,24 @@ public class RandomForestPredictor implements FraudPredictor {
     private static final List<String> FRAUD_CLASS_VALUES = List.of("0", "1");
 
     private final ModelManager modelManager;
+    private final double fraudThreshold;
+
+    @Autowired
+    public RandomForestPredictor(
+            ModelManager modelManager,
+            @Value("${safepay.ml.fraud-threshold:0.25}") double fraudThreshold) {
+        this.modelManager = modelManager;
+        this.fraudThreshold = (Double.isFinite(fraudThreshold) && fraudThreshold > 0.0 && fraudThreshold < 1.0)
+                ? fraudThreshold
+                : DEFAULT_FRAUD_THRESHOLD;
+    }
 
     public RandomForestPredictor(ModelManager modelManager) {
-        this.modelManager = modelManager;
+        this(modelManager, DEFAULT_FRAUD_THRESHOLD);
+    }
+
+    public double getFraudThreshold() {
+        return fraudThreshold;
     }
 
     @Override
@@ -97,13 +116,14 @@ public class RandomForestPredictor implements FraudPredictor {
                 );
             }
 
-            String prediction = model.classifyInstance(modelInput) == fraudClassIndex
+            double fraudProbability = distribution[fraudClassIndex];
+            String prediction = fraudProbability >= fraudThreshold
                     ? "FRAUD"
                     : "LEGITIMATE";
 
             return new FraudPredictionResult(
                     prediction,
-                    distribution[fraudClassIndex],
+                    fraudProbability,
                     getModelName()
             );
         } catch (Exception exception) {

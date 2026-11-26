@@ -40,15 +40,37 @@ public class FraudDetectionGuiApp {
             log.debug("Using default Swing look and feel: {}", e.getMessage());
         }
 
+        String targetUrl = null;
+        if (args != null && args.length > 0) {
+            for (String rawArg : args) {
+                if (rawArg == null) continue;
+                String arg = rawArg.replace("\"", "").replace("'", "").trim();
+                if (arg.startsWith("http://") || arg.startsWith("https://")) {
+                    targetUrl = arg;
+                    break;
+                } else if (arg.startsWith("--server.port=")) {
+                    String p = arg.substring("--server.port=".length()).trim();
+                    targetUrl = "http://localhost:" + p;
+                    break;
+                } else if (arg.matches("^\\d+$")) {
+                    targetUrl = "http://localhost:" + arg;
+                    break;
+                }
+            }
+        }
+        final String resolvedUrl = targetUrl;
+
         SwingUtilities.invokeLater(() -> {
             try {
-                SafePayApiClient apiClient = new SafePayApiClient("http://127.0.0.1:8080");
+                SafePayApiClient apiClient = resolvedUrl != null
+                        ? new SafePayApiClient(resolvedUrl)
+                        : new SafePayApiClient();
                 AuthFrame authFrame = new AuthFrame(apiClient, authResp -> {
                     DashboardFrame dashboard = new DashboardFrame(apiClient, authResp);
                     dashboard.setVisible(true);
                 });
                 authFrame.setVisible(true);
-                log.info("SafePay Desktop GUI initialized successfully.");
+                log.info("SafePay Desktop GUI initialized successfully connecting to {}.", apiClient.getBaseUrl());
             } catch (Exception e) {
                 log.error("Failed to display SafePay Desktop GUI: {}", e.getMessage(), e);
             }

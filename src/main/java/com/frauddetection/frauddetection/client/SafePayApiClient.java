@@ -23,6 +23,7 @@ import com.frauddetection.frauddetection.dto.CsrfResponse;
 import com.frauddetection.frauddetection.dto.DashboardResponse;
 import com.frauddetection.frauddetection.dto.LoginRequest;
 import com.frauddetection.frauddetection.dto.RegisterRequest;
+import com.frauddetection.frauddetection.dto.ReviewRequest;
 import com.frauddetection.frauddetection.dto.TransactionRequest;
 import com.frauddetection.frauddetection.dto.TransactionResponse;
 import com.frauddetection.frauddetection.dto.TransactionSummaryDto;
@@ -52,13 +53,20 @@ public class SafePayApiClient {
     private AuthResponse currentUser = null;
 
     public SafePayApiClient() {
-        this("http://localhost:8080");
+        this(resolveDefaultBaseUrl());
     }
 
     public SafePayApiClient(String baseUrl) {
-        this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-        this.cookieManager = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
-        this.httpClient = HttpClient.newBuilder()
+        this(baseUrl, null, null);
+    }
+
+    /**
+     * Explicit constructor for testing with custom HttpClient or CookieManager.
+     */
+    public SafePayApiClient(String baseUrl, HttpClient httpClient, CookieManager cookieManager) {
+        this.baseUrl = normalizeBaseUrl(baseUrl);
+        this.cookieManager = cookieManager != null ? cookieManager : new CookieManager(null, CookiePolicy.ACCEPT_ALL);
+        this.httpClient = httpClient != null ? httpClient : HttpClient.newBuilder()
                 .cookieHandler(this.cookieManager)
                 .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NEVER)
@@ -66,14 +74,86 @@ public class SafePayApiClient {
         this.objectMapper = new ObjectMapper();
     }
 
-    /**
-     * Explicit constructor for testing with custom HttpClient or CookieManager.
-     */
-    public SafePayApiClient(String baseUrl, HttpClient httpClient, CookieManager cookieManager) {
-        this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
-        this.cookieManager = cookieManager;
-        this.httpClient = httpClient;
-        this.objectMapper = new ObjectMapper();
+    private static String resolveDefaultBaseUrl() {
+        String sysProp = System.getProperty("safepay.api.url");
+        if (sysProp != null && !sysProp.isBlank()) {
+            return cleanUrlString(sysProp);
+        }
+        String envVar = System.getenv("SAFEPAY_API_URL");
+        if (envVar != null && !envVar.isBlank()) {
+            return cleanUrlString(envVar);
+        }
+        String apiEnv = System.getenv("API_BASE_URL");
+        if (apiEnv != null && !apiEnv.isBlank()) {
+            return cleanUrlString(apiEnv);
+        }
+        String serverPortProp = System.getProperty("server.port");
+        if (serverPortProp != null && !serverPortProp.isBlank()) {
+            return "http://localhost:" + cleanPortString(serverPortProp);
+        }
+        String serverPortEnv = System.getenv("SERVER_PORT");
+        if (serverPortEnv != null && !serverPortEnv.isBlank()) {
+            return "http://localhost:" + cleanPortString(serverPortEnv);
+        }
+        String portEnv = System.getenv("PORT");
+        if (portEnv != null && !portEnv.isBlank()) {
+            return "http://localhost:" + cleanPortString(portEnv);
+        }
+
+        try (java.io.InputStream in = SafePayApiClient.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (in != null) {
+                java.util.Properties props = new java.util.Properties();
+                props.load(in);
+                String propPort = props.getProperty("server.port");
+                if (propPort != null && !propPort.isBlank()) {
+                    String portVal = propPort.trim();
+                    if (portVal.startsWith("${") && portVal.endsWith("}")) {
+                        String inner = portVal.substring(2, portVal.length() - 1);
+                        int colon = inner.indexOf(':');
+                        if (colon >= 0) {
+                            String envName = inner.substring(0, colon);
+                            String defPort = inner.substring(colon + 1);
+                            String env = System.getenv(envName);
+                            portVal = (env != null && !env.isBlank()) ? env.trim() : defPort.trim();
+                        } else {
+                            String env = System.getenv(inner);
+                            portVal = (env != null && !env.isBlank()) ? env.trim() : "8081";
+                        }
+                    }
+                    if (portVal.matches("^\\d+$")) {
+                        return "http://localhost:" + portVal;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        return "http://localhost:8081";
+    }
+
+    private static String cleanUrlString(String val) {
+        return val.replace("\"", "").replace("'", "").trim();
+    }
+
+    private static String cleanPortString(String val) {
+        return val.replace("\"", "").replace("'", "").trim();
+    }
+
+    static String normalizeBaseUrl(String url) {
+        if (url == null || url.isBlank()) {
+            return resolveDefaultBaseUrl();
+        }
+        String cleaned = cleanUrlString(url);
+        while (cleaned.endsWith("/")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 1);
+        }
+        if (cleaned.endsWith("/api")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 4);
+        }
+        while (cleaned.endsWith("/")) {
+            cleaned = cleaned.substring(0, cleaned.length() - 1);
+        }
+        return cleaned.isBlank() ? resolveDefaultBaseUrl() : cleaned;
     }
 
     /**
@@ -383,13 +463,26 @@ public class SafePayApiClient {
             fetchCsrfToken();
         }
 
+        // Ensure persistent idempotency key is attached
+        TransactionRequest effectiveRequest = request;
+        if (request.idempotencyKey() == null || request.idempotencyKey().isBlank()) {
+            String generatedKey = java.util.UUID.randomUUID().toString();
+            effectiveRequest = new TransactionRequest(
+                    request.amount(),
+                    request.transactionType(),
+                    request.receiverAccountNumber(),
+                    generatedKey
+            );
+        }
+
         try {
-            String requestBody = objectMapper.writeValueAsString(request);
+            String requestBody = objectMapper.writeValueAsString(effectiveRequest);
             HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/api/transactions"))
                     .timeout(Duration.ofSeconds(15))
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
+                    .header("Idempotency-Key", effectiveRequest.idempotencyKey())
                     .POST(HttpRequest.BodyPublishers.ofString(requestBody));
 
             if (csrfToken != null) {
@@ -401,7 +494,7 @@ public class SafePayApiClient {
             // Handle CSRF expiration retry on 403
             if (response.statusCode() == 403) {
                 log.info("Received 403 during transaction execution; refreshing CSRF token and retrying...");
-                return retryCreateTransaction(request);
+                return retryCreateTransaction(effectiveRequest);
             }
 
             if (response.statusCode() == 200) {
@@ -427,14 +520,18 @@ public class SafePayApiClient {
         fetchCsrfToken();
         try {
             String requestBody = objectMapper.writeValueAsString(txRequest);
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest.Builder builder = HttpRequest.newBuilder()
                     .uri(URI.create(baseUrl + "/api/transactions"))
                     .timeout(Duration.ofSeconds(15))
                     .header("Content-Type", "application/json")
                     .header("Accept", "application/json")
                     .header(csrfHeaderName, csrfToken != null ? csrfToken : "")
-                    .POST(HttpRequest.BodyPublishers.ofString(requestBody))
-                    .build();
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody));
+
+            if (txRequest != null && txRequest.idempotencyKey() != null) {
+                builder.header("Idempotency-Key", txRequest.idempotencyKey());
+            }
+            HttpRequest request = builder.build();
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == 200) {
@@ -538,6 +635,240 @@ public class SafePayApiClient {
                 Thread.currentThread().interrupt();
             }
             throw new ApiClientException(0, "Network error retrieving admin alerts: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Retrieves all transactions currently in PENDING_REVIEW status awaiting administrator review.
+     * Requires ROLE_ADMIN privileges.
+     *
+     * @return List of pending transactions as summaries
+     * @throws ApiClientException if unauthenticated (401), forbidden (403), or network fails
+     */
+    public List<TransactionSummaryDto> getPendingTransactions() throws ApiClientException {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + "/api/admin/pending"))
+                    .timeout(Duration.ofSeconds(15))
+                    .header("Accept", "application/json")
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                List<TransactionSummaryDto> list = new ArrayList<>();
+                JsonNode root = objectMapper.readTree(response.body());
+                if (root.isArray()) {
+                    for (JsonNode node : root) {
+                        Long id = node.has("id") && !node.get("id").isNull() ? node.get("id").asLong() : null;
+                        BigDecimal amt = node.has("amount") && !node.get("amount").isNull()
+                                ? new BigDecimal(node.get("amount").asString()) : BigDecimal.ZERO;
+                        String tType = node.has("transactionType") && !node.get("transactionType").isNull()
+                                ? node.get("transactionType").asString() : "PAYMENT";
+                        String tStatus = node.has("status") && !node.get("status").isNull()
+                                ? node.get("status").asString() : "PENDING_REVIEW";
+                        JsonNode timeNode = node.get("transactionTime");
+                        String time = timeNode != null && !timeNode.isNull() ? timeNode.stringValue() : "";
+                        String accNum = null;
+                        String username = null;
+                        if (node.has("account") && !node.get("account").isNull()) {
+                            JsonNode acc = node.get("account");
+                            if (acc.has("accountNumber") && !acc.get("accountNumber").isNull()) {
+                                accNum = acc.get("accountNumber").asString();
+                            }
+                            if (acc.has("user") && !acc.get("user").isNull() && acc.get("user").has("username") && !acc.get("user").get("username").isNull()) {
+                                username = acc.get("user").get("username").asString();
+                            }
+                        }
+                        list.add(new TransactionSummaryDto(id, amt, tType, tStatus, time, accNum, username));
+                    }
+                }
+                return list;
+            } else if (response.statusCode() == 401) {
+                throw new ApiClientException(401, "Session expired or authentication required. Please log in again.");
+            } else if (response.statusCode() == 403) {
+                throw new ApiClientException(403, "Access forbidden: Administrator privileges required.");
+            } else {
+                throw new ApiClientException(response.statusCode(),
+                        "Failed to retrieve pending transactions (HTTP " + response.statusCode() + ").");
+            }
+        } catch (IOException | InterruptedException ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new ApiClientException(0, "Network error retrieving pending transactions: " + ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Approves and settles a pending transaction with optional review notes.
+     *
+     * @param id    Transaction ID
+     * @param notes Optional administrator remarks
+     * @return Transaction outcome response
+     * @throws ApiClientException if rejected (400), unauthenticated (401), forbidden (403), not found (404), or network fails
+     */
+    public TransactionResponse approveTransaction(Long id, String notes) throws ApiClientException {
+        if (id == null || id <= 0) {
+            throw new ApiClientException(400, "Invalid transaction ID.");
+        }
+        return executeReviewAction("/api/admin/transactions/" + id + "/approve", id, notes, "Transaction approval");
+    }
+
+    public TransactionResponse approveTransaction(Long id) throws ApiClientException {
+        return approveTransaction(id, null);
+    }
+
+    /**
+     * Rejects a pending transaction with optional review notes, leaving balances untouched.
+     *
+     * @param id    Transaction ID
+     * @param notes Optional administrator remarks
+     * @return Transaction outcome response
+     * @throws ApiClientException if rejected (400), unauthenticated (401), forbidden (403), not found (404), or network fails
+     */
+    public TransactionResponse rejectTransaction(Long id, String notes) throws ApiClientException {
+        if (id == null || id <= 0) {
+            throw new ApiClientException(400, "Invalid transaction ID.");
+        }
+        return executeReviewAction("/api/admin/transactions/" + id + "/reject", id, notes, "Transaction rejection");
+    }
+
+    public TransactionResponse rejectTransaction(Long id) throws ApiClientException {
+        return rejectTransaction(id, null);
+    }
+
+    /**
+     * Approves and settles the pending transaction linked to a fraud alert.
+     *
+     * @param alertId Alert ID
+     * @param notes   Optional administrator remarks
+     * @return Transaction outcome response
+     * @throws ApiClientException if rejected (400), unauthenticated (401), forbidden (403), not found (404), or network fails
+     */
+    public TransactionResponse approveAlert(Long alertId, String notes) throws ApiClientException {
+        if (alertId == null || alertId <= 0) {
+            throw new ApiClientException(400, "Invalid alert ID.");
+        }
+        return executeReviewAction("/api/admin/alerts/" + alertId + "/approve", alertId, notes, "Alert approval");
+    }
+
+    public TransactionResponse approveAlert(Long alertId) throws ApiClientException {
+        return approveAlert(alertId, null);
+    }
+
+    /**
+     * Rejects the pending transaction linked to a fraud alert.
+     *
+     * @param alertId Alert ID
+     * @param notes   Optional administrator remarks
+     * @return Transaction outcome response
+     * @throws ApiClientException if rejected (400), unauthenticated (401), forbidden (403), not found (404), or network fails
+     */
+    public TransactionResponse rejectAlert(Long alertId, String notes) throws ApiClientException {
+        if (alertId == null || alertId <= 0) {
+            throw new ApiClientException(400, "Invalid alert ID.");
+        }
+        return executeReviewAction("/api/admin/alerts/" + alertId + "/reject", alertId, notes, "Alert rejection");
+    }
+
+    public TransactionResponse rejectAlert(Long alertId) throws ApiClientException {
+        return rejectAlert(alertId, null);
+    }
+
+    private TransactionResponse executeReviewAction(String path, Long targetId, String notes, String actionDesc) throws ApiClientException {
+        if (csrfToken == null) {
+            fetchCsrfToken();
+        }
+
+        try {
+            ReviewRequest reviewReq = new ReviewRequest(notes != null ? notes : "");
+            String requestBody = objectMapper.writeValueAsString(reviewReq);
+
+            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + path))
+                    .timeout(Duration.ofSeconds(15))
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody));
+
+            if (csrfToken != null) {
+                reqBuilder.header(csrfHeaderName, csrfToken);
+            }
+
+            HttpResponse<String> response = httpClient.send(reqBuilder.build(), HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonNode node = objectMapper.readTree(response.body());
+                boolean success = node.has("success") && node.get("success").asBoolean();
+                String message = node.has("message") ? node.get("message").asString() : actionDesc + " succeeded.";
+                Long txId = node.has("transactionId") && !node.get("transactionId").isNull()
+                        ? node.get("transactionId").asLong() : targetId;
+                String status = node.has("status") ? node.get("status").asString() : "REVIEWED";
+                return new TransactionResponse(success, message, txId, null, null, status, null, null, null, null, null);
+            } else if (response.statusCode() == 400) {
+                throw new ApiClientException(400, parseErrorMessage(response.body(), actionDesc + " failed due to invalid request."));
+            } else if (response.statusCode() == 401) {
+                throw new ApiClientException(401, "Session expired or authentication required. Please log in again.");
+            } else if (response.statusCode() == 403) {
+                log.info("Received 403 during {} for id {}; refreshing CSRF token and retrying...", actionDesc, targetId);
+                fetchCsrfToken();
+                return retryExecuteReviewAction(path, targetId, notes, actionDesc);
+            } else if (response.statusCode() == 404) {
+                throw new ApiClientException(404, parseErrorMessage(response.body(), "Target resource not found for " + actionDesc.toLowerCase() + "."));
+            } else {
+                throw new ApiClientException(response.statusCode(),
+                        actionDesc + " failed with HTTP status " + response.statusCode() + ".");
+            }
+        } catch (IOException | InterruptedException ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new ApiClientException(0, "Network error during " + actionDesc.toLowerCase() + ": " + ex.getMessage(), ex);
+        }
+    }
+
+    private TransactionResponse retryExecuteReviewAction(String path, Long targetId, String notes, String actionDesc) throws ApiClientException {
+        try {
+            ReviewRequest reviewReq = new ReviewRequest(notes != null ? notes : "");
+            String requestBody = objectMapper.writeValueAsString(reviewReq);
+
+            HttpRequest.Builder reqBuilder = HttpRequest.newBuilder()
+                    .uri(URI.create(baseUrl + path))
+                    .timeout(Duration.ofSeconds(15))
+                    .header("Content-Type", "application/json")
+                    .header("Accept", "application/json")
+                    .header(csrfHeaderName, csrfToken != null ? csrfToken : "")
+                    .POST(HttpRequest.BodyPublishers.ofString(requestBody));
+
+            HttpResponse<String> response = httpClient.send(reqBuilder.build(), HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JsonNode node = objectMapper.readTree(response.body());
+                boolean success = node.has("success") && node.get("success").asBoolean();
+                String message = node.has("message") ? node.get("message").asString() : actionDesc + " succeeded.";
+                Long txId = node.has("transactionId") && !node.get("transactionId").isNull()
+                        ? node.get("transactionId").asLong() : targetId;
+                String status = node.has("status") ? node.get("status").asString() : "REVIEWED";
+                return new TransactionResponse(success, message, txId, null, null, status, null, null, null, null, null);
+            } else if (response.statusCode() == 400) {
+                throw new ApiClientException(400, parseErrorMessage(response.body(), actionDesc + " failed due to invalid request."));
+            } else if (response.statusCode() == 401) {
+                throw new ApiClientException(401, "Session expired or authentication required. Please log in again.");
+            } else if (response.statusCode() == 403) {
+                throw new ApiClientException(403, "Access forbidden: Administrator privileges required.");
+            } else if (response.statusCode() == 404) {
+                throw new ApiClientException(404, parseErrorMessage(response.body(), "Target resource not found for " + actionDesc.toLowerCase() + "."));
+            } else {
+                throw new ApiClientException(response.statusCode(),
+                        actionDesc + " failed with HTTP status " + response.statusCode() + ".");
+            }
+        } catch (IOException | InterruptedException ex) {
+            if (ex instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw new ApiClientException(0, "Network error during " + actionDesc.toLowerCase() + " retry: " + ex.getMessage(), ex);
         }
     }
 

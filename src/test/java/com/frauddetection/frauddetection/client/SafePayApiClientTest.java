@@ -77,6 +77,66 @@ class SafePayApiClientTest {
     }
 
     @Test
+    @DisplayName("SafePayApiClient normalizes baseUrl with trailing slashes or /api prefix")
+    void constructor_normalizesBaseUrl() {
+        SafePayApiClient client1 = new SafePayApiClient("http://localhost:8080/");
+        assertEquals("http://localhost:8080", client1.getBaseUrl());
+
+        SafePayApiClient client2 = new SafePayApiClient("http://localhost:8080/api");
+        assertEquals("http://localhost:8080", client2.getBaseUrl());
+
+        SafePayApiClient client3 = new SafePayApiClient("http://localhost:8080/api/");
+        assertEquals("http://localhost:8080", client3.getBaseUrl());
+
+        SafePayApiClient client4 = new SafePayApiClient("  http://localhost:8080/api/  ");
+        assertEquals("http://localhost:8080", client4.getBaseUrl());
+
+        SafePayApiClient client5 = new SafePayApiClient("\"http://localhost:8081/\"");
+        assertEquals("http://localhost:8081", client5.getBaseUrl());
+    }
+
+    @Test
+    @DisplayName("fetchCsrfToken with /api configured baseUrl normalizes and retrieves CSRF token successfully")
+    void fetchCsrfToken_withApiBaseUrl_succeeds() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            String response = objectMapper.writeValueAsString(
+                    new CsrfResponse("test-csrf-token-normalized", "X-XSRF-TOKEN", "_csrf")
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        // Pass baseUrl configured with trailing /api
+        SafePayApiClient client = new SafePayApiClient(baseUrl + "/api");
+        CsrfResponse csrf = client.fetchCsrfToken();
+
+        assertNotNull(csrf);
+        assertEquals("test-csrf-token-normalized", csrf.token());
+        assertEquals("X-XSRF-TOKEN", csrf.headerName());
+        assertEquals("test-csrf-token-normalized", client.getCsrfToken());
+    }
+
+    @Test
+    @DisplayName("fetchCsrfToken throws ApiClientException with exact message when server returns 404")
+    void fetchCsrfToken_serverReturns404_throwsApiClientException() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            exchange.sendResponseHeaders(404, -1);
+            exchange.close();
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        ApiClientException ex = assertThrows(ApiClientException.class, client::fetchCsrfToken);
+        assertEquals(404, ex.getStatusCode());
+        assertEquals("Failed to obtain CSRF token from server (HTTP 404).", ex.getMessage());
+    }
+
+    @Test
     @DisplayName("login auto-fetches CSRF token, attaches header, and parses AuthResponse")
     void login_autoFetchesCsrfAndAuthenticates() throws Exception {
         AtomicInteger csrfHits = new AtomicInteger(0);
@@ -724,5 +784,358 @@ class SafePayApiClientTest {
                 client.getTransactionDetails(999L));
         assertEquals(404, ex.getStatusCode());
         assertTrue(ex.getMessage().contains("Transaction not found"));
+    }
+
+    @Test
+    @DisplayName("getPendingTransactions retrieves and parses pending review transactions")
+    void getPendingTransactions_success() throws Exception {
+        mockServer.createContext("/api/admin/pending", exchange -> {
+            assertEquals("GET", exchange.getRequestMethod());
+            String json = "[{\"id\":101,\"amount\":25000.00,\"transactionType\":\"TRANSFER\",\"status\":\"PENDING_REVIEW\",\"transactionTime\":\"2026-11-18 20:00:00\"}," +
+                    "{\"id\":102,\"amount\":5000.00,\"transactionType\":\"PAYMENT\",\"status\":\"PENDING_REVIEW\",\"transactionTime\":\"2026-11-18 20:05:00\"}]";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        java.util.List<com.frauddetection.frauddetection.dto.TransactionSummaryDto> pending = client.getPendingTransactions();
+
+        assertNotNull(pending);
+        assertEquals(2, pending.size());
+        assertEquals(101L, pending.get(0).id());
+        assertEquals(0, new java.math.BigDecimal("25000.00").compareTo(pending.get(0).amount()));
+        assertEquals("TRANSFER", pending.get(0).transactionType());
+        assertEquals("PENDING_REVIEW", pending.get(0).status());
+        assertEquals(102L, pending.get(1).id());
+    }
+
+    @Test
+    @DisplayName("getPendingTransactions throws ApiClientException on 401 Unauthorized")
+    void getPendingTransactions_unauthorized_throws401() throws Exception {
+        mockServer.createContext("/api/admin/pending", exchange -> {
+            exchange.sendResponseHeaders(401, -1);
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        ApiClientException ex = assertThrows(ApiClientException.class, () -> client.getPendingTransactions());
+        assertEquals(401, ex.getStatusCode());
+        assertTrue(ex.getMessage().contains("Session expired or authentication required"));
+    }
+
+    @Test
+    @DisplayName("getPendingTransactions throws ApiClientException on 403 Forbidden")
+    void getPendingTransactions_forbidden_throws403() throws Exception {
+        mockServer.createContext("/api/admin/pending", exchange -> {
+            exchange.sendResponseHeaders(403, -1);
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        ApiClientException ex = assertThrows(ApiClientException.class, () -> client.getPendingTransactions());
+        assertEquals(403, ex.getStatusCode());
+        assertTrue(ex.getMessage().contains("Administrator privileges required"));
+    }
+
+    @Test
+    @DisplayName("approveTransaction attaches CSRF, serializes notes, and returns TransactionResponse")
+    void approveTransaction_success() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            String response = objectMapper.writeValueAsString(
+                    new CsrfResponse("admin-csrf-token", "X-CSRF-TOKEN", "_csrf")
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/admin/transactions/101/approve", exchange -> {
+            assertEquals("POST", exchange.getRequestMethod());
+            assertEquals("admin-csrf-token", exchange.getRequestHeaders().getFirst("X-CSRF-TOKEN"));
+            String reqBody = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            assertTrue(reqBody.contains("Verified with customer"));
+
+            String json = "{\"success\":true,\"message\":\"Transaction #101 approved and settled successfully.\",\"transactionId\":101,\"status\":\"APPROVED\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        com.frauddetection.frauddetection.dto.TransactionResponse resp =
+                client.approveTransaction(101L, "Verified with customer");
+
+        assertNotNull(resp);
+        assertTrue(resp.success());
+        assertEquals(101L, resp.transactionId());
+        assertEquals("APPROVED", resp.status());
+        assertTrue(resp.message().contains("approved and settled"));
+    }
+
+    @Test
+    @DisplayName("approveTransaction throws ApiClientException on 400 Bad Request")
+    void approveTransaction_badRequest_throws400() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            String response = objectMapper.writeValueAsString(
+                    new CsrfResponse("admin-csrf-token", "X-CSRF-TOKEN", "_csrf")
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/admin/transactions/101/approve", exchange -> {
+            String json = "{\"success\":false,\"message\":\"Transaction #101 is not pending review.\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(400, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        ApiClientException ex = assertThrows(ApiClientException.class, () ->
+                client.approveTransaction(101L, "Notes"));
+        assertEquals(400, ex.getStatusCode());
+        assertTrue(ex.getMessage().contains("not pending review"));
+    }
+
+    @Test
+    @DisplayName("rejectTransaction attaches CSRF, serializes notes, and returns TransactionResponse")
+    void rejectTransaction_success() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            String response = objectMapper.writeValueAsString(
+                    new CsrfResponse("admin-csrf-token", "X-CSRF-TOKEN", "_csrf")
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/admin/transactions/102/reject", exchange -> {
+            assertEquals("POST", exchange.getRequestMethod());
+            String json = "{\"success\":true,\"message\":\"Transaction #102 rejected successfully.\",\"transactionId\":102,\"status\":\"REJECTED\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        com.frauddetection.frauddetection.dto.TransactionResponse resp =
+                client.rejectTransaction(102L, "Suspicious transaction velocity");
+
+        assertNotNull(resp);
+        assertTrue(resp.success());
+        assertEquals(102L, resp.transactionId());
+        assertEquals("REJECTED", resp.status());
+    }
+
+    @Test
+    @DisplayName("approveAlert and rejectAlert invoke alert review endpoints")
+    void approveAndRejectAlert_success() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            String response = objectMapper.writeValueAsString(
+                    new CsrfResponse("admin-csrf-token", "X-CSRF-TOKEN", "_csrf")
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/admin/alerts/50/approve", exchange -> {
+            String json = "{\"success\":true,\"message\":\"Alert #50 approved.\",\"transactionId\":205,\"status\":\"APPROVED\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/admin/alerts/51/reject", exchange -> {
+            String json = "{\"success\":true,\"message\":\"Alert #51 rejected.\",\"transactionId\":206,\"status\":\"REJECTED\"}";
+            byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        com.frauddetection.frauddetection.dto.TransactionResponse appResp = client.approveAlert(50L, "Approved via alert");
+        assertTrue(appResp.success());
+        assertEquals(205L, appResp.transactionId());
+
+        com.frauddetection.frauddetection.dto.TransactionResponse rejResp = client.rejectAlert(51L, "Rejected via alert");
+        assertTrue(rejResp.success());
+        assertEquals(206L, rejResp.transactionId());
+    }
+
+    @Test
+    @DisplayName("createTransaction correctly serializes receiverAccountNumber in payload")
+    void createTransaction_withReceiverAccountNumber_sendsContractField() throws Exception {
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            String response = objectMapper.writeValueAsString(
+                    new CsrfResponse("csrf-token-123", "X-CSRF-TOKEN", "_csrf")
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/transactions", exchange -> {
+            assertEquals("POST", exchange.getRequestMethod());
+            String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
+            assertTrue(body.contains("\"receiverAccountNumber\":\"100000000002\""),
+                    "Request body must serialize receiverAccountNumber field");
+
+            String response = objectMapper.writeValueAsString(
+                    new com.frauddetection.frauddetection.dto.TransactionResponse(
+                            true,
+                            "Your transaction was approved and processed successfully.",
+                            301L,
+                            new java.math.BigDecimal("2500.00"),
+                            "TRANSFER",
+                            "APPROVED",
+                            "2026-11-18 21:00:00",
+                            "Normal / Legitimate",
+                            "LOW",
+                            0.01,
+                            new java.math.BigDecimal("47500.00")
+                    )
+            );
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        com.frauddetection.frauddetection.dto.TransactionRequest req =
+                new com.frauddetection.frauddetection.dto.TransactionRequest(
+                        new java.math.BigDecimal("2500.00"),
+                        "TRANSFER",
+                        "100000000002"
+                );
+
+        com.frauddetection.frauddetection.dto.TransactionResponse res = client.createTransaction(req);
+        assertNotNull(res);
+        assertTrue(res.success());
+        assertEquals("APPROVED", res.status());
+        assertEquals(301L, res.transactionId());
+    }
+
+    @Test
+    @DisplayName("SafePayApiClient default constructor resolves to port 8081 or system property")
+    void defaultConstructor_resolvesDefaultPort8081() {
+        String prevSys = System.getProperty("safepay.api.url");
+        String prevPort = System.getProperty("server.port");
+        try {
+            System.clearProperty("safepay.api.url");
+            System.clearProperty("server.port");
+
+            SafePayApiClient defaultClient = new SafePayApiClient();
+            assertEquals("http://localhost:8081", defaultClient.getBaseUrl());
+
+            SafePayApiClient blankClient = new SafePayApiClient("   ");
+            assertEquals("http://localhost:8081", blankClient.getBaseUrl());
+
+            System.setProperty("safepay.api.url", "http://localhost:9090");
+            SafePayApiClient propClient = new SafePayApiClient();
+            assertEquals("http://localhost:9090", propClient.getBaseUrl());
+
+            System.clearProperty("safepay.api.url");
+            System.setProperty("server.port", "8085");
+            SafePayApiClient portClient = new SafePayApiClient();
+            assertEquals("http://localhost:8085", portClient.getBaseUrl());
+        } finally {
+            if (prevSys != null) System.setProperty("safepay.api.url", prevSys);
+            else System.clearProperty("safepay.api.url");
+
+            if (prevPort != null) System.setProperty("server.port", prevPort);
+            else System.clearProperty("server.port");
+        }
+    }
+
+    @Test
+    @DisplayName("approveTransaction refreshes CSRF token and retries once upon receiving HTTP 403")
+    void approveTransaction_csrfExpired_refreshesAndRetries() throws Exception {
+        AtomicInteger csrfFetchCount = new AtomicInteger(0);
+        AtomicInteger approveCallCount = new AtomicInteger(0);
+
+        mockServer.createContext("/api/auth/csrf", exchange -> {
+            int count = csrfFetchCount.incrementAndGet();
+            String tok = "admin-csrf-v" + count;
+            String response = objectMapper.writeValueAsString(new CsrfResponse(tok, "X-CSRF-TOKEN", "_csrf"));
+            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        });
+
+        mockServer.createContext("/api/admin/transactions/555/approve", exchange -> {
+            int count = approveCallCount.incrementAndGet();
+            if (count == 1) {
+                // First call fails with 403
+                exchange.sendResponseHeaders(403, -1);
+            } else {
+                // Retry succeeds with refreshed CSRF token
+                assertEquals("admin-csrf-v2", exchange.getRequestHeaders().getFirst("X-CSRF-TOKEN"));
+                String json = "{\"success\":true,\"message\":\"Approved on retry\",\"transactionId\":555,\"status\":\"APPROVED\"}";
+                byte[] bytes = json.getBytes(StandardCharsets.UTF_8);
+                exchange.getResponseHeaders().set("Content-Type", "application/json");
+                exchange.sendResponseHeaders(200, bytes.length);
+                try (OutputStream os = exchange.getResponseBody()) {
+                    os.write(bytes);
+                }
+            }
+        });
+        mockServer.start();
+
+        SafePayApiClient client = new SafePayApiClient(baseUrl);
+        com.frauddetection.frauddetection.dto.TransactionResponse resp = client.approveTransaction(555L, "Retried approval");
+
+        assertNotNull(resp);
+        assertTrue(resp.success());
+        assertEquals(555L, resp.transactionId());
+        assertEquals("APPROVED", resp.status());
+        assertEquals(2, approveCallCount.get());
     }
 }

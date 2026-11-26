@@ -1,6 +1,7 @@
 package com.frauddetection.frauddetection.security;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -247,4 +248,31 @@ class AdminAuthorizationTest {
                 .andExpect(status().isForbidden());
     }
 
+        @Test
+    @WithMockUser(username = "alice", roles = "USER")
+    void userCannotAccessApiAdminPending() throws Exception {
+        mockMvc.perform(get("/api/admin/pending"))
+                .andExpect(status().isForbidden());
     }
+
+    @Test
+    @WithMockUser(username = "alice", roles = "USER")
+    void userCannotApproveApiAdminTransaction() throws Exception {
+        mockMvc.perform(post("/api/admin/transactions/1/approve").with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "alice", roles = "USER")
+    void userCannotRejectApiAdminTransaction() throws Exception {
+        mockMvc.perform(post("/api/admin/transactions/1/reject").with(csrf()))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = "ADMIN")
+    void adminCanAccessApiAdminPending() throws Exception {
+        mockMvc.perform(get("/api/admin/pending"))
+                .andExpect(status().isOk());
+    }
+}

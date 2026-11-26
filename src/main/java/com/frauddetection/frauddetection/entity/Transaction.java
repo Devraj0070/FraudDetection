@@ -36,6 +36,12 @@ public class Transaction {
     @ManyToOne
     private Account account;
 
+    @ManyToOne
+    private Account receiverAccount;
+
+    @jakarta.persistence.Column(name = "idempotency_key", unique = true, length = 128)
+    private String idempotencyKey;
+
     public Transaction() {
     }
 
@@ -105,5 +111,21 @@ public class Transaction {
 
     public void setAccount(Account account) {
         this.account = account;
+    }
+
+    public Account getReceiverAccount() {
+        return receiverAccount;
+    }
+
+    public void setReceiverAccount(Account receiverAccount) {
+        this.receiverAccount = receiverAccount;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
     }
 }

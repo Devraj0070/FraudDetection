@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
  * and optional {@link javax.sql.DataSource} pooling.
  *
  * Fulfills Academic Rubric:
- * - Database Connectivity (JDBC) — 3 marks (GUI) & 8 marks (Web)
- * - Implement JDBC for database connectivity — 3 marks
- * - Classes for Database Operations — 7 marks
+ * - Database Connectivity (JDBC) - 3 marks (GUI) & 8 marks (Web)
+ * - Implement JDBC for database connectivity - 3 marks
+ * - Classes for Database Operations - 7 marks
  */
 public final class DatabaseConnection {
 
@@ -36,11 +36,12 @@ public final class DatabaseConnection {
     }
 
     private DatabaseConnection() {
-        // Utility / Factory class — prevent instantiation
+        // Utility / Factory class - prevent instantiation
     }
 
     /**
      * Load JDBC configuration from environment variables or application.properties.
+     * Enforces external configuration: no hardcoded database password fallback.
      */
     public static void loadConfiguration() {
         String envUrl = System.getenv("DB_URL");
@@ -60,7 +61,7 @@ public final class DatabaseConnection {
         }
 
         if (envPassword != null && !envPassword.trim().isEmpty()) {
-            jdbcPassword = envPassword;
+            jdbcPassword = envPassword.trim();
         } else {
             jdbcPassword = null;
         }
@@ -74,24 +75,24 @@ public final class DatabaseConnection {
                 String propUrl = props.getProperty("spring.datasource.url");
                 if (propUrl != null && !propUrl.trim().isEmpty() && (envUrl == null || envUrl.isEmpty())) {
                     String resolvedUrl = resolvePropertyPlaceholder(propUrl);
-                    if (resolvedUrl != null) {
-                        jdbcUrl = resolvedUrl;
+                    if (resolvedUrl != null && !resolvedUrl.trim().isEmpty()) {
+                        jdbcUrl = resolvedUrl.trim();
                     }
                 }
 
                 String propUser = props.getProperty("spring.datasource.username");
                 if (propUser != null && !propUser.trim().isEmpty() && (envUser == null || envUser.isEmpty())) {
                     String resolvedUser = resolvePropertyPlaceholder(propUser);
-                    if (resolvedUser != null) {
-                        jdbcUser = resolvedUser;
+                    if (resolvedUser != null && !resolvedUser.trim().isEmpty()) {
+                        jdbcUser = resolvedUser.trim();
                     }
                 }
 
                 String propPassword = props.getProperty("spring.datasource.password");
                 if (propPassword != null && !propPassword.trim().isEmpty() && (envPassword == null || envPassword.isEmpty())) {
                     String resolvedPassword = resolvePropertyPlaceholder(propPassword);
-                    if (resolvedPassword != null) {
-                        jdbcPassword = resolvedPassword;
+                    if (resolvedPassword != null && !resolvedPassword.trim().isEmpty()) {
+                        jdbcPassword = resolvedPassword.trim();
                     }
                 }
             }
@@ -128,13 +129,17 @@ public final class DatabaseConnection {
         sharedDataSource = dataSource;
     }
 
+    public static DataSource getSharedDataSource() {
+        return sharedDataSource;
+    }
+
     /**
      * Obtain an active JDBC connection.
      * If a shared DataSource is registered, it takes precedence. Otherwise,
      * a direct {@link DriverManager} connection is established.
      *
      * @return Active {@link Connection}
-     * @throws DatabaseOperationException If connectivity fails
+     * @throws DatabaseOperationException If connectivity fails or password is not configured
      */
     public static Connection getConnection() throws DatabaseOperationException {
         try {
@@ -146,9 +151,7 @@ public final class DatabaseConnection {
             }
 
             if (jdbcPassword == null || jdbcPassword.trim().isEmpty()) {
-                String msg = "Database connection password is not configured. Please set the DB_PASSWORD environment variable.";
-                log.warn(msg);
-                throw new DatabaseOperationException(msg);
+                throw new DatabaseOperationException("Database password is not configured. Please supply the DB_PASSWORD environment variable.");
             }
 
             // Ensure MySQL Driver is loaded
@@ -173,8 +176,7 @@ public final class DatabaseConnection {
     public static Connection getConnection(String url, String username, String password)
             throws DatabaseOperationException {
         if (password == null || password.trim().isEmpty()) {
-            throw new DatabaseOperationException(
-                    "Direct JDBC connection failed: Database password is not configured. Please set the DB_PASSWORD environment variable.");
+            throw new DatabaseOperationException("Database password is required for direct JDBC connection.");
         }
         try {
             return DriverManager.getConnection(url, username, password);
@@ -237,5 +239,9 @@ public final class DatabaseConnection {
 
     public static String getJdbcUser() {
         return jdbcUser;
+    }
+
+    public static boolean isPasswordConfigured() {
+        return jdbcPassword != null && !jdbcPassword.trim().isEmpty();
     }
 }

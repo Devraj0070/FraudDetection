@@ -28,6 +28,15 @@ public class FraudAlert {
     @ManyToOne
     private Transaction transaction;
 
+    @ManyToOne
+    private User reviewingAdmin;
+
+    private LocalDateTime reviewedAt;
+
+    private String decision;
+
+    private String reviewNotes;
+
     public FraudAlert() {
     }
 
@@ -77,5 +86,37 @@ public class FraudAlert {
 
     public void setTransaction(Transaction transaction) {
         this.transaction = transaction;
+    }
+
+    public User getReviewingAdmin() {
+        return reviewingAdmin;
+    }
+
+    public void setReviewingAdmin(User reviewingAdmin) {
+        this.reviewingAdmin = reviewingAdmin;
+    }
+
+    public LocalDateTime getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setReviewedAt(LocalDateTime reviewedAt) {
+        this.reviewedAt = reviewedAt;
+    }
+
+    public String getDecision() {
+        return decision;
+    }
+
+    public void setDecision(String decision) {
+        this.decision = decision;
+    }
+
+    public String getReviewNotes() {
+        return reviewNotes;
+    }
+
+    public void setReviewNotes(String reviewNotes) {
+        this.reviewNotes = reviewNotes;
     }
 }

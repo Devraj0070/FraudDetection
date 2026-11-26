@@ -67,20 +67,21 @@ public class TransactionHistoryPanel extends JPanel {
     public static final String STATE_ERROR = "STATE_ERROR";
 
     // Finora / SafePay Design Tokens
-    public static final Color COLOR_PURPLE_PRIMARY = new Color(124, 58, 237); // #7C3AED
-    public static final Color COLOR_PURPLE_LIGHT = new Color(196, 181, 253);   // #C4B5FD
-    public static final Color COLOR_PURPLE_PILL = new Color(243, 232, 255);    // #F3E8FF
-    public static final Color COLOR_HERO_BG = new Color(248, 247, 252);       // #F8F7FC
-    public static final Color COLOR_CARD_WHITE = Color.WHITE;
-    public static final Color COLOR_CARD_OUTLINE = new Color(241, 245, 249);  // #F1F5F9
-    public static final Color COLOR_BORDER_SUBTLE = new Color(226, 232, 240); // #E2E8F0
-    public static final Color COLOR_TEXT_MAIN = new Color(15, 23, 42);        // #0F172A
-    public static final Color COLOR_TEXT_SUBTLE = new Color(100, 116, 139);   // #64748B
-    public static final Color COLOR_INPUT_BG = new Color(248, 250, 252);      // #F8FAFC
+    public static final Color COLOR_PURPLE_PRIMARY = new Color(216, 255, 0); // #D8FF00 Electric Lime
+    public static final Color COLOR_PURPLE_LIGHT = new Color(216, 255, 0, 100);
+    public static final Color COLOR_PURPLE_PILL = new Color(216, 255, 0, 35);
+    public static final Color COLOR_HERO_BG = new Color(22, 22, 22);
+    public static final Color COLOR_CARD_WHITE = new Color(22, 22, 22);
+    public static final Color COLOR_CARD_OUTLINE = new Color(36, 36, 36);
+    public static final Color COLOR_BORDER_SUBTLE = new Color(36, 36, 36);
+    public static final Color COLOR_TEXT_MAIN = Color.WHITE;
+    public static final Color COLOR_TEXT_SUBTLE = new Color(156, 163, 175);
+    public static final Color COLOR_INPUT_BG = new Color(17, 17, 17);
 
     public static final Color COLOR_STATUS_APPROVED = new Color(22, 163, 74); // #16A34A
     public static final Color COLOR_STATUS_BLOCKED = new Color(220, 38, 38);  // #DC2626
     public static final Color COLOR_STATUS_DECLINED = new Color(217, 119, 6); // #D97706
+    public static final Color COLOR_STATUS_PENDING = new Color(124, 58, 237);  // #7C3AED
 
     private final SafePayApiClient apiClient;
     private final Runnable onNavigateToDashboard;
@@ -100,6 +101,7 @@ public class TransactionHistoryPanel extends JPanel {
     private JLabel lblTotalCount;
     private JLabel lblTotalVolume;
     private JLabel lblApprovedCount;
+    private JLabel lblPendingCount;
     private JLabel lblDeclinedCount;
     private JLabel lblBlockedCount;
 
@@ -113,6 +115,16 @@ public class TransactionHistoryPanel extends JPanel {
     private JLabel lblEmptyMessage;
 
     private boolean isLoading = false;
+    private String currentState = STATE_LOADING;
+
+    public void showState(String state) {
+        this.currentState = state;
+        stateCardLayout.show(stateContainer, state);
+    }
+
+    public String getCurrentState() {
+        return currentState;
+    }
 
     public TransactionHistoryPanel(SafePayApiClient apiClient, Runnable onNavigateToDashboard) {
         this.apiClient = apiClient != null ? apiClient : new SafePayApiClient();
@@ -223,7 +235,7 @@ public class TransactionHistoryPanel extends JPanel {
             protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                g2.setColor(new Color(243, 232, 255));
+                g2.setColor(new Color(22, 22, 22));
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 16, 16);
                 g2.setColor(COLOR_PURPLE_PRIMARY);
                 g2.setStroke(new BasicStroke(1.0f));
@@ -264,6 +276,7 @@ public class TransactionHistoryPanel extends JPanel {
         lblTotalCount = new JLabel("0");
         lblTotalVolume = new JLabel("₹ 0.00");
         lblApprovedCount = new JLabel("0");
+        lblPendingCount = new JLabel("0");
         lblDeclinedCount = new JLabel("0");
         lblBlockedCount = new JLabel("0");
 
@@ -272,6 +285,8 @@ public class TransactionHistoryPanel extends JPanel {
         card.add(createMetricItem("Total Volume", lblTotalVolume, COLOR_PURPLE_PRIMARY));
         card.add(createDivider());
         card.add(createMetricItem("Approved", lblApprovedCount, COLOR_STATUS_APPROVED));
+        card.add(createDivider());
+        card.add(createMetricItem("Pending Review", lblPendingCount, COLOR_STATUS_PENDING));
         card.add(createDivider());
         card.add(createMetricItem("Declined", lblDeclinedCount, COLOR_STATUS_DECLINED));
         card.add(createDivider());
@@ -350,7 +365,7 @@ public class TransactionHistoryPanel extends JPanel {
         filterRow.add(cmbTypeFilter);
 
         // Status Filter Dropdown
-        String[] statusOptions = {"All Statuses", "APPROVED", "DECLINED", "BLOCKED"};
+        String[] statusOptions = {"All Statuses", "APPROVED", "PENDING_REVIEW", "DECLINED", "BLOCKED"};
         cmbStatusFilter = new JComboBox<>(statusOptions);
         styleComboBox(cmbStatusFilter);
         filterRow.add(cmbStatusFilter);
@@ -534,7 +549,7 @@ public class TransactionHistoryPanel extends JPanel {
         JScrollPane tableScroll = new JScrollPane(transactionTable);
         tableScroll.setBorder(BorderFactory.createLineBorder(COLOR_BORDER_SUBTLE, 1));
         tableScroll.setBackground(Color.WHITE);
-        tableScroll.getViewport().setBackground(Color.WHITE);
+        tableScroll.getViewport().setBackground(new Color(22, 22, 22));
         tableScroll.setPreferredSize(new Dimension(0, 380));
 
         card.add(tableScroll, BorderLayout.CENTER);
@@ -708,7 +723,7 @@ public class TransactionHistoryPanel extends JPanel {
             return;
         }
         isLoading = true;
-        stateCardLayout.show(stateContainer, STATE_LOADING);
+        showState(STATE_LOADING);
 
         String typeParam = cmbTypeFilter != null && cmbTypeFilter.getSelectedIndex() > 0
                 ? (String) cmbTypeFilter.getSelectedItem() : null;
@@ -732,7 +747,7 @@ public class TransactionHistoryPanel extends JPanel {
                 } catch (Exception ex) {
                     Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
                     lblErrorMessage.setText("Error loading transactions: " + cause.getMessage());
-                    stateCardLayout.show(stateContainer, STATE_ERROR);
+                    showState(STATE_ERROR);
                 }
             }
         };
@@ -747,15 +762,16 @@ public class TransactionHistoryPanel extends JPanel {
         tableModel.fireTableDataChanged();
 
         if (transactionsList.isEmpty()) {
-            stateCardLayout.show(stateContainer, STATE_EMPTY);
+            showState(STATE_EMPTY);
         } else {
-            stateCardLayout.show(stateContainer, STATE_CONTENT);
+            showState(STATE_CONTENT);
         }
 
         // Calculate and update metrics
         int total = transactionsList.size();
         BigDecimal totalVolume = BigDecimal.ZERO;
         int approved = 0;
+        int pending = 0;
         int declined = 0;
         int blocked = 0;
 
@@ -765,6 +781,8 @@ public class TransactionHistoryPanel extends JPanel {
             }
             if ("APPROVED".equalsIgnoreCase(tx.status())) {
                 approved++;
+            } else if ("PENDING_REVIEW".equalsIgnoreCase(tx.status())) {
+                pending++;
             } else if ("DECLINED".equalsIgnoreCase(tx.status())) {
                 declined++;
             } else if ("BLOCKED".equalsIgnoreCase(tx.status())) {
@@ -775,6 +793,7 @@ public class TransactionHistoryPanel extends JPanel {
         lblTotalCount.setText(String.valueOf(total));
         lblTotalVolume.setText(String.format(Locale.US, "₹ %,.2f", totalVolume));
         lblApprovedCount.setText(String.valueOf(approved));
+        lblPendingCount.setText(String.valueOf(pending));
         lblDeclinedCount.setText(String.valueOf(declined));
         lblBlockedCount.setText(String.valueOf(blocked));
     }
@@ -830,7 +849,7 @@ public class TransactionHistoryPanel extends JPanel {
         dialog.setVisible(true);
     }
 
-    private JPanel buildDetailContent(TransactionResponse resp, JDialog dialog) {
+    JPanel buildDetailContent(TransactionResponse resp, JDialog dialog) {
         JPanel root = new JPanel();
         root.setLayout(new BoxLayout(root, BoxLayout.Y_AXIS));
         root.setBackground(Color.WHITE);
@@ -850,6 +869,7 @@ public class TransactionHistoryPanel extends JPanel {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                 Color bg = "APPROVED".equalsIgnoreCase(resp.status()) ? new Color(220, 252, 231)
+                        : "PENDING_REVIEW".equalsIgnoreCase(resp.status()) ? new Color(243, 232, 255)
                         : "DECLINED".equalsIgnoreCase(resp.status()) ? new Color(254, 243, 199)
                         : new Color(254, 226, 226);
                 g2.setColor(bg);
@@ -860,10 +880,11 @@ public class TransactionHistoryPanel extends JPanel {
         };
         lblBadge.setFont(new Font("Segoe UI", Font.BOLD, 11));
         Color textColor = "APPROVED".equalsIgnoreCase(resp.status()) ? COLOR_STATUS_APPROVED
+                : "PENDING_REVIEW".equalsIgnoreCase(resp.status()) ? COLOR_STATUS_PENDING
                 : "DECLINED".equalsIgnoreCase(resp.status()) ? COLOR_STATUS_DECLINED
                 : COLOR_STATUS_BLOCKED;
         lblBadge.setForeground(textColor);
-        lblBadge.setPreferredSize(new Dimension(84, 24));
+        lblBadge.setPreferredSize(new Dimension("PENDING_REVIEW".equalsIgnoreCase(resp.status()) ? 120 : 84, 24));
         lblBadge.setOpaque(false);
 
         topRow.add(lblTitle, BorderLayout.WEST);
@@ -888,39 +909,52 @@ public class TransactionHistoryPanel extends JPanel {
 
         root.add(Box.createVerticalStrut(12));
 
-        // AI Risk Classification Card
-        JPanel riskCard = new JPanel();
-        riskCard.setLayout(new BoxLayout(riskCard, BoxLayout.Y_AXIS));
-        riskCard.setBackground(COLOR_INPUT_BG);
-        riskCard.setBorder(BorderFactory.createCompoundBorder(
+        // Security & Verification Status Card (Sanitized for customer privacy - no raw ML probabilities)
+        JPanel securityCard = new JPanel();
+        securityCard.setLayout(new BoxLayout(securityCard, BoxLayout.Y_AXIS));
+        securityCard.setBackground(COLOR_INPUT_BG);
+        securityCard.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(COLOR_BORDER_SUBTLE, 1),
                 BorderFactory.createEmptyBorder(10, 12, 10, 12)
         ));
 
-        JLabel lblAiHeader = new JLabel("AI Fraud Assessment");
-        lblAiHeader.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblAiHeader.setForeground(COLOR_PURPLE_PRIMARY);
+        JLabel lblSecurityHeader = new JLabel("Security & Verification Status");
+        lblSecurityHeader.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lblSecurityHeader.setForeground(COLOR_PURPLE_PRIMARY);
 
-        double score = resp.fraudProbability() != null ? resp.fraudProbability() : 0.0;
-        String tier = resp.riskAssessment() != null ? resp.riskAssessment() : (score >= 0.70 ? "HIGH" : score >= 0.40 ? "MEDIUM" : "LOW");
-        String scorePercent = String.format(Locale.US, "Probability: %.1f%% (%s RISK)", score * 100, tier);
-        JLabel lblScore = new JLabel(scorePercent);
-        lblScore.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblScore.setForeground("HIGH".equalsIgnoreCase(tier) || score >= 0.70 ? COLOR_STATUS_BLOCKED
-                : "MEDIUM".equalsIgnoreCase(tier) || score >= 0.40 ? COLOR_STATUS_DECLINED
-                : COLOR_STATUS_APPROVED);
+        String status = resp.status() != null ? resp.status().toUpperCase() : "UNKNOWN";
+        JLabel lblStatusSummary = new JLabel();
+        lblStatusSummary.setFont(new Font("Segoe UI", Font.BOLD, 12));
 
-        JLabel lblReason = new JLabel("Reason: " + (resp.detectionReason() != null ? resp.detectionReason() : "Verified"));
-        lblReason.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblReason.setForeground(COLOR_TEXT_SUBTLE);
+        JLabel lblExplanation = new JLabel();
+        lblExplanation.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        lblExplanation.setForeground(COLOR_TEXT_SUBTLE);
 
-        riskCard.add(lblAiHeader);
-        riskCard.add(Box.createVerticalStrut(4));
-        riskCard.add(lblScore);
-        riskCard.add(Box.createVerticalStrut(2));
-        riskCard.add(lblReason);
+        if ("PENDING_REVIEW".equals(status)) {
+            lblStatusSummary.setText("Under Administrator Review");
+            lblStatusSummary.setForeground(COLOR_STATUS_PENDING);
+            lblExplanation.setText("<html>This transaction is under manual security review. Account balances remain untouched until reviewed.</html>");
+        } else if ("APPROVED".equals(status)) {
+            lblStatusSummary.setText("Verified & Approved");
+            lblStatusSummary.setForeground(COLOR_STATUS_APPROVED);
+            lblExplanation.setText("<html>Transaction passed automated security verification and settled successfully.</html>");
+        } else if ("BLOCKED".equals(status)) {
+            lblStatusSummary.setText("Blocked by Security Protection");
+            lblStatusSummary.setForeground(COLOR_STATUS_BLOCKED);
+            lblExplanation.setText("<html>Transaction flagged by automated fraud protection protocols to protect your funds.</html>");
+        } else {
+            lblStatusSummary.setText("Declined");
+            lblStatusSummary.setForeground(COLOR_STATUS_DECLINED);
+            lblExplanation.setText(resp.message() != null ? resp.message() : "Transaction was declined.");
+        }
 
-        root.add(riskCard);
+        securityCard.add(lblSecurityHeader);
+        securityCard.add(Box.createVerticalStrut(4));
+        securityCard.add(lblStatusSummary);
+        securityCard.add(Box.createVerticalStrut(2));
+        securityCard.add(lblExplanation);
+
+        root.add(securityCard);
         root.add(Box.createVerticalStrut(18));
 
         // Close Button
@@ -1017,7 +1051,7 @@ public class TransactionHistoryPanel extends JPanel {
         }
     }
 
-    private static class StatusBadgeRenderer extends DefaultTableCellRenderer {
+    static class StatusBadgeRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
             String status = value != null ? value.toString() : "";
@@ -1027,6 +1061,7 @@ public class TransactionHistoryPanel extends JPanel {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     Color bg = "APPROVED".equalsIgnoreCase(status) ? new Color(220, 252, 231)
+                            : "PENDING_REVIEW".equalsIgnoreCase(status) ? new Color(243, 232, 255)
                             : "DECLINED".equalsIgnoreCase(status) ? new Color(254, 243, 199)
                             : new Color(254, 226, 226);
                     g2.setColor(bg);
@@ -1037,6 +1072,7 @@ public class TransactionHistoryPanel extends JPanel {
             };
             lbl.setFont(new Font("Segoe UI", Font.BOLD, 10));
             Color fg = "APPROVED".equalsIgnoreCase(status) ? COLOR_STATUS_APPROVED
+                    : "PENDING_REVIEW".equalsIgnoreCase(status) ? COLOR_STATUS_PENDING
                     : "DECLINED".equalsIgnoreCase(status) ? COLOR_STATUS_DECLINED
                     : COLOR_STATUS_BLOCKED;
             lbl.setForeground(fg);
@@ -1084,5 +1120,45 @@ public class TransactionHistoryPanel extends JPanel {
 
     public JButton getResetButton() {
         return btnResetFilters;
+    }
+
+    public JLabel getLblTotalCount() {
+        return lblTotalCount;
+    }
+
+    public JLabel getLblTotalVolume() {
+        return lblTotalVolume;
+    }
+
+    public JLabel getLblApprovedCount() {
+        return lblApprovedCount;
+    }
+
+    public JLabel getLblPendingCount() {
+        return lblPendingCount;
+    }
+
+    public JLabel getPendingCountLabel() {
+        return lblPendingCount;
+    }
+
+    public String getPendingCountText() {
+        return lblPendingCount != null ? lblPendingCount.getText() : "0";
+    }
+
+    public JLabel getLblDeclinedCount() {
+        return lblDeclinedCount;
+    }
+
+    public JLabel getLblBlockedCount() {
+        return lblBlockedCount;
+    }
+
+    public JLabel getErrorMessageLabel() {
+        return lblErrorMessage;
+    }
+
+    public JLabel getEmptyMessageLabel() {
+        return lblEmptyMessage;
     }
 }

@@ -19,6 +19,15 @@ import org.junit.jupiter.api.Test;
 
 import com.frauddetection.frauddetection.client.SafePayApiClient;
 import com.frauddetection.frauddetection.dto.TransactionSummaryDto;
+import com.frauddetection.frauddetection.dto.TransactionResponse;
+import com.frauddetection.frauddetection.client.ApiClientException;
+import java.awt.Component;
+import java.awt.Container;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  * Unit and visual rendering tests for {@link TransactionHistoryPanel}.
@@ -166,5 +175,193 @@ class TransactionHistoryPanelTest {
         assertEquals("", panel.getSearchField().getText());
         assertEquals(0, panel.getTypeFilter().getSelectedIndex());
         assertEquals(0, panel.getStatusFilter().getSelectedIndex());
+    }
+    @Test
+    @DisplayName("TransactionHistoryPanel status filter contains PENDING_REVIEW and executes filtered query (Headless)")
+    void transactionHistoryPanel_statusFilter_containsPendingReview_headless() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<String> capturedStatus = new AtomicReference<>();
+
+        SafePayApiClient testClient = new SafePayApiClient("http://127.0.0.1:8080") {
+            @Override
+            public List<TransactionSummaryDto> getTransactionHistory(String type, String status, String search) {
+                capturedStatus.set(status);
+                latch.countDown();
+                return List.of(
+                        new TransactionSummaryDto(105L, new BigDecimal("8500.00"), "TRANSFER", "PENDING_REVIEW", "2026-11-18 10:00:00")
+                );
+            }
+        };
+
+        TransactionHistoryPanel panel = new TransactionHistoryPanel(testClient, () -> {});
+
+        // Verify status filter contains PENDING_REVIEW
+        boolean foundPendingReview = false;
+        int pendingReviewIndex = -1;
+        for (int i = 0; i < panel.getStatusFilter().getItemCount(); i++) {
+            if ("PENDING_REVIEW".equals(panel.getStatusFilter().getItemAt(i))) {
+                foundPendingReview = true;
+                pendingReviewIndex = i;
+                break;
+            }
+        }
+        assertTrue(foundPendingReview, "Status filter combo must contain PENDING_REVIEW option");
+
+        panel.getStatusFilter().setSelectedIndex(pendingReviewIndex);
+        panel.loadTransactionHistory();
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Loading worker should query API");
+        assertEquals("PENDING_REVIEW", capturedStatus.get());
+    }
+
+    @Test
+    @DisplayName("TransactionHistoryPanel StatusBadgeRenderer renders distinct styling for PENDING_REVIEW (Headless)")
+    void transactionHistoryPanel_statusBadgeRenderer_rendersPendingReviewBadge_headless() {
+        TransactionHistoryPanel.StatusBadgeRenderer renderer = new TransactionHistoryPanel.StatusBadgeRenderer();
+        TransactionHistoryPanel panel = new TransactionHistoryPanel(new SafePayApiClient(), () -> {});
+
+        // PENDING_REVIEW badge
+        Component compPending = renderer.getTableCellRendererComponent(
+                panel.getTransactionsTable(), "PENDING_REVIEW", false, false, 0, 4
+        );
+        assertNotNull(compPending);
+        assertEquals(TransactionHistoryPanel.COLOR_STATUS_PENDING, compPending.getForeground());
+
+        // APPROVED badge
+        Component compApproved = renderer.getTableCellRendererComponent(
+                panel.getTransactionsTable(), "APPROVED", false, false, 0, 4
+        );
+        assertEquals(TransactionHistoryPanel.COLOR_STATUS_APPROVED, compApproved.getForeground());
+
+        // DECLINED badge
+        Component compDeclined = renderer.getTableCellRendererComponent(
+                panel.getTransactionsTable(), "DECLINED", false, false, 0, 4
+        );
+        assertEquals(TransactionHistoryPanel.COLOR_STATUS_DECLINED, compDeclined.getForeground());
+
+        // BLOCKED badge
+        Component compBlocked = renderer.getTableCellRendererComponent(
+                panel.getTransactionsTable(), "BLOCKED", false, false, 0, 4
+        );
+        assertEquals(TransactionHistoryPanel.COLOR_STATUS_BLOCKED, compBlocked.getForeground());
+    }
+
+    @Test
+    @DisplayName("TransactionHistoryPanel summary metrics count PENDING_REVIEW and volume accurately (Headless)")
+    void transactionHistoryPanel_summaryCounts_includesPendingReview_headless() throws Exception {
+        TransactionHistoryPanel panel = new TransactionHistoryPanel(new SafePayApiClient(), () -> {});
+
+        List<TransactionSummaryDto> testData = List.of(
+                new TransactionSummaryDto(101L, new BigDecimal("1000.00"), "PAYMENT", "APPROVED", "2026-11-18 10:00:00"),
+                new TransactionSummaryDto(102L, new BigDecimal("2500.00"), "TRANSFER", "PENDING_REVIEW", "2026-11-18 11:00:00"),
+                new TransactionSummaryDto(103L, new BigDecimal("500.00"), "PAYMENT", "DECLINED", "2026-11-18 12:00:00"),
+                new TransactionSummaryDto(104L, new BigDecimal("50000.00"), "TRANSFER", "BLOCKED", "2026-11-18 13:00:00"),
+                new TransactionSummaryDto(105L, new BigDecimal("1500.00"), "TRANSFER", "PENDING_REVIEW", "2026-11-18 14:00:00")
+        );
+
+        panel.updateTableData(testData);
+
+        assertEquals("5", panel.getLblTotalCount().getText());
+        assertEquals("1", panel.getLblApprovedCount().getText());
+        assertEquals("2", panel.getPendingCountText());
+        assertEquals("2", panel.getLblPendingCount().getText());
+        assertEquals("1", panel.getLblDeclinedCount().getText());
+        assertEquals("1", panel.getLblBlockedCount().getText());
+        assertTrue(panel.getLblTotalVolume().getText().contains("55,500.00"));
+        assertEquals(TransactionHistoryPanel.STATE_CONTENT, panel.getCurrentState());
+    }
+
+    @Test
+    @DisplayName("TransactionHistoryPanel empty history displays STATE_EMPTY and zeroes counters (Headless)")
+    void transactionHistoryPanel_emptyHistory_showsEmptyState_headless() {
+        TransactionHistoryPanel panel = new TransactionHistoryPanel(new SafePayApiClient(), () -> {});
+
+        panel.updateTableData(List.of());
+
+        assertEquals(TransactionHistoryPanel.STATE_EMPTY, panel.getCurrentState());
+        assertEquals("0", panel.getLblTotalCount().getText());
+        assertEquals("0", panel.getLblApprovedCount().getText());
+        assertEquals("0", panel.getPendingCountText());
+        assertEquals(0, panel.getTransactionsTable().getRowCount());
+    }
+
+    @Test
+    @DisplayName("TransactionHistoryPanel API failure transitions to STATE_ERROR with message (Headless)")
+    void transactionHistoryPanel_apiFailure_showsErrorState_headless() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+
+        SafePayApiClient testClient = new SafePayApiClient("http://127.0.0.1:8080") {
+            @Override
+            public List<TransactionSummaryDto> getTransactionHistory(String type, String status, String search)
+                    throws ApiClientException {
+                latch.countDown();
+                throw new ApiClientException("Connection refused to backend API: 503");
+            }
+        };
+
+        TransactionHistoryPanel panel = new TransactionHistoryPanel(testClient, () -> {});
+
+        panel.loadTransactionHistory();
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Worker must attempt loading");
+        int retries = 0;
+        while (!TransactionHistoryPanel.STATE_ERROR.equals(panel.getCurrentState()) && retries < 20) {
+            Thread.sleep(50);
+            retries++;
+        }
+
+        assertEquals(TransactionHistoryPanel.STATE_ERROR, panel.getCurrentState());
+        assertTrue(panel.getErrorMessageLabel().getText().contains("Connection refused"));
+    }
+
+    @Test
+    @DisplayName("TransactionHistoryPanel detail dialog displays clear security status without exposing raw ML models (Headless)")
+    void transactionHistoryPanel_detailDialog_displaysWithoutExposingInternalMl_headless() {
+        TransactionHistoryPanel panel = new TransactionHistoryPanel(new SafePayApiClient(), () -> {});
+
+        TransactionResponse pendingResp = new TransactionResponse(
+                true,
+                "Your transaction is pending review by SafePay Fraud Protection.",
+                901L,
+                new BigDecimal("12500.00"),
+                "TRANSFER",
+                "PENDING_REVIEW",
+                "2026-11-18 15:30:00",
+                "Flagged for manual fraud review",
+                "HIGH",
+                0.8875,
+                new BigDecimal("50000.00")
+        );
+
+        JPanel content = panel.buildDetailContent(pendingResp, null);
+        assertNotNull(content);
+
+        // Recursively extract all text from labels
+        StringBuilder allText = new StringBuilder();
+        extractText(content, allText);
+        String text = allText.toString();
+
+        // Must display user-facing security info
+        assertTrue(text.contains("Under Administrator Review") || text.contains("Security & Verification"),
+                "Detail dialog must show security verification status");
+        assertTrue(text.contains("12,500.00"), "Detail dialog must show amount");
+        assertTrue(text.contains("TRANSFER"), "Detail dialog must show type");
+
+        // Must NOT expose internal ML details to customers
+        assertFalse(text.contains("Probability:"), "Customer dialog must not expose 'Probability:'");
+        assertFalse(text.contains("88.8%"), "Customer dialog must not expose percentage probability");
+        assertFalse(text.contains("0.88"), "Customer dialog must not expose raw probability decimal");
+        assertFalse(text.contains("HIGH RISK"), "Customer dialog must not expose raw ML risk assessment tier");
+    }
+
+    private void extractText(Component comp, StringBuilder sb) {
+        if (comp instanceof JLabel lbl) {
+            sb.append(" ").append(lbl.getText());
+        }
+        if (comp instanceof Container container) {
+            for (Component child : container.getComponents()) {
+                extractText(child, sb);
+            }
+        }
     }
 }

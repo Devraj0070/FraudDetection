@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -56,16 +57,43 @@ public class GlobalExceptionHandler {
         return errorPage(model, "Amount must be a valid number.");
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public Object handleIllegalArgumentException(
+            IllegalArgumentException exception,
+            HttpServletRequest request,
+            Model model) {
+
+        String msg = exception.getMessage() != null ? exception.getMessage() : "Invalid request parameter.";
+        if (isApiRequest(request)) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, msg);
+        }
+        return errorPage(model, msg);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public Object handleHttpMessageNotReadable(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request,
+            Model model) {
+
+        String msg = "Malformed or unreadable request payload.";
+        if (isApiRequest(request)) {
+            return buildErrorResponse(HttpStatus.BAD_REQUEST, msg);
+        }
+        return errorPage(model, msg);
+    }
+
     @ExceptionHandler(DataAccessException.class)
     public Object handleDataAccessException(
             DataAccessException exception,
             HttpServletRequest request,
             Model model) {
 
+        String msg = "Database operation failed. The database may be unavailable or experiencing connectivity issues.";
         if (isApiRequest(request)) {
-            return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "The transaction could not be completed. Please try again.");
+            return buildErrorResponse(HttpStatus.SERVICE_UNAVAILABLE, msg);
         }
-        return errorPage(model, "The transaction could not be completed. Please try again.");
+        return errorPage(model, msg);
     }
 
     private boolean isApiRequest(HttpServletRequest request) {

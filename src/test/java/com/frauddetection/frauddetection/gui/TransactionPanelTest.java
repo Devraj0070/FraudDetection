@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -14,6 +16,11 @@ import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import com.frauddetection.frauddetection.dto.TransactionRequest;
+import com.frauddetection.frauddetection.entity.TransactionType;
 
 import com.frauddetection.frauddetection.client.SafePayApiClient;
 import com.frauddetection.frauddetection.dto.TransactionResponse;
@@ -303,6 +310,198 @@ class TransactionPanelTest {
 
         TransactionPanel panel = panelHolder[0];
         assertEquals("", panel.getTxtAmount().getText());
+        assertEquals(" ", panel.getLblValidationError().getText());
+    }
+
+    // =========================================================================
+    // HEADLESS-COMPATIBLE TESTS (Phase D Milestone 1)
+    // =========================================================================
+
+    @Test
+    @DisplayName("TransactionPanel hides receiver field for PAYMENT and shows for TRANSFER (Headless)")
+    void transactionPanel_transferField_visibilityTogglesWithType_headless() {
+        SafePayApiClient client = new SafePayApiClient("http://127.0.0.1:8080");
+        TransactionPanel panel = new TransactionPanel(client, () -> {}, () -> {});
+
+        assertNotNull(panel.getReceiverAccountContainer());
+        assertNotNull(panel.getTxtReceiverAccount());
+        assertFalse(panel.getReceiverAccountContainer().isVisible(),
+                "Receiver account container must be hidden by default for PAYMENT");
+        assertFalse(panel.getTxtReceiverAccount().isEnabled(),
+                "Receiver account field must be disabled by default for PAYMENT");
+
+        // Switch to TRANSFER
+        for (int i = 0; i < panel.getCmbType().getItemCount(); i++) {
+            TransactionPanel.TransactionTypeItem item = panel.getCmbType().getItemAt(i);
+            if (item.type == TransactionType.TRANSFER) {
+                panel.getCmbType().setSelectedIndex(i);
+                break;
+            }
+        }
+
+        assertTrue(panel.getReceiverAccountContainer().isVisible(),
+                "Receiver account container must be visible when TRANSFER is selected");
+        assertTrue(panel.getTxtReceiverAccount().isEnabled(),
+                "Receiver account field must be enabled when TRANSFER is selected");
+
+        // Switch back to PAYMENT
+        panel.getCmbType().setSelectedIndex(0);
+        assertFalse(panel.getReceiverAccountContainer().isVisible(),
+                "Receiver account container must be hidden when switched back to PAYMENT");
+        assertFalse(panel.getTxtReceiverAccount().isEnabled(),
+                "Receiver account field must be disabled when switched back to PAYMENT");
+    }
+
+    @Test
+    @DisplayName("TransactionPanel validation rejects TRANSFER when recipient account number is empty (Headless)")
+    void transactionPanel_transferValidation_requiresReceiverAccount_headless() {
+        SafePayApiClient client = new SafePayApiClient("http://127.0.0.1:8080");
+        TransactionPanel panel = new TransactionPanel(client, () -> {}, () -> {});
+
+        // Switch to TRANSFER
+        for (int i = 0; i < panel.getCmbType().getItemCount(); i++) {
+            TransactionPanel.TransactionTypeItem item = panel.getCmbType().getItemAt(i);
+            if (item.type == TransactionType.TRANSFER) {
+                panel.getCmbType().setSelectedIndex(i);
+                break;
+            }
+        }
+
+        panel.getTxtAmount().setText("1500.00");
+        panel.getTxtReceiverAccount().setText("");
+
+        panel.executeTransactionSubmission();
+
+        assertEquals("Please enter the recipient's account number for transfers.",
+                panel.getLblValidationError().getText());
+    }
+
+    @Test
+    @DisplayName("TransactionPanel constructs TransactionRequest with receiverAccountNumber for TRANSFER (Headless)")
+    void transactionPanel_transferSubmission_constructsRequestWithReceiverAccountNumber_headless() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<TransactionRequest> capturedReq = new AtomicReference<>();
+
+        SafePayApiClient testClient = new SafePayApiClient("http://127.0.0.1:8080") {
+            @Override
+            public TransactionResponse createTransaction(TransactionRequest request) {
+                capturedReq.set(request);
+                latch.countDown();
+                return new TransactionResponse(
+                        true, "Processed", 101L, request.amount(), request.transactionType(),
+                        "APPROVED", "2026-11-18 20:00:00", "Normal", "LOW", 0.01, new BigDecimal("48500.00")
+                );
+            }
+        };
+
+        TransactionPanel panel = new TransactionPanel(testClient, () -> {}, () -> {});
+
+        // Switch to TRANSFER
+        for (int i = 0; i < panel.getCmbType().getItemCount(); i++) {
+            TransactionPanel.TransactionTypeItem item = panel.getCmbType().getItemAt(i);
+            if (item.type == TransactionType.TRANSFER) {
+                panel.getCmbType().setSelectedIndex(i);
+                break;
+            }
+        }
+
+        panel.getTxtAmount().setText("1500.00");
+        panel.getTxtReceiverAccount().setText("100000000002");
+
+        panel.executeTransactionSubmission();
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Submission worker must complete");
+        assertNotNull(capturedReq.get());
+        assertEquals(0, new BigDecimal("1500.00").compareTo(capturedReq.get().amount()));
+        assertEquals("TRANSFER", capturedReq.get().transactionType());
+        assertEquals("100000000002", capturedReq.get().receiverAccountNumber());
+    }
+
+    @Test
+    @DisplayName("TransactionPanel constructs TransactionRequest without receiver for PAYMENT (Headless)")
+    void transactionPanel_paymentSubmission_constructsRequestWithoutReceiver_headless() throws Exception {
+        CountDownLatch latch = new CountDownLatch(1);
+        AtomicReference<TransactionRequest> capturedReq = new AtomicReference<>();
+
+        SafePayApiClient testClient = new SafePayApiClient("http://127.0.0.1:8080") {
+            @Override
+            public TransactionResponse createTransaction(TransactionRequest request) {
+                capturedReq.set(request);
+                latch.countDown();
+                return new TransactionResponse(
+                        true, "Processed", 102L, request.amount(), request.transactionType(),
+                        "APPROVED", "2026-11-18 20:00:00", "Normal", "LOW", 0.01, new BigDecimal("49500.00")
+                );
+            }
+        };
+
+        TransactionPanel panel = new TransactionPanel(testClient, () -> {}, () -> {});
+
+        // Default is PAYMENT
+        panel.getTxtAmount().setText("500.00");
+
+        panel.executeTransactionSubmission();
+
+        assertTrue(latch.await(5, TimeUnit.SECONDS), "Submission worker must complete");
+        assertNotNull(capturedReq.get());
+        assertEquals(0, new BigDecimal("500.00").compareTo(capturedReq.get().amount()));
+        assertEquals("PAYMENT", capturedReq.get().transactionType());
+        assertNull(capturedReq.get().receiverAccountNumber(),
+                "Receiver account number must be null for standard payment");
+    }
+
+    @Test
+    @DisplayName("TransactionPanel displays PENDING_REVIEW result receipt with distinct title and styling (Headless)")
+    void transactionPanel_displayResult_rendersPendingReviewReceipt_headless() {
+        SafePayApiClient client = new SafePayApiClient("http://127.0.0.1:8080");
+        TransactionPanel panel = new TransactionPanel(client, () -> {}, () -> {});
+
+        TransactionResponse pendingResponse = new TransactionResponse(
+                true,
+                "Your transaction is pending review by SafePay Fraud Protection.",
+                901L,
+                new BigDecimal("35000.00"),
+                "TRANSFER",
+                "PENDING_REVIEW",
+                "2026-11-18 20:30:00",
+                "Machine Learning & Behavioral Anomaly",
+                "HIGH",
+                0.88,
+                new BigDecimal("50000.00")
+        );
+
+        panel.displayResultScreen(pendingResponse);
+
+        assertEquals("Transaction Submitted for Review", panel.getLblResultTitle().getText());
+        assertTrue(panel.getLblResultSubtitle().getText().contains("Balances remain unchanged"));
+        assertTrue(panel.getLblResultSubtitle().getText().contains("administrator review"));
+        assertEquals("PENDING_REVIEW", panel.getLblReceiptStatus().getText());
+        assertEquals(TransactionPanel.COLOR_STATUS_PENDING, panel.getLblReceiptStatus().getForeground());
+        assertEquals("#901", panel.getLblReceiptId().getText());
+    }
+
+    @Test
+    @DisplayName("TransactionPanel resetFormAndShow clears receiver field and resets visibility (Headless)")
+    void transactionPanel_resetFormAndShow_resetsReceiverField_headless() {
+        SafePayApiClient client = new SafePayApiClient("http://127.0.0.1:8080");
+        TransactionPanel panel = new TransactionPanel(client, () -> {}, () -> {});
+
+        // Switch to TRANSFER and set fields
+        for (int i = 0; i < panel.getCmbType().getItemCount(); i++) {
+            TransactionPanel.TransactionTypeItem item = panel.getCmbType().getItemAt(i);
+            if (item.type == TransactionType.TRANSFER) {
+                panel.getCmbType().setSelectedIndex(i);
+                break;
+            }
+        }
+        panel.getTxtAmount().setText("1200.00");
+        panel.getTxtReceiverAccount().setText("100000000002");
+
+        // Reset
+        panel.resetFormAndShow();
+
+        assertEquals("", panel.getTxtAmount().getText());
+        assertEquals("", panel.getTxtReceiverAccount().getText());
         assertEquals(" ", panel.getLblValidationError().getText());
     }
 }

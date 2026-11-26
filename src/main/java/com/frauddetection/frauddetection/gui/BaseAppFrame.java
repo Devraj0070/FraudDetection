@@ -14,24 +14,31 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 /**
- * Abstract base JFrame establishing design system, dark modern aesthetics,
- * global status bar, and dialog helpers for the Java GUI application.
- *
- * Demonstrates Academic Rubric:
- * - OOP Implementation: Inheritance (Abstract Base Class extending {@link JFrame})
- * - UI/UX & Aesthetics
+ * Abstract base JFrame establishing the SafePay unified design system:
+ * - Dark Obsidian canvas (#080808)
+ * - Elevated Surface (#111111)
+ * - Cards (#161616) with subtle perimeter borders (#242424)
+ * - Electric Neon Lime (#D8FF00) signature accent
+ * - Pure White and Slate Muted typography
+ * - Hardware-accelerated native 2D rendering hints
  */
 public abstract class BaseAppFrame extends JFrame {
 
-    public static final Color COLOR_BG_DARK = new Color(15, 23, 42);       // Slate 900
-    public static final Color COLOR_CARD_BG = new Color(30, 41, 59);      // Slate 800
-    public static final Color COLOR_CARD_BORDER = new Color(51, 65, 85);   // Slate 700
-    public static final Color COLOR_TEXT_PRIMARY = new Color(248, 250, 252);
-    public static final Color COLOR_TEXT_MUTED = new Color(148, 163, 184); // Slate 400
-    public static final Color COLOR_ACCENT_BLUE = new Color(37, 99, 235);  // Blue 600
-    public static final Color COLOR_STATUS_GREEN = new Color(16, 185, 129); // Emerald 500
-    public static final Color COLOR_STATUS_RED = new Color(239, 68, 68);    // Red 500
-    public static final Color COLOR_STATUS_AMBER = new Color(245, 158, 11); // Amber 500
+    // SafePay Unified Design Tokens (Matching Website)
+    public static final Color COLOR_BG_DARK = new Color(8, 8, 8);          // #080808 Obsidian Dark
+    public static final Color COLOR_BG_SURFACE = new Color(17, 17, 17);    // #111111 Dark Surface
+    public static final Color COLOR_CARD_BG = new Color(22, 22, 22);       // #161616 Card Surface
+    public static final Color COLOR_CARD_BORDER = new Color(36, 36, 36);   // #242424 Subtle Border
+    public static final Color COLOR_TEXT_PRIMARY = new Color(255, 255, 255); // #FFFFFF Pure White
+    public static final Color COLOR_TEXT_MUTED = new Color(156, 163, 175); // #9CA3AF Muted Text
+    public static final Color COLOR_ACCENT_LIME = new Color(216, 255, 0);  // #D8FF00 Electric Neon Lime
+    public static final Color COLOR_ACCENT_HOVER = new Color(194, 230, 0); // #C2E600 Hover Lime
+    public static final Color COLOR_ACCENT_GLOW = new Color(216, 255, 0, 45); // Subtle Lime Glow
+    public static final Color COLOR_ACCENT_BLUE = COLOR_ACCENT_LIME;       // Backward compatibility alias
+
+    public static final Color COLOR_STATUS_GREEN = new Color(16, 185, 129); // #10B981 Emerald
+    public static final Color COLOR_STATUS_RED = new Color(239, 68, 68);    // #EF4444 Rose Red
+    public static final Color COLOR_STATUS_AMBER = new Color(245, 158, 11); // #F59E0B Warning Amber
 
     public static final Font FONT_TITLE = new Font("Segoe UI", Font.BOLD, 18);
     public static final Font FONT_HEADER = new Font("Segoe UI", Font.BOLD, 14);
@@ -55,10 +62,10 @@ public abstract class BaseAppFrame extends JFrame {
      */
     protected JPanel createStatusBar() {
         JPanel statusBar = new JPanel(new BorderLayout());
-        statusBar.setBackground(new Color(11, 17, 33));
+        statusBar.setBackground(COLOR_BG_SURFACE);
         statusBar.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(1, 0, 0, 0, COLOR_CARD_BORDER),
-                BorderFactory.createEmptyBorder(6, 12, 6, 12)
+                BorderFactory.createEmptyBorder(6, 14, 6, 14)
         ));
 
         statusTextLabel.setForeground(COLOR_TEXT_MUTED);

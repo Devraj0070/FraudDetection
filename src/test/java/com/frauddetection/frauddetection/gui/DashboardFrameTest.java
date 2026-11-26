@@ -4,6 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import java.awt.Component;
+import java.awt.Container;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import javax.swing.JPanel;
+import javax.swing.JLabel;
+import com.frauddetection.frauddetection.client.ApiClientException;
+
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
@@ -308,4 +320,282 @@ class DashboardFrameTest {
 
         SwingUtilities.invokeAndWait(frame::dispose);
     }
+
+    // =========================================================================
+    // HEADLESS-COMPATIBLE MILESTONE 4 TESTS
+    // =========================================================================
+
+    @Test
+    @DisplayName("DashboardPanel customer navigation shows only customer options (Headless)")
+    void dashboardPanel_customerNavigation_visibility_headless() {
+        SafePayApiClient dummyClient = new SafePayApiClient("http://127.0.0.1:8080");
+        AuthResponse customerUser = new AuthResponse(
+                true, "Success", "customer1", "customer@safepay.com", "ROLE_USER", "ACC-1001"
+        );
+        DashboardPanel panel = new DashboardPanel(dummyClient, customerUser);
+
+        assertFalse(panel.isAdmin(), "Must not be admin");
+        assertNotNull(panel.getBtnNavDashboard(), "Dashboard nav button must be present");
+        assertEquals("Dashboard", panel.getBtnNavDashboard().getText());
+
+        assertNotNull(panel.getBtnNavTransaction(), "Transaction nav button must be present for customer");
+        assertEquals("Payments & Transfers", panel.getBtnNavTransaction().getText());
+
+        assertNotNull(panel.getBtnNavHistory(), "History nav button must be present");
+        assertEquals("Transaction History", panel.getBtnNavHistory().getText());
+
+        assertNotNull(panel.getBtnNavProfile(), "Profile nav button must be present");
+        assertEquals("Profile & Security", panel.getBtnNavProfile().getText());
+
+        assertNotNull(panel.getBtnNavSupport(), "Support nav button must be present");
+        assertEquals("Help & Support", panel.getBtnNavSupport().getText());
+
+        assertNotNull(panel.getBtnLogout(), "Logout button must be present");
+
+        // Admin-only buttons must not be visible or added for customer
+        assertNull(panel.getBtnNavAlerts(), "Alerts button must not exist for customer");
+        assertNull(panel.getBtnNavPendingReviews(), "Pending Reviews button must not exist for customer");
+
+        // Customer cannot access alerts screen directly
+        panel.navigateToAlerts();
+        assertEquals(DashboardPanel.CARD_DASHBOARD, panel.getCurrentCard(), "Customer must not switch to alerts card");
+        assertTrue(panel.getStatusMessage().contains("Access Denied"));
+    }
+
+    @Test
+    @DisplayName("DashboardPanel administrator navigation shows admin-only options (Headless)")
+    void dashboardPanel_adminNavigation_visibility_headless() {
+        SafePayApiClient dummyClient = new SafePayApiClient("http://127.0.0.1:8080");
+        AuthResponse adminUser = new AuthResponse(
+                true, "Success", "admin1", "admin@safepay.com", "ROLE_ADMIN", "ACC-ADMIN-01"
+        );
+        DashboardPanel panel = new DashboardPanel(dummyClient, adminUser);
+
+        assertTrue(panel.isAdmin(), "Must be admin");
+        assertNotNull(panel.getBtnNavDashboard());
+        assertEquals("Admin Dashboard", panel.getBtnNavDashboard().getText());
+
+        assertNotNull(panel.getBtnNavHistory());
+        assertEquals("Transaction Monitoring", panel.getBtnNavHistory().getText());
+
+        assertNotNull(panel.getBtnNavAlerts(), "Fraud Alerts button must be present for admin");
+        assertEquals("Fraud Alerts", panel.getBtnNavAlerts().getText());
+
+        assertNotNull(panel.getBtnNavPendingReviews(), "Pending Reviews button must be present for admin");
+        assertEquals("Pending Reviews", panel.getBtnNavPendingReviews().getText());
+
+        assertNotNull(panel.getBtnNavProfile());
+        assertEquals("Admin Profile", panel.getBtnNavProfile().getText());
+
+        assertNotNull(panel.getBtnNavSupport());
+        assertEquals("Help & Support", panel.getBtnNavSupport().getText());
+
+        assertNull(panel.getBtnNavTransaction(), "Customer transfer button must not be in admin sidebar");
+
+        // Admin can navigate directly to alerts and pending reviews
+        panel.navigateToAlerts();
+        assertEquals(DashboardPanel.CARD_ALERTS, panel.getCurrentCard(), "Admin must switch to alerts card");
+        assertEquals("Fraud Surveillance Alerts", panel.getHeaderTitleText());
+
+        panel.navigateToPendingReviews();
+        assertEquals(DashboardPanel.CARD_ALERTS, panel.getCurrentCard(), "Admin must switch to pending reviews card");
+        assertEquals("Pending Fraud Reviews", panel.getHeaderTitleText());
+    }
+
+    @Test
+    @DisplayName("DashboardPanel switches panels correctly and updates header title (Headless)")
+    void dashboardPanel_panelSwitching_updatesStateAndHeader_headless() {
+        SafePayApiClient dummyClient = new SafePayApiClient("http://127.0.0.1:8080");
+        AuthResponse user = new AuthResponse(
+                true, "Success", "customer2", "customer2@safepay.com", "ROLE_USER", "ACC-1002"
+        );
+        DashboardPanel panel = new DashboardPanel(dummyClient, user);
+
+        assertEquals(DashboardPanel.CARD_DASHBOARD, panel.getCurrentCard());
+
+        panel.navigateToTransaction();
+        assertEquals(DashboardPanel.CARD_TRANSACTION, panel.getCurrentCard());
+        assertEquals("Payments & Transfers", panel.getHeaderTitleText());
+
+        panel.navigateToHistory();
+        assertEquals(DashboardPanel.CARD_HISTORY, panel.getCurrentCard());
+        assertEquals("Transaction History", panel.getHeaderTitleText());
+
+        panel.navigateToProfile();
+        assertEquals(DashboardPanel.CARD_PROFILE, panel.getCurrentCard());
+        assertEquals("Profile & Security", panel.getHeaderTitleText());
+
+        panel.navigateToDashboard();
+        assertEquals(DashboardPanel.CARD_DASHBOARD, panel.getCurrentCard());
+        assertEquals("Dashboard", panel.getHeaderTitleText());
+    }
+
+    @Test
+    @DisplayName("DashboardPanel reuses panel instances and prevents duplicate allocation (Headless)")
+    void dashboardPanel_noDuplicatePanelCreation_preservesInstances_headless() {
+        SafePayApiClient dummyClient = new SafePayApiClient("http://127.0.0.1:8080");
+        AuthResponse adminUser = new AuthResponse(
+                true, "Success", "admin2", "admin2@safepay.com", "ROLE_ADMIN", "ACC-ADMIN-02"
+        );
+        DashboardPanel panel = new DashboardPanel(dummyClient, adminUser);
+
+        TransactionPanel txPanelInitial = panel.getTransactionPanel();
+        TransactionHistoryPanel historyPanelInitial = panel.getHistoryPanel();
+        AdminMonitoringPanel adminPanelInitial = panel.getAdminMonitoringPanel();
+
+        assertNotNull(txPanelInitial);
+        assertNotNull(historyPanelInitial);
+        assertNotNull(adminPanelInitial);
+
+        // Perform repeated navigation between panels
+        for (int i = 0; i < 5; i++) {
+            panel.navigateToHistory();
+            panel.navigateToAlerts();
+            panel.navigateToPendingReviews();
+            panel.navigateToDashboard();
+        }
+
+        assertSame(txPanelInitial, panel.getTransactionPanel(), "TransactionPanel instance must be preserved");
+        assertSame(historyPanelInitial, panel.getHistoryPanel(), "TransactionHistoryPanel instance must be preserved");
+        assertSame(adminPanelInitial, panel.getAdminMonitoringPanel(), "AdminMonitoringPanel instance must be preserved");
+        assertEquals(5, panel.getCardsPanel().getComponentCount(), "CardsPanel must contain exactly 5 pre-allocated cards");
+    }
+
+    @Test
+    @DisplayName("DashboardPanel pending-review count updates nav badge and metrics (Headless)")
+    void dashboardPanel_pendingReviewCount_updatesBadgeAndLabel_headless() {
+        SafePayApiClient dummyClient = new SafePayApiClient("http://127.0.0.1:8080");
+        AuthResponse adminUser = new AuthResponse(
+                true, "Success", "admin3", "admin3@safepay.com", "ROLE_ADMIN", "ACC-ADMIN-03"
+        );
+        DashboardPanel panel = new DashboardPanel(dummyClient, adminUser);
+
+        panel.setPendingReviewCount(4);
+        assertEquals(4, panel.getPendingReviewCount());
+        assertEquals("04", panel.getBtnNavPendingReviews().getBadge());
+
+        panel.setPendingReviewCount(0);
+        assertEquals(0, panel.getPendingReviewCount());
+        assertNull(panel.getBtnNavPendingReviews().getBadge());
+    }
+
+    @Test
+    @DisplayName("DashboardPanel logout clears session and triggers onLogout callback (Headless)")
+    void dashboardPanel_logoutAndSessionCleanup_headless() throws Exception {
+        CountDownLatch logoutLatch = new CountDownLatch(1);
+        CountDownLatch callbackLatch = new CountDownLatch(1);
+
+        SafePayApiClient client = new SafePayApiClient("http://127.0.0.1:8080") {
+            @Override
+            public AuthResponse logout() {
+                logoutLatch.countDown();
+                return new AuthResponse(true, "Logged out", null, null, null, null);
+            }
+        };
+
+        AuthResponse user = new AuthResponse(
+                true, "Success", "alice_logout", "alice@safepay.com", "ROLE_USER", "ACC-LOGOUT"
+        );
+
+        DashboardPanel panel = new DashboardPanel(client, user, callbackLatch::countDown);
+        panel.setAutoConfirmLogoutForTesting(true);
+
+        panel.performLogout();
+
+        assertTrue(logoutLatch.await(5, TimeUnit.SECONDS), "API client logout must be invoked");
+        assertTrue(callbackLatch.await(5, TimeUnit.SECONDS), "onLogout callback must be triggered");
+    }
+
+    @Test
+    @DisplayName("DashboardPanel notification and support content render safely without external contacts (Headless)")
+    void dashboardPanel_notificationAndSupportActions_headless() {
+        SafePayApiClient dummyClient = new SafePayApiClient("http://127.0.0.1:8080");
+        AuthResponse adminUser = new AuthResponse(
+                true, "Success", "admin_notify", "admin@safepay.com", "ROLE_ADMIN", "ACC-ADMIN-99"
+        );
+        DashboardPanel panel = new DashboardPanel(dummyClient, adminUser);
+        panel.setPendingReviewCount(3);
+
+        // 1. Verify Notifications content
+        JPanel notifPanel = panel.buildNotificationsContent(null);
+        assertNotNull(notifPanel);
+        StringBuilder notifText = new StringBuilder();
+        extractText(notifPanel, notifText);
+        assertTrue(notifText.toString().contains("3 transactions awaiting manual fraud review"));
+
+        // 2. Verify Support content
+        JPanel supportPanel = panel.buildSupportContent(null);
+        assertNotNull(supportPanel);
+        StringBuilder supportText = new StringBuilder();
+        extractText(supportPanel, supportText);
+        String s = supportText.toString();
+        assertTrue(s.contains("SafePay Help & Support Center"));
+        assertTrue(s.contains("Real-Time Fraud Prevention"));
+        assertTrue(s.contains("Pending Fraud Review"));
+        assertTrue(s.contains("Account & Transfer Safety"));
+        // Confirm no fake external numbers or addresses
+        assertFalse(s.contains("1-800"));
+        assertFalse(s.contains("@external.com"));
+        assertFalse(s.contains("www.fakebank.com"));
+    }
+
+    @Test
+    @DisplayName("DashboardPanel 401 response flags expired session and triggers cleanup (Headless)")
+    void dashboardPanel_expiredSessionHandling_on401_headless() throws Exception {
+        CountDownLatch errorLatch = new CountDownLatch(1);
+        CountDownLatch expiredCallbackLatch = new CountDownLatch(1);
+
+        SafePayApiClient expiredClient = new SafePayApiClient("http://127.0.0.1:8080") {
+            @Override
+            public DashboardResponse getDashboardData() throws ApiClientException {
+                errorLatch.countDown();
+                throw new ApiClientException(401, "Full authentication is required to access this resource");
+            }
+
+            @Override
+            public AuthResponse logout() {
+                return new AuthResponse(true, "Logged out", null, null, null, null);
+            }
+        };
+
+        AuthResponse user = new AuthResponse(
+                true, "Success", "bob_expired", "bob@safepay.com", "ROLE_USER", "ACC-EXPIRED"
+        );
+
+        DashboardPanel panel = new DashboardPanel(expiredClient, user);
+        panel.setOnSessionExpired(expiredCallbackLatch::countDown);
+
+        panel.refreshDashboardData();
+
+        assertTrue(errorLatch.await(5, TimeUnit.SECONDS), "getDashboardData must be called");
+        assertTrue(expiredCallbackLatch.await(5, TimeUnit.SECONDS), "onSessionExpired callback must be invoked");
+
+        assertTrue(panel.isSessionExpired(), "Session must be marked expired");
+        assertTrue(panel.getStatusMessage().contains("Session expired"));
+    }
+
+    @Test
+    @DisplayName("DashboardFrame static helpers and constants remain functional")
+    void dashboardFrame_staticHelpersAndConstants() {
+        assertEquals("₹ 1,250.50", DashboardFrame.formatCurrency(new BigDecimal("1250.50")));
+        assertEquals("₹ 0.00", DashboardFrame.formatCurrency(null));
+        assertNotNull(DashboardFrame.createStyledCardPanel());
+        assertNotNull(DashboardFrame.createGradientPillButton("Action", 100, 30));
+        assertEquals(DashboardPanel.CARD_DASHBOARD, DashboardFrame.CARD_DASHBOARD);
+        assertEquals(DashboardPanel.CARD_TRANSACTION, DashboardFrame.CARD_TRANSACTION);
+        assertEquals(DashboardPanel.CARD_HISTORY, DashboardFrame.CARD_HISTORY);
+        assertEquals(DashboardPanel.CARD_ALERTS, DashboardFrame.CARD_ALERTS);
+    }
+
+    private void extractText(Component comp, StringBuilder sb) {
+        if (comp instanceof JLabel lbl) {
+            sb.append(" ").append(lbl.getText());
+        }
+        if (comp instanceof Container container) {
+            for (Component child : container.getComponents()) {
+                extractText(child, sb);
+            }
+        }
+    }
+
 }

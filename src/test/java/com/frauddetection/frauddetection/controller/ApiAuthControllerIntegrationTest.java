@@ -1,5 +1,6 @@
 package com.frauddetection.frauddetection.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -246,4 +247,192 @@ class ApiAuthControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").isString());
     }
+
+    @Test
+    @DisplayName("1. CSRF token endpoint returns HTTP 200 and sets XSRF-TOKEN cookie")
+    void csrfTokenEndpoint_returnsHttp200() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/auth/csrf")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isString())
+                .andExpect(jsonPath("$.headerName").value("X-XSRF-TOKEN"))
+                .andExpect(jsonPath("$.parameterName").value("_csrf"))
+                .andReturn();
+
+        String body = result.getResponse().getContentAsString();
+        CsrfResponse csrfResponse = objectMapper.readValue(body, CsrfResponse.class);
+        assertNotNull(csrfResponse.token(), "Token must not be null");
+        assertFalse(csrfResponse.token().isBlank(), "Token must not be blank");
+
+        Cookie xsrfCookie = result.getResponse().getCookie("XSRF-TOKEN");
+        assertNotNull(xsrfCookie, "XSRF-TOKEN cookie must be set by CookieCsrfTokenRepository");
+    }
+
+    @Test
+    @DisplayName("2. Login page can obtain a CSRF token unauthenticated")
+    void loginPage_canObtainCsrfToken() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/auth/csrf"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        CsrfResponse csrfResponse = objectMapper.readValue(result.getResponse().getContentAsString(), CsrfResponse.class);
+        assertNotNull(csrfResponse.token());
+        assertFalse(csrfResponse.token().isBlank());
+        assertEquals("X-XSRF-TOKEN", csrfResponse.headerName());
+        assertEquals("_csrf", csrfResponse.parameterName());
+
+        Cookie xsrfCookie = result.getResponse().getCookie("XSRF-TOKEN");
+        assertNotNull(xsrfCookie, "XSRF-TOKEN cookie must be present for login form integration");
+    }
+
+    @Test
+    @DisplayName("3. Login succeeds with valid credentials and CSRF token")
+    void login_succeedsWithValidCredentialsAndCsrfToken() throws Exception {
+        User user = new User();
+        user.setUsername("swing_test_user");
+        user.setEmail("swing_test@example.com");
+        user.setPassword("Secret@123");
+        user.setRole("USER");
+        userService.registerUser(user);
+
+        MvcResult csrfResult = mockMvc.perform(get("/api/auth/csrf")).andReturn();
+        CsrfResponse csrf = objectMapper.readValue(csrfResult.getResponse().getContentAsString(), CsrfResponse.class);
+        Cookie xsrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
+
+        LoginRequest loginRequest = new LoginRequest("swing_test_user", "Secret@123");
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(xsrfCookie)
+                        .header(csrf.headerName(), csrf.token())
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.username").value("swing_test_user"))
+                .andExpect(jsonPath("$.role").value("USER"))
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+        assertNotNull(session, "HTTP session must be established upon successful login");
+    }
+
+    @Test
+    @DisplayName("4. Login fails appropriately with an invalid password")
+    void login_failsAppropriatelyWithInvalidPassword() throws Exception {
+        User user = new User();
+        user.setUsername("swing_test_user");
+        user.setEmail("swing_test@example.com");
+        user.setPassword("Secret@123");
+        user.setRole("USER");
+        userService.registerUser(user);
+
+        MvcResult csrfResult = mockMvc.perform(get("/api/auth/csrf")).andReturn();
+        CsrfResponse csrf = objectMapper.readValue(csrfResult.getResponse().getContentAsString(), CsrfResponse.class);
+        Cookie xsrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
+
+        LoginRequest badLogin = new LoginRequest("swing_test_user", "IncorrectPassword");
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(xsrfCookie)
+                        .header(csrf.headerName(), csrf.token())
+                        .content(objectMapper.writeValueAsString(badLogin)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Invalid username or password."));
+    }
+
+    @Test
+    @DisplayName("5. Login POST without a valid CSRF token is rejected")
+    void login_withoutValidCsrfToken_isRejectedWith403() throws Exception {
+        LoginRequest loginRequest = new LoginRequest("swing_test_user", "Secret@123");
+
+        // Without any CSRF token
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isForbidden());
+
+        // With invalid / forged CSRF token
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-XSRF-TOKEN", "forged-invalid-csrf-token")
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("6. Authenticated requests continue working with established session")
+    void authenticatedRequests_continueWorkingWithSession() throws Exception {
+        User user = new User();
+        user.setUsername("swing_test_user");
+        user.setEmail("swing_test@example.com");
+        user.setPassword("Secret@123");
+        user.setRole("USER");
+        userService.registerUser(user);
+
+        MvcResult csrfResult = mockMvc.perform(get("/api/auth/csrf")).andReturn();
+        CsrfResponse csrf = objectMapper.readValue(csrfResult.getResponse().getContentAsString(), CsrfResponse.class);
+        Cookie xsrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
+
+        LoginRequest loginRequest = new LoginRequest("swing_test_user", "Secret@123");
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(xsrfCookie)
+                        .header(csrf.headerName(), csrf.token())
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+        assertNotNull(session, "Session must exist");
+
+        mockMvc.perform(get("/api/auth/me")
+                        .session(session)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.username").value("swing_test_user"));
+    }
+
+    @Test
+    @DisplayName("7. Logout and session handling work correctly")
+    void logoutAndSessionHandling_workCorrectly() throws Exception {
+        User user = new User();
+        user.setUsername("swing_test_user");
+        user.setEmail("swing_test@example.com");
+        user.setPassword("Secret@123");
+        user.setRole("USER");
+        userService.registerUser(user);
+
+        MvcResult csrfResult = mockMvc.perform(get("/api/auth/csrf")).andReturn();
+        CsrfResponse csrf = objectMapper.readValue(csrfResult.getResponse().getContentAsString(), CsrfResponse.class);
+        Cookie xsrfCookie = csrfResult.getResponse().getCookie("XSRF-TOKEN");
+
+        LoginRequest loginRequest = new LoginRequest("swing_test_user", "Secret@123");
+        MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(xsrfCookie)
+                        .header(csrf.headerName(), csrf.token())
+                        .content(objectMapper.writeValueAsString(loginRequest)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) loginResult.getRequest().getSession(false);
+        assertNotNull(session, "Session must exist before logout");
+
+        // Submit logout
+        mockMvc.perform(post("/api/auth/logout")
+                        .session(session)
+                        .cookie(xsrfCookie)
+                        .header(csrf.headerName(), csrf.token()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Logged out successfully."));
+
+        // Subsequent access to protected endpoint is rejected with 401 Unauthorized
+        mockMvc.perform(get("/api/auth/me")
+                        .session(session)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized());
+    }
+
 }
